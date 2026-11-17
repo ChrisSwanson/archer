@@ -1,0 +1,37 @@
+version = 1
+name = "HTCPCP: I'm a Teapot"
+folder = ".archer"
+
+# The README and the reading guide link to the notice; the browser lists it beside them, read-only.
+[discovery]
+roots = [".archer", "NOTICE.md"]
+
+[[views]]
+id = "coffee-conversations"
+kind = "sequence"
+title = "Coffee Conversations"
+source = ".archer/diagrams/coffee-conversations.mmd"
+
+[[views]]
+id = "brew-decisions"
+kind = "freeform"
+title = "Brew Decisions"
+source = ".archer/diagrams/brew-decisions.mmd"
+
+[[views]]
+id = "coffee-controls"
+kind = "state"
+title = "Coffee Controls"
+source = ".archer/diagrams/coffee-controls.mmd"
+
+[[views]]
+id = "coffee-uri"
+kind = "entity-relationship"
+title = "Anatomy of a Coffee URI"
+source = ".archer/diagrams/coffee-uri.mmd"
+
+[[views]]
+id = "coffee-across-firewalls"
+kind = "c4"
+title = "Coffee Across Firewalls"
+source = ".archer/diagrams/coffee-across-firewalls.mmd"

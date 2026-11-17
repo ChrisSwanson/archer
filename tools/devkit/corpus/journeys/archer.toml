@@ -1,0 +1,16 @@
+# Small stable diagrams the example journeys edit. Journeys run against sandbox copies.
+version = 1
+name = "Journeys"
+folder = ".archer"
+
+[[views]]
+id = "flow"
+kind = "freeform"
+title = "Request flow"
+source = ".archer/diagrams/flow.mmd"
+
+[[views]]
+id = "seq"
+kind = "sequence"
+title = "Login sequence"
+source = ".archer/diagrams/seq.mmd"

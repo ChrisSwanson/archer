@@ -1,0 +1,25 @@
+C4Container
+    %% Every construct the C4 profile reads.
+    title Web shop containers
+    Person(customer, "Customer", "Buys things")
+    Person_Ext(courier, "Courier")
+    Enterprise_Boundary(company, "Shop Ltd") {
+        System_Boundary(shop, "Web shop") {
+            Container(web, "Web app", "TypeScript", "Serves the pages")
+            ContainerDb(orders, "Orders", "PostgreSQL")
+            ContainerQueue(events, "Events", "Kafka", "Order events")
+        }
+        Boundary(ops, "Operations") {
+            Container_Ext(crm, "CRM")
+        }
+    }
+    System_Ext(payments, "Payment provider", "Takes the money")
+    SystemDb_Ext(ledger, "Ledger")
+    Rel(customer, web, "Orders from", "HTTPS")
+    Rel(web, orders, "Reads and writes", "SQL", "every request")
+    Rel_D(web, events, "Publishes")
+    BiRel(web, payments, "Pays through")
+    Rel(events, crm, "Feeds")
+    Rel(payments, ledger, "Records in")
+    Rel(crm, courier, "Books")
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")

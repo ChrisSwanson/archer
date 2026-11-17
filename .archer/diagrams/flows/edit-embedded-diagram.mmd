@@ -1,0 +1,33 @@
+sequenceDiagram
+    %% A mermaid fence in a note, opened and edited at its address (ADR 0012)
+    %% notes/embedded.ts, shared/note-diagrams.mts, application/index.ts writeEmbeddedDiagram
+    actor person as Person
+    participant page as Archer page
+    participant service as Background service
+    participant notefile as notes/x.md
+    participant app as MCP server (application layer)
+    actor agent as Coding agent
+    person->>page: open the note
+    page->>service: GET api/notes/content?path=notes/x.md
+    page->>page: render Markdown, draw each mermaid fence as a figure
+    person->>page: open a figure as a diagram
+    page->>service: GET api/notes/diagram?address=notes/x.md#35;login-flow
+    Note over page,service: the address is note path, #35;, then the archer-id, heading slug or diagram-n
+    agent->>app: list_diagrams, then read_diagram viewId notes/x.md#35;login-flow
+    app->>notefile: find the fence, compile its body
+    app-->>agent: body, sourceRevision of the body only, note line numbers
+    agent->>app: write_diagram address, source, expectedRevision
+    alt the fence is nested in a list or quote and relocate is not set
+        app-->>agent: invalid_request, nothing written
+    else the fence body changed since the read
+        app-->>agent: revision_conflict
+    else ok
+        app-)service: recordWrite for the address
+        app->>notefile: re-read, the note must be unchanged since the read
+        app->>notefile: replace only that fence body, pin its archer-id line, writeConfined
+        app-->>agent: compiled or failed, new sourceRevision
+    end
+    notefile-)service: fs.watch event, reload recompiles the embedded view
+    service-)page: SSE change and notes
+    page-->>person: figure and open diagram redrawn, prose untouched
+    Note over person,notefile: comments on it live in notes/x.login-flow.comments.json

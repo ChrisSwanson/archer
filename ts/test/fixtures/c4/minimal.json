@@ -1,0 +1,10 @@
+{
+  "type": "c4-model",
+  "level": "context",
+  "elements": [
+    { "id": "customer", "kind": "person", "label": "Customer" },
+    { "id": "shop", "kind": "system", "label": "Web shop" }
+  ],
+  "boundaries": [],
+  "relationships": [{ "id": "customer--shop", "source": "customer", "target": "shop", "label": "Buys from" }]
+}

@@ -1,0 +1,26 @@
+C4Container
+    title Pageturner Containers
+    Person(customer, "Customer", "Buys books online")
+    Person(staff, "Shop Staff", "Packs orders and manages stock")
+    System_Boundary(pageturner, "Pageturner Online Bookshop") {
+        Container(web, "Storefront", "TypeScript, React", "Catalogue, basket and checkout pages")
+        Container(backoffice, "Back Office", "TypeScript, React", "Stock and order screens for staff")
+        Container(api, "Shop API", "Node.js", "Orders, stock and payments")
+        ContainerQueue(jobs, "Job Queue", "Redis", "Order emails and courier bookings")
+        Container(worker, "Worker", "Node.js", "Sends emails and books couriers")
+        ContainerDb(db, "Shop Database", "PostgreSQL", "Books, customers, orders and payments")
+    }
+    System_Ext(payments, "Payment Provider", "Hosted card payment page")
+    System_Ext(courier, "Courier", "Collects and delivers parcels")
+    System_Ext(email, "Email Service", "Delivers order emails")
+    Rel(customer, web, "Browses and buys from", "HTTPS")
+    Rel(staff, backoffice, "Manages orders in", "HTTPS")
+    Rel(web, api, "Calls", "JSON over HTTPS")
+    Rel(backoffice, api, "Calls", "JSON over HTTPS")
+    Rel(api, db, "Reads and writes", "SQL")
+    Rel(api, payments, "Creates payment sessions with", "HTTPS")
+    Rel(payments, api, "Reports payment outcomes to", "Webhook")
+    Rel(api, jobs, "Queues emails and courier bookings on")
+    Rel(worker, jobs, "Takes work from")
+    Rel(worker, email, "Sends order emails through", "HTTPS")
+    Rel(worker, courier, "Books parcel collections with", "HTTPS")

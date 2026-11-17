@@ -1,0 +1,18 @@
+C4Context
+    title Archer in its environment
+    Person(person, "Person", "Reads diagrams and notes, selects, comments")
+    Person_Ext(agent, "Coding agent", "Writes diagrams and notes, presents them, answers comments")
+    System_Ext(host, "Agent host", "Claude Code, Codex or another MCP client; runs the plugin and the MCP server")
+    System(archer, "Archer", "archer.js: CLI, MCP server and the per-user background service")
+    System_Ext(browser, "Web browser", "Shows the Archer page for each attached project")
+    SystemDb_Ext(project, "Project checkout", "archer.toml, the .archer folder of diagrams, notes and comments files")
+    SystemDb_Ext(state, "Account state", "XDG state dir: service.json, archer.sock, runtime recovery files")
+    System_Ext(git, "Git", "History of the project, read for staleness, freshness and diagram history")
+    Rel(person, agent, "Asks, discusses")
+    Rel(agent, host, "Works through")
+    Rel(host, archer, "Calls tools", "stdio, shell", "Calls MCP tools, runs the CLI")
+    Rel(archer, project, "Reads and writes", "files", "Reads and writes diagrams, notes, comments")
+    Rel(archer, state, "Keeps its state", "files, Unix socket", "Keeps token, port and recovery")
+    Rel(archer, git, "Runs read-only git commands", "git CLI")
+    BiRel(archer, browser, "Serves the page", "HTTP, SSE", "Page and live events out; selection, comments and page operations in")
+    Rel(person, browser, "Reads, comments", "", "Reads, selects, comments")

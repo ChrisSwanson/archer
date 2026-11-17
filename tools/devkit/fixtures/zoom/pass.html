@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Zoom pass</title>
+<style>
+*{box-sizing:border-box} body{margin:0;padding:12px;font:16px/1.5 sans-serif;height:100vh;overflow:hidden}
+main{width:100%;overflow-wrap:anywhere} p{margin:0 0 16px} button{max-width:100%;white-space:normal;font:inherit}
+#nontext{width:120px;height:30px;background:teal} #sample{display:inline-block;font-size:20px}
+.react-flow{width:100%;overflow:auto}.react-flow__viewport{width:900px;height:60px}
+.scrollport{height:80px;overflow:auto}.scroll-content{padding-top:700px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+</style><main><span id="sample">MMMM</span><p>A wrapping paragraph keeps all its words available when the text grows and the viewport narrows.</p>
+<button>Open project settings</button><div id="nontext" aria-label="Fixed width non-text box"></div>
+<div class="react-flow"><div class="react-flow__viewport"><div tabindex="0">Two dimensional drawing content</div></div></div>
+<div class="scrollport"><div class="scroll-content"><p>Below-fold content is reachable by vertical scrolling</p></div></div>
+<span class="sr-only">Screen reader label is intentionally visually hidden</span>
+</main></html>

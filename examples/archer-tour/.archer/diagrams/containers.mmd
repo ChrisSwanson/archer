@@ -1,0 +1,27 @@
+%% description: The parts of Archer, what starts each one, and how a diagram travels between them.
+C4Container
+    title Archer Containers
+    %% archer-key dashed: Opt-in MCP path
+    %% archer-line dashed: mcp_host--mcp_server
+    Person(developer, "Developer", "Thinks in pictures; works with coding agents")
+    System_Ext(coding_agent, "Coding Agent", "Claude Code, Codex or another agent")
+    System_Ext(mcp_host, "MCP Host", "An agent app that runs MCP servers and Apps")
+    System_Boundary(archer, "Archer") {
+        Container(skill, "Archer Skill", "Markdown", "Teaches the agent the heartbeat and the tools")
+        Container(cli, "Archer CLI", "Node", "The archer command: validate, write, present, comments")
+        Container(mcp_server, "MCP Server and App", "Node, React", "archer mcp: the same operations as tools, plus the App")
+        Container(archer_service, "Background Service", "Node", "One per user: watches, compiles, serves every project")
+        Container(web_page, "Archer Page", "React", "Canvas, notes reader, comments, walkthroughs, editor")
+    }
+    System_Ext(repository, "Project Repository", "Code, archer.toml and .archer/ in Git")
+    Rel(coding_agent, skill, "Learns the workflow from")
+    Rel(coding_agent, cli, "Runs commands", "Shell")
+    Rel(mcp_host, mcp_server, "Starts, calls tools", "MCP over stdio")
+    Rel(cli, repository, "Reads and writes diagrams")
+    Rel(mcp_server, repository, "Reads and writes diagrams")
+    Rel(cli, archer_service, "Presents and points", "Local socket")
+    Rel(mcp_server, archer_service, "Presents and points", "Local socket")
+    Rel(archer_service, repository, "Watches; keeps comments")
+    Rel(archer_service, web_page, "Serves page, live events", "HTTPS, SSE")
+    Rel(developer, web_page, "Reads, selects, comments", "Browser")
+    Rel(web_page, archer_service, "Sends selection, comments", "HTTPS")

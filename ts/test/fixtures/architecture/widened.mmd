@@ -1,0 +1,17 @@
+architecture-beta
+    %% Every construct the architecture profile reads.
+    title Shop platform
+    group cloud(cloud)[Cloud]
+    group data(database)[Data tier] in cloud
+    service gateway(internet)[Gateway] in cloud
+    service app(server)[App server] in cloud
+    service db(database)[Orders DB] in data
+    service files(disk)[File store] in data
+    service client[Client]
+    junction hub in cloud
+    client:R --> L:gateway
+    gateway:R -- L:hub
+    hub:R --> L:app
+    hub:B --> T:files
+    app{group}:B <--> T:db{group}
+    app:R -[audit]- L:files

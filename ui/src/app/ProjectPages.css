@@ -1,0 +1,667 @@
+/* The project, folder and search pages (projects-and-search.md): files as one
+   quiet table -- a survey sheet's schedule, not a wall of cards. Structure in
+   the warm greys; hue only for the two voices (the agent's amber chip) and for
+   what is wrong (does not compile). Numerals are tabular, paths are data. */
+
+.archer-project-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.archer-project-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 10px 6px 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-body);
+  cursor: pointer;
+}
+
+.archer-project-search:hover {
+  background: var(--border);
+}
+
+.archer-project-search svg {
+  color: var(--text-dim);
+}
+
+.archer-project-search kbd {
+  min-width: 18px;
+  padding: 1px 5px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-mark);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-floor);
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------ the table */
+
+/* A table wider than its column scrolls inside it, never the page. */
+.archer-files-frame {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.archer-files {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-files-head {
+  padding: 8px 10px;
+  border-bottom: var(--line-chrome) solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.archer-files-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -4px -6px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--radius-mark);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.archer-files-sort:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.archer-files-sort[data-active="true"] {
+  color: var(--text);
+}
+
+.archer-files-sort-mark {
+  width: var(--icon-indicator);
+  height: var(--icon-indicator);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.55;
+}
+
+.archer-files-sort[data-active="true"] .archer-files-sort-mark {
+  opacity: 1;
+}
+
+.archer-files-row td {
+  padding: 10px 10px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  vertical-align: top;
+}
+
+.archer-files-row {
+  cursor: pointer;
+}
+
+.archer-files-row:hover td {
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+
+.archer-files-name {
+  min-width: 14rem;
+}
+
+.archer-files-title-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.archer-files-glyph {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 2px;
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.archer-files-open {
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-mark);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.archer-files-row:hover .archer-files-open,
+.archer-files-open:hover {
+  color: var(--accent-quiet);
+}
+
+.archer-files-description {
+  display: -webkit-box;
+  max-width: 68ch;
+  margin: 3px 0 0 26px;
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.archer-files-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 6px 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+.archer-files-chip {
+  padding: 1px 8px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.archer-files-chip[data-voice="agent"] {
+  border-color: transparent;
+  background: var(--agent-fill);
+  color: var(--agent-text);
+}
+
+.archer-files-chip[data-tone="danger"] {
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.archer-files-name .archer-search-matches {
+  margin: 6px 0 0 26px;
+}
+
+.archer-files-row td[data-column="type"] {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.archer-files-path {
+  max-width: 17rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-size: var(--type-small);
+  line-height: 1.7;
+}
+
+/* The folder gives way first: the file name is what tells two rows apart. */
+.archer-files-path-line {
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.archer-files-file {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+}
+
+.archer-files-source {
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+}
+
+.archer-files-date {
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.archer-files-none {
+  color: var(--text-faint);
+}
+
+/* A folder's heading: a row of its own, opening the folder page. */
+.archer-files-group-head th {
+  padding: 22px 12px 8px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  text-align: left;
+  font-weight: 400;
+}
+
+.archer-files-group:first-of-type .archer-files-group-head th {
+  padding-top: 14px;
+}
+
+.archer-files-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px -6px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--radius-mark);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-size: var(--type-small);
+  font-weight: 600;
+}
+
+button.archer-files-folder {
+  cursor: pointer;
+}
+
+button.archer-files-folder:hover {
+  background: var(--surface-2);
+  color: var(--accent-quiet);
+}
+
+.archer-files-folder .archer-files-glyph {
+  margin-top: 0;
+}
+
+.archer-files-group-count {
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: var(--type-floor);
+  font-weight: 400;
+}
+
+/* ------------------------------------------------------- the search page */
+
+.archer-contents.archer-search-page {
+  max-width: 96rem;
+}
+
+.archer-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 56rem;
+}
+
+.archer-search-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 8px 44px 8px 38px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text);
+  caret-color: var(--you);
+  font: inherit;
+  font-size: var(--type-body);
+}
+
+.archer-search-input::placeholder {
+  color: var(--text-faint);
+}
+
+/* Chromium shows the box's own clear (×) only while it is hovered or focused, so after a step moved focus the box
+   held words with no way shown to clear them (E5, claude-05). Keep it whenever there are words to clear. */
+.archer-search-input:enabled:read-write::-webkit-search-cancel-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.archer-search-input:hover {
+  border-color: var(--border-hover);
+}
+
+.archer-search-input:focus-visible {
+  border-color: var(--you);
+  outline: 2px solid var(--you);
+  outline-offset: -1px;
+}
+
+.archer-search-facet {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.archer-search-facet legend,
+.archer-search-facet-label {
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--text);
+  font-size: var(--type-small);
+  font-weight: 600;
+}
+
+.archer-search-choice {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--text);
+  font-size: var(--type-body);
+  cursor: pointer;
+}
+
+.archer-search-choice input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.archer-search-choice-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archer-search-choice-count {
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-search-choice[data-empty="true"] {
+  color: var(--text-dim);
+}
+
+.archer-search-facet select,
+.archer-search-facet input[type="date"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-body);
+}
+
+.archer-search-facet select:hover,
+.archer-search-facet input[type="date"]:hover {
+  border-color: var(--border-hover);
+}
+
+.archer-search-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.archer-search-range label {
+  display: grid;
+  gap: 2px;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-search-clear {
+  justify-self: start;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-small);
+  cursor: pointer;
+}
+
+.archer-search-clear:hover {
+  background: var(--border);
+}
+
+.archer-search-summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+  margin-bottom: 4px;
+}
+
+.archer-search-summary {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-search-unavailable-label {
+  margin: 0 0 2px;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-search-unavailable {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-search-unavailable-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.archer-search-empty {
+  padding: 32px 0;
+  font-size: var(--type-body);
+  color: var(--text-dim);
+}
+
+.archer-search-empty p {
+  margin: 0 0 12px;
+}
+
+/* "Clear the search" and "Clear filters" side by side: two separate targets, not one strip (E5). */
+.archer-search-empty .archer-search-clear + .archer-search-clear {
+  margin-left: 8px;
+}
+
+/* The one headline a project with nothing in it shows, on the display token (not the browser's 1.5em). */
+.archer-search-empty h2 {
+  color: var(--text);
+  font-size: var(--type-display);
+  font-weight: 600;
+}
+
+/* --------------------------------------------- phone: a list, not a grid */
+
+@media (max-width: 720px) {
+
+  /* The way back to the results, always in reach under a long list of filters. */
+
+  .archer-search-summary-line {
+    flex-wrap: wrap;
+  }
+
+  .archer-search-input {
+    padding-right: 12px;
+  }
+
+  .archer-project-search kbd {
+    display: none;
+  }
+
+  /* The table's rows become blocks: the name and description, then the
+     facts on one wrapping line. The roles in FileTable.tsx keep it a table. */
+  .archer-files,
+  .archer-files tbody,
+  .archer-files tr,
+  .archer-files td,
+  .archer-files th {
+    display: block;
+  }
+
+  .archer-files-frame {
+    overflow-x: visible;
+  }
+
+  .archer-files thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .archer-files tr.archer-files-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    padding: 12px 0 12px 26px;
+    border-bottom: var(--line-chrome) solid var(--border);
+  }
+
+  .archer-files-row td {
+    padding: 0;
+    border: 0;
+    color: var(--text-dim);
+    font-size: var(--type-small);
+  }
+
+  .archer-files-row:hover td {
+    background: none;
+  }
+
+  .archer-files-row td.archer-files-name {
+    flex: 1 0 100%;
+    min-width: 0;
+    margin: 0 0 4px -26px;
+    color: var(--text);
+    font-size: var(--type-body);
+  }
+
+  .archer-files-row td[data-column="type"] {
+    color: var(--text-dim);
+  }
+
+  .archer-files-path {
+    max-width: 100%;
+  }
+
+  .archer-files-path-line {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* The facts in fixed lines: kind, type and project; then the path; then the dates. */
+  .archer-files-row td[data-column="folder"] {
+    order: 1;
+    flex: 1 0 100%;
+  }
+
+  .archer-files-row td[data-column="edited"],
+  .archer-files-row td[data-column="created"] {
+    order: 2;
+  }
+
+
+  .archer-files-row td[data-column="edited"]::before {
+    content: "Edited ";
+  }
+
+  .archer-files-row td[data-column="created"]::before {
+    content: "Created ";
+  }
+
+  /* A row is one target for a thumb: its title's hit area covers the whole
+     row (44px or more), and what can be jumped to inside it sits above. */
+  .archer-files tr.archer-files-row {
+    position: relative;
+  }
+
+  .archer-files-open::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .archer-files-name .archer-search-matches,
+  .archer-files-description {
+    position: relative;
+    z-index: 1;
+  }
+
+  .archer-files-group-head th {
+    padding: 18px 0 6px;
+  }
+
+  .archer-files-description,
+  .archer-files-chips,
+  .archer-files-name .archer-search-matches {
+    margin-left: 26px;
+  }
+}
+
+/* A coarse pointer, whatever the window's width: every control is a 44px target. */
+@media (pointer: coarse) {
+  .archer-search-choice,
+  .archer-project-search,
+  .archer-search-clear,
+  .archer-files-folder,
+  .archer-files-sort,
+  .archer-search-facet select,
+  .archer-search-facet input[type="date"] {
+    min-height: 44px;
+  }
+
+  .archer-files-folder,
+  .archer-files-sort {
+    margin: 0 -6px;
+  }
+}
+
+/* Search and discovery share one stable project gallery. */
+.archer-project-browser { padding: 0; width: 100%; max-width: none; }
+.archer-project-browser .archer-search-page { width: 100%; max-width: none; }
+.archer-project-browser .archer-search-bar { width: min(760px, 100%); margin: 8px auto 28px; position: relative; }
+.archer-project-browser .archer-search-input { min-height: 56px; padding-right: 132px; font-size: var(--type-body); background: var(--surface); }
+.archer-project-browser .archer-browser-filter-button { position: absolute; right: 10px; top: 10px; }

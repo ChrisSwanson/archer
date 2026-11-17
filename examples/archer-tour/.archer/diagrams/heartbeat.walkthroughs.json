@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "target": "view:heartbeat",
+  "walkthroughs": [
+    {
+      "id": "one-turn",
+      "title": "One Turn of the Heartbeat",
+      "description": "Follow one question from the big picture to an agreed design and back into the docs.",
+      "revision": 2,
+      "modelRevision": "sha256:22ce1271ec69890cbfae9f9012112df22d1a741eb4b5039b150183826969f017",
+      "author": "agent",
+      "writtenAt": "2026-11-13T14:49:56.937Z",
+      "steps": [
+        {
+          "id": "start-at-the-top",
+          "title": "Start at the top",
+          "kind": "sends",
+          "what": "A question or an idea starts at the system context: who uses the system, and what surrounds it.",
+          "why": "Agreeing on the top level first keeps the detail from drifting.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "question",
+              "label": "Question or Idea"
+            },
+            {
+              "kind": "node",
+              "id": "context",
+              "label": "Big Picture First\nContext, then containers, then flows"
+            }
+          ],
+          "edges": [
+            {
+              "id": "q_context",
+              "source": "question",
+              "target": "context"
+            }
+          ]
+        },
+        {
+          "id": "zoom-in",
+          "title": "Zoom in a level at a time",
+          "kind": "sends",
+          "what": "From the context to the containers, then to the flows and components the question is about.",
+          "why": "The agent asks the bigger questions before the detailed ones.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "context",
+              "label": "Big Picture First\nContext, then containers, then flows"
+            }
+          ]
+        },
+        {
+          "id": "answer-by-showing",
+          "title": "Answer by showing",
+          "kind": "sends",
+          "what": "The agent presents the diagram that holds the answer and lights the path with emphasis or a walkthrough.",
+          "why": "A lit path on a familiar picture is quicker to check than a paragraph.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "show",
+              "label": "Answer by Showing\nThe diagram with the path lit"
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail_show",
+              "source": "context",
+              "target": "show",
+              "label": "Point at the answer"
+            }
+          ]
+        },
+        {
+          "id": "the-person-points",
+          "title": "The person selects and comments",
+          "kind": "does",
+          "what": "The person clicks the parts they mean and leaves comments on them, then sends the comments to the agent.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "react",
+              "label": "Person Selects and Comments"
+            }
+          ],
+          "edges": [
+            {
+              "id": "show_react",
+              "source": "show",
+              "target": "react"
+            }
+          ]
+        },
+        {
+          "id": "revise",
+          "title": "The agent revises the picture",
+          "kind": "does",
+          "what": "The agent changes the diagram, replies to each comment and resolves it. The page redraws and names the change.",
+          "why": "Wrong ideas are cheap to fix while they are still a picture.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "revise",
+              "label": "Design Together, Live\nThe agent revises the picture"
+            }
+          ],
+          "edges": [
+            {
+              "id": "react_revise",
+              "source": "react",
+              "target": "revise",
+              "label": "Comments"
+            },
+            {
+              "id": "revise_show",
+              "source": "revise",
+              "target": "show",
+              "label": "Shown again"
+            }
+          ]
+        },
+        {
+          "id": "agree",
+          "title": "Agree on the picture",
+          "kind": "sends",
+          "what": "When the picture looks right, it is the agreement: what will be built, drawn before any code.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "agreed",
+              "label": "Agreed Picture"
+            }
+          ],
+          "edges": [
+            {
+              "id": "react_agreed",
+              "source": "react",
+              "target": "agreed",
+              "label": "Looks right"
+            }
+          ]
+        },
+        {
+          "id": "code-and-docs",
+          "title": "Code and docs change together",
+          "kind": "sends",
+          "what": "The code follows the agreed picture, and the same change updates the diagrams and notes in Git.",
+          "why": "Docs that change with the code stay worth answering from.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "code",
+              "label": "Code Follows"
+            },
+            {
+              "kind": "node",
+              "id": "docs",
+              "label": "Living Knowledge Base\nDocs change with the code"
+            }
+          ],
+          "edges": [
+            {
+              "id": "agreed_code",
+              "source": "agreed",
+              "target": "code",
+              "label": "Build it"
+            },
+            {
+              "id": "agreed_docs",
+              "source": "agreed",
+              "target": "docs",
+              "label": "Kept with it"
+            }
+          ]
+        },
+        {
+          "id": "reuse",
+          "title": "The next answer starts here",
+          "kind": "sends",
+          "what": "The next question starts from the kept diagrams, not from a blank page or a long chat.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "docs",
+              "label": "Living Knowledge Base\nDocs change with the code"
+            },
+            {
+              "kind": "node",
+              "id": "context",
+              "label": "Big Picture First\nContext, then containers, then flows"
+            }
+          ],
+          "edges": [
+            {
+              "id": "docs_context",
+              "source": "docs",
+              "target": "context",
+              "label": "Next question"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

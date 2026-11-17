@@ -1,0 +1,107 @@
+{
+  "type": "c4-model",
+  "level": "component",
+  "title": "Web shop (model)",
+  "elements": [
+    {
+      "id": "customer",
+      "kind": "person",
+      "label": "Customer",
+      "description": "Buys things"
+    },
+    {
+      "id": "checkout",
+      "kind": "component",
+      "label": "Checkout",
+      "technology": "TypeScript",
+      "description": "Takes orders",
+      "boundaryId": "api"
+    },
+    {
+      "id": "catalog",
+      "kind": "component",
+      "label": "Catalog",
+      "technology": "TypeScript",
+      "description": "Lists products",
+      "boundaryId": "api"
+    },
+    {
+      "id": "web",
+      "kind": "container",
+      "label": "Web app",
+      "technology": "React",
+      "description": "Serves the pages",
+      "boundaryId": "shop"
+    },
+    {
+      "id": "orders",
+      "kind": "container",
+      "label": "Orders",
+      "shape": "database",
+      "technology": "PostgreSQL",
+      "boundaryId": "shop"
+    },
+    {
+      "id": "payments",
+      "kind": "system",
+      "label": "Payment provider",
+      "external": true
+    }
+  ],
+  "boundaries": [
+    {
+      "id": "shop",
+      "kind": "system",
+      "label": "Web shop"
+    },
+    {
+      "id": "api",
+      "kind": "container",
+      "label": "API",
+      "parentId": "shop"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "customer--web",
+      "source": "customer",
+      "target": "web",
+      "label": "Shops with",
+      "technology": "HTTPS"
+    },
+    {
+      "id": "web--checkout",
+      "source": "web",
+      "target": "checkout",
+      "label": "Places orders",
+      "technology": "JSON"
+    },
+    {
+      "id": "web--catalog",
+      "source": "web",
+      "target": "catalog",
+      "label": "Reads products",
+      "technology": "JSON"
+    },
+    {
+      "id": "checkout--orders",
+      "source": "checkout",
+      "target": "orders",
+      "label": "Writes orders",
+      "technology": "SQL"
+    },
+    {
+      "id": "checkout--payments",
+      "source": "checkout",
+      "target": "payments",
+      "label": "Charges cards",
+      "technology": "HTTPS"
+    },
+    {
+      "id": "checkout--catalog",
+      "source": "checkout",
+      "target": "catalog",
+      "label": "Checks stock"
+    }
+  ]
+}

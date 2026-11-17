@@ -1,0 +1,287 @@
+{
+  "generatedAt": "2026-10-20T02:05:47.012Z",
+  "base": "https://192.168.1.42:40399",
+  "note": "Seeded from a run against https://192.168.1.42:40399; caps carry head-room for noise. before this lab: a 5 MB uncompressed page on an uncached load; ~150 comment requests per project page; the Diagrams tab ~2.25 MB and 5–7 s over a remote link.",
+  "budgets": {
+    "projects/default/cold": {
+      "transferBytes": 5854208,
+      "decodedBytes": 5912576,
+      "requests": 24,
+      "duplicateRequests": 7,
+      "lcpMs": 1200,
+      "wallMs": 2000,
+      "longTaskMs": 900,
+      "domNodes": 1732
+    },
+    "projects/default/warm": {
+      "transferBytes": 5849088,
+      "decodedBytes": 5912576,
+      "requests": 24,
+      "duplicateRequests": 7,
+      "lcpMs": 700,
+      "wallMs": 1500,
+      "longTaskMs": 300,
+      "domNodes": 1732
+    },
+    "projects/remote-link/cold": {
+      "transferBytes": 5915648,
+      "decodedBytes": 5912576,
+      "requests": 24,
+      "duplicateRequests": 7,
+      "lcpMs": 5700,
+      "wallMs": 7200,
+      "longTaskMs": 3700,
+      "domNodes": 1732
+    },
+    "projects/remote-link/warm": {
+      "transferBytes": 5915648,
+      "decodedBytes": 5912576,
+      "requests": 24,
+      "duplicateRequests": 7,
+      "lcpMs": 4200,
+      "wallMs": 5200,
+      "longTaskMs": 1950,
+      "domNodes": 1732
+    },
+    "project-folders/default/cold": {
+      "transferBytes": 6188032,
+      "decodedBytes": 6092800,
+      "requests": 218,
+      "duplicateRequests": 135,
+      "lcpMs": 2200,
+      "wallMs": 3600,
+      "longTaskMs": 850,
+      "domNodes": 1574
+    },
+    "project-folders/default/warm": {
+      "transferBytes": 6188032,
+      "decodedBytes": 6092800,
+      "requests": 218,
+      "duplicateRequests": 135,
+      "lcpMs": 1600,
+      "wallMs": 3000,
+      "longTaskMs": 400,
+      "domNodes": 1574
+    },
+    "project-folders/remote-link/cold": {
+      "transferBytes": 6202368,
+      "decodedBytes": 6106112,
+      "requests": 219,
+      "duplicateRequests": 136,
+      "lcpMs": 7900,
+      "wallMs": 8400,
+      "longTaskMs": 5250,
+      "domNodes": 1574
+    },
+    "project-folders/remote-link/warm": {
+      "transferBytes": 6202368,
+      "decodedBytes": 6106112,
+      "requests": 219,
+      "duplicateRequests": 136,
+      "lcpMs": 6100,
+      "wallMs": 6600,
+      "longTaskMs": 3150,
+      "domNodes": 1574
+    },
+    "project-diagrams/default/cold": {
+      "transferBytes": 8743936,
+      "decodedBytes": 8639488,
+      "requests": 281,
+      "duplicateRequests": 159,
+      "lcpMs": 1900,
+      "wallMs": 9400,
+      "longTaskMs": 700,
+      "domNodes": 728
+    },
+    "project-diagrams/default/warm": {
+      "transferBytes": 8743936,
+      "decodedBytes": 8639488,
+      "requests": 281,
+      "duplicateRequests": 159,
+      "lcpMs": 1700,
+      "wallMs": 9500,
+      "longTaskMs": 250,
+      "domNodes": 728
+    },
+    "project-diagrams/remote-link/cold": {
+      "transferBytes": 8840192,
+      "decodedBytes": 8730624,
+      "requests": 284,
+      "duplicateRequests": 162,
+      "lcpMs": 7900,
+      "wallMs": 17700,
+      "longTaskMs": 5550,
+      "domNodes": 728
+    },
+    "project-diagrams/remote-link/warm": {
+      "transferBytes": 8821760,
+      "decodedBytes": 8716288,
+      "requests": 284,
+      "duplicateRequests": 162,
+      "lcpMs": 5700,
+      "wallMs": 16100,
+      "longTaskMs": 2650,
+      "domNodes": 728
+    },
+    "project-notes/default/cold": {
+      "transferBytes": 6112256,
+      "decodedBytes": 6019072,
+      "requests": 216,
+      "duplicateRequests": 134,
+      "lcpMs": 1900,
+      "wallMs": 2900,
+      "longTaskMs": 650,
+      "domNodes": 881
+    },
+    "project-notes/default/warm": {
+      "transferBytes": 6188032,
+      "decodedBytes": 6092800,
+      "requests": 218,
+      "duplicateRequests": 135,
+      "lcpMs": 1300,
+      "wallMs": 2700,
+      "longTaskMs": 250,
+      "domNodes": 881
+    },
+    "project-notes/remote-link/cold": {
+      "transferBytes": 6193152,
+      "decodedBytes": 6097920,
+      "requests": 219,
+      "duplicateRequests": 136,
+      "lcpMs": 7700,
+      "wallMs": 8300,
+      "longTaskMs": 4350,
+      "domNodes": 881
+    },
+    "project-notes/remote-link/warm": {
+      "transferBytes": 6193152,
+      "decodedBytes": 6097920,
+      "requests": 219,
+      "duplicateRequests": 136,
+      "lcpMs": 5700,
+      "wallMs": 6500,
+      "longTaskMs": 3200,
+      "domNodes": 881
+    },
+    "diagram/default/cold": {
+      "transferBytes": 6050816,
+      "decodedBytes": 5960704,
+      "requests": 205,
+      "duplicateRequests": 127,
+      "lcpMs": 1100,
+      "wallMs": 3400,
+      "longTaskMs": 900,
+      "domNodes": 539
+    },
+    "diagram/default/warm": {
+      "transferBytes": 6050816,
+      "decodedBytes": 5960704,
+      "requests": 205,
+      "duplicateRequests": 127,
+      "lcpMs": 800,
+      "wallMs": 2700,
+      "longTaskMs": 400,
+      "domNodes": 539
+    },
+    "diagram/remote-link/cold": {
+      "transferBytes": 6049792,
+      "decodedBytes": 5959680,
+      "requests": 204,
+      "duplicateRequests": 124,
+      "lcpMs": 5500,
+      "wallMs": 7800,
+      "longTaskMs": 3500,
+      "domNodes": 539
+    },
+    "diagram/remote-link/warm": {
+      "transferBytes": 6050816,
+      "decodedBytes": 5960704,
+      "requests": 205,
+      "duplicateRequests": 127,
+      "lcpMs": 3900,
+      "wallMs": 6000,
+      "longTaskMs": 1750,
+      "domNodes": 539
+    },
+    "diagram-edit/default/cold": {
+      "transferBytes": 6061056,
+      "decodedBytes": 5968896,
+      "requests": 211,
+      "duplicateRequests": 126,
+      "lcpMs": 3600,
+      "wallMs": 3600,
+      "longTaskMs": 800,
+      "domNodes": 637
+    },
+    "diagram-edit/default/warm": {
+      "transferBytes": 6027264,
+      "decodedBytes": 5958656,
+      "requests": 203,
+      "duplicateRequests": 124,
+      "lcpMs": 2000,
+      "wallMs": 2600,
+      "longTaskMs": 250,
+      "domNodes": 223
+    },
+    "diagram-edit/remote-link/cold": {
+      "transferBytes": 6064128,
+      "decodedBytes": 5971968,
+      "requests": 212,
+      "duplicateRequests": 127,
+      "lcpMs": 9000,
+      "wallMs": 9100,
+      "longTaskMs": 3700,
+      "domNodes": 637
+    },
+    "diagram-edit/remote-link/warm": {
+      "transferBytes": 6065152,
+      "decodedBytes": 5971968,
+      "requests": 213,
+      "duplicateRequests": 129,
+      "lcpMs": 7300,
+      "wallMs": 7400,
+      "longTaskMs": 2050,
+      "domNodes": 637
+    },
+    "new-diagram/default/cold": {
+      "transferBytes": 6014976,
+      "decodedBytes": 5926912,
+      "requests": 201,
+      "duplicateRequests": 124,
+      "lcpMs": 1600,
+      "wallMs": 3100,
+      "longTaskMs": 900,
+      "domNodes": 402
+    },
+    "new-diagram/default/warm": {
+      "transferBytes": 6014976,
+      "decodedBytes": 5926912,
+      "requests": 201,
+      "duplicateRequests": 124,
+      "lcpMs": 1100,
+      "wallMs": 3100,
+      "longTaskMs": 450,
+      "domNodes": 402
+    },
+    "new-diagram/remote-link/cold": {
+      "transferBytes": 6021120,
+      "decodedBytes": 5932032,
+      "requests": 203,
+      "duplicateRequests": 126,
+      "lcpMs": 6700,
+      "wallMs": 9100,
+      "longTaskMs": 4000,
+      "domNodes": 402
+    },
+    "new-diagram/remote-link/warm": {
+      "transferBytes": 6021120,
+      "decodedBytes": 5932032,
+      "requests": 203,
+      "duplicateRequests": 126,
+      "lcpMs": 4600,
+      "wallMs": 7200,
+      "longTaskMs": 1800,
+      "domNodes": 402
+    }
+  }
+}

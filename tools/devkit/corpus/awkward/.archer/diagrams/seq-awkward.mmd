@@ -1,0 +1,32 @@
+%% Notes, actors, autonumber, activation and nested fragments.
+%%{init: {"theme": "forest"}}%%
+sequenceDiagram
+    autonumber
+    actor user as End user (mobile, EU)
+    participant web as Web app
+    participant api as API Gateway — v2
+    participant db as Orders DB
+    Note left of user: Signed out
+    Note over web,api: TLS 1.3, mutual auth
+    user->>web: Open "My orders" & filter (last 30 days)
+    activate web
+    web->>api: GET /orders?since=30d#59; page=1
+    loop paginate (until next_cursor is empty)
+        api->>db: SELECT * FROM orders WHERE customer = $1 LIMIT 50
+        alt rows found
+            db-->>api: 50 rows
+            opt cache warm
+                api-)web: prefetch hint
+            end
+        else no rows
+            db-->>api: empty
+        end
+    end
+    par render
+        api-->>web: 200 OK (JSON)
+    and audit
+        api-)db: INSERT audit_log
+    end
+    deactivate web
+    web-->>user: Orders list
+    Note right of db: a very long note that goes on and on so that layout and label measurement get a workout here

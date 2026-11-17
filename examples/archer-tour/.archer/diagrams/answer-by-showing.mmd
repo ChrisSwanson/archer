@@ -1,0 +1,21 @@
+%% description: "How does checkout work?" answered from the existing diagram, with the path lit, not with prose.
+sequenceDiagram
+    actor developer as Developer
+    participant coding_agent as Coding Agent
+    participant archer as Archer
+    participant web_page as Archer Page
+    developer->>coding_agent: How does checkout work?
+    coding_agent->>archer: list_diagrams
+    archer-->>coding_agent: Views, notes, walkthroughs
+    coding_agent->>archer: read_diagram checkout
+    archer-->>coding_agent: Model with node and edge ids
+    alt a walkthrough covers the question
+        coding_agent->>archer: present_diagram with walkthrough
+    else no walkthrough fits
+        coding_agent->>archer: present_diagram with emphasis
+    end
+    archer->>web_page: The diagram, the path lit
+    archer-->>coding_agent: Page URL
+    coding_agent-->>developer: The URL and a few sentences
+    developer->>web_page: Follow the path, ask about a part
+    Note over coding_agent,archer: No new diagram, no change to its source

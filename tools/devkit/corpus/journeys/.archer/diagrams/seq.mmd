@@ -1,0 +1,8 @@
+sequenceDiagram
+    participant c as Client
+    participant s as Server
+    participant d as Database
+    c->>s: POST /login
+    s->>d: SELECT user
+    d-->>s: user record
+    s-->>c: 200 OK

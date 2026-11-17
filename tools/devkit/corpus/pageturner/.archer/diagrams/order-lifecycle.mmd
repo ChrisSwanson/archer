@@ -1,0 +1,27 @@
+stateDiagram-v2
+    direction LR
+    PendingPayment : Pending Payment
+    PaymentFailed : Payment Failed
+    state Fulfilment {
+        state Packing
+        AwaitingCourier : Awaiting Courier
+        [*] --> Packing
+        Packing --> AwaitingCourier : packed
+        AwaitingCourier --> [*] : collected
+    }
+    state Paid
+    state Shipped
+    state Delivered
+    state Cancelled
+    [*] --> PendingPayment : order placed
+    PendingPayment --> Paid : card accepted
+    PendingPayment --> PaymentFailed : card declined
+    PaymentFailed --> PendingPayment : customer tries another card
+    PaymentFailed --> Cancelled : no new card within 24 hours
+    Paid --> Fulfilment : picked from the shelf
+    Paid --> Cancelled : customer cancels and is refunded
+    Fulfilment --> Shipped : handed to courier
+    Shipped --> Delivered : courier confirms delivery
+    Delivered --> [*]
+    Cancelled --> [*]
+    note right of PaymentFailed : the reserved stock is released at once

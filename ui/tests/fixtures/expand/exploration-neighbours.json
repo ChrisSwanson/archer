@@ -1,0 +1,145 @@
+{
+ "schemaVersion": 1,
+ "viewId": "hub",
+ "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+ "origin": "link",
+ "modelGeneration": 1,
+ "limits": {
+  "maxAddedSources": 5,
+  "maxAddedBoxes": 60,
+  "maxAddedWires": 120,
+  "maxMenuCandidates": 12,
+  "maxRelationshipsPerElement": 24,
+  "maxPieceBoxes": 40,
+  "maxResponseBytes": 65536,
+  "maxExpansions": 24,
+  "maxExpandParamChars": 4096
+ },
+ "expansions": {
+  "items": [
+   {
+    "element": "a",
+    "source": "star",
+    "neighbour": "b",
+    "status": "added",
+    "frame": 0,
+    "piece": {
+     "source": "star",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "flowchart",
+     "touches": "a",
+     "opens": false,
+     "kind": "freeform",
+     "model": {
+      "type": "freeform-graph",
+      "direction": "lr",
+      "nodes": [
+       {
+        "id": "b",
+        "label": "Bravo",
+        "shape": "rectangle",
+        "classes": [
+         "container"
+        ],
+        "groupId": null
+       }
+      ],
+      "edges": [],
+      "groups": []
+     },
+     "attach": [
+      {
+       "key": "ab",
+       "from": "a",
+       "to": "b",
+       "direction": "forward"
+      }
+     ],
+     "boxes": 1,
+     "wires": 1,
+     "total": {
+      "boxes": 1,
+      "wires": 1
+     },
+     "truncated": false
+    }
+   },
+   {
+    "element": "a",
+    "source": "star",
+    "neighbour": "c",
+    "status": "added",
+    "frame": 0,
+    "piece": {
+     "source": "star",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "flowchart",
+     "touches": "a",
+     "opens": false,
+     "kind": "freeform",
+     "model": {
+      "type": "freeform-graph",
+      "direction": "lr",
+      "nodes": [
+       {
+        "id": "c",
+        "label": "Charlie",
+        "shape": "rectangle",
+        "classes": [
+         "container"
+        ],
+        "groupId": null
+       }
+      ],
+      "edges": [],
+      "groups": []
+     },
+     "attach": [
+      {
+       "key": "ac",
+       "from": "a",
+       "to": "c",
+       "direction": "forward"
+      }
+     ],
+     "boxes": 1,
+     "wires": 1,
+     "total": {
+      "boxes": 1,
+      "wires": 1
+     },
+     "truncated": false
+    }
+   },
+   {
+    "element": "a",
+    "source": "star",
+    "neighbour": "c",
+    "status": "dropped",
+    "reason": "duplicate"
+   }
+  ],
+  "total": 3,
+  "truncated": false
+ },
+ "frames": [
+  {
+   "source": "star",
+   "sourceRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+   "title": "Star",
+   "family": "flowchart",
+   "touches": [
+    "a"
+   ],
+   "boxes": 2,
+   "wires": 2,
+   "truncated": false,
+   "pins": []
+  }
+ ],
+ "counts": {
+  "sources": 1,
+  "boxes": 2,
+  "wires": 2
+ }
+}

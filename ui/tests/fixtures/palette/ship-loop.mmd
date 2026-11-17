@@ -1,0 +1,39 @@
+flowchart TB
+  %% archer-key you: You decide
+  %% archer-key ai: The AI's work
+  %% archer-key real: Changes the real server
+  %% archer-key gone: Dropped
+  %% archer-key dotted: Lessons feed back
+  ask["1. Ask<br/>You say what you want built, in your own words"]:::you
+  plan["2. Write the Plan<br/>The farm chat turns your ask into a plan: what done looks like and how to prove it"]:::ai
+  poke["3. Poke Holes<br/>A second AI argues with the plan. Is it wrong? Would anyone use it?"]:::ai
+  ok["4. Your OK<br/>You read the plan and say go. This is the only sign-off before work starts"]:::you
+  build["5. Build<br/>An AI works alone in a fresh, throwaway container, 45 minutes max"]:::ai
+  check["6. Check the Work<br/>The farm runs the plan's test itself. The AI doesn't get to grade its own homework"]:::ai
+  retry["Try Once More<br/>The AI gets its failed attempt and the error, and has another go"]:::ai
+  second["7. Second Opinion<br/>A reviewer checks every promise in the plan and suggests keep or send back"]:::ai
+  decide["8. Your Call<br/>Keep it, send it back, or drop it"]:::you
+  dropped["Dropped"]:::gone
+  ship["9. Ship It<br/>Claude opens a PR, tests and reviews it, then you install it on the server"]:::real
+  remember["10. Remember<br/>Anything that surprised us becomes a rule that future plans follow"]:::ai
+  ask ask_plan@-->|handed to the chat| plan
+  plan plan_poke@--> poke
+  poke poke_plan@-->|holes found: rewrite it| plan
+  poke poke_ok@-->|holds up| ok
+  ok ok_plan@-->|not quite: rewrite it| plan
+  ok ok_build@-->|go| build
+  build build_check@-->|here's what I did| check
+  check check_second@-->|test passes| second
+  check check_second_2@-->|fails again: you decide| second
+  check check_retry@-->|fails the first time| retry
+  retry retry_build@--> build
+  second second_decide@--> decide
+  decide decide_build@-->|send it back| build
+  decide decide_dropped@-->|not worth it| dropped
+  decide decide_ship@-->|keep it| ship
+  ship ship_remember@-->|live on the server| remember
+  remember remember_plan@-.->|next plans start smarter| plan
+  classDef you fill:#dbeafe,stroke:#1d4ed8
+  classDef ai fill:#f1f5f9,stroke:#64748b
+  classDef real fill:#7f1d1d,stroke:#450a0a,color:#ffffff
+  classDef gone fill:#e5e7eb,stroke:#9ca3af

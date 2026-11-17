@@ -1,0 +1,127 @@
+/*
+ * The nested view (ADR 0029). One cue per meaning, colour only (the approved reference,
+ * docs/prototypes/emphasis-colour-only, rule 8): a closed box is drawn as any node of its family
+ * and an open frame as any frame, so emphasis and selection own their borders (ADR 0030). The only
+ * nesting cue is the control: an accent "+" on a box that can open, a quiet "−" on an open frame.
+ */
+
+/* A box that opens has rounder corners, so its "+" can be rounded too and still keep one gap along both
+   sides and round the corner (toggle-place.ts toggleRadius; decided 2026-10-29). Rounder shapes keep theirs. */
+.archer-node.archer-nest-closed:is(.archer-shape-rectangle, .archer-figure-service) {
+  border-radius: var(--radius-node);
+}
+/* What is inside, in the row the layout added under the label (`elk-layout.ts` NEST_CAPTION_ROW_PX). */
+.archer-node.archer-nest-closed:has(> .archer-nest-inside) {
+  padding-bottom: 16px;
+}
+.archer-nest-inside {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  left: 6px;
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: var(--type-canvas-nest-caption);
+  font-weight: 400;
+  line-height: 14px;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* A bundle, "N connections": heavier for two, heavier still for three or more -- 1px and 3px over the resting 2px
+   line (the prototype's steps, kept when the owner lightened the lines, 2026-11-15). */
+.archer-edge.archer-edge-bundle.archer-bundle-two .react-flow__edge-path {
+  stroke-width: 3;
+}
+.archer-edge.archer-edge-bundle.archer-bundle-many .react-flow__edge-path {
+  stroke-width: 5;
+}
+
+/* The controls: screen-space buttons over the flow. */
+.archer-nest-toggles {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* A 28 px hit area round the 20 px mark (44 px on a touch screen), centred on it. */
+.archer-nest-toggle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+@media (pointer: coarse) {
+  .archer-nest-toggle { width: 44px; height: 44px; margin: -12px; }
+}
+.archer-nest-toggle-mark {
+  overflow: visible;
+}
+.archer-nest-toggle-mark rect {
+  fill: var(--accent-fill);
+  stroke: var(--accent);
+}
+.archer-nest-toggle-mark path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+}
+/* The "−": the node's own outline (3:1 and more round it in both schemes; the reference's border-strong is not). */
+.archer-nest-toggle-open rect {
+  fill: var(--node-bg);
+  stroke: var(--node-border);
+}
+.archer-nest-toggle-open path {
+  stroke: var(--text-dim);
+}
+.archer-nest-toggle:hover rect {
+  stroke-width: 2;
+}
+.archer-nest-toggle:focus-visible {
+  outline: none;
+}
+.archer-nest-toggle:focus-visible rect {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+/*
+ * Motion (`transform`, `opacity`, and the frames' size): about half a second, ease-in-out. Boxes
+ * glide to their new places, a box opening grows into its frame, children fade in where they sit, staggered; wires and their labels fade in over the last 45%, by when the routed
+ * wires have usually replaced the first picture's elbows. Reduced motion never sets these classes.
+ */
+.archer-nest-moving .react-flow__node {
+  transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1), width 520ms cubic-bezier(0.65, 0, 0.35, 1), height 520ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.archer-nest-moving .react-flow__edges,
+.archer-nest-moving .react-flow__edgelabel-renderer,
+.archer-nest-moving .archer-nest-toggle {
+  animation: archer-nest-late 520ms linear both;
+}
+/* React Flow owns the wrapper's transform, so a child entering fades (its wrapper's opacity). */
+.archer-nest-moving .react-flow__node.archer-nest-entering {
+  animation: archer-nest-enter 380ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: var(--nest-delay, 0ms);
+}
+@keyframes archer-nest-late {
+  0%, 55% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes archer-nest-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* A tight corner gives a square "+" (toggle-place.ts toggleRadius): its outline's corners stay soft. */
+.archer-nest-toggle-mark rect { stroke-linejoin: round; }

@@ -1,0 +1,34 @@
+{
+  "type": "service-architecture",
+  "title": "Shop platform",
+  "groups": [
+    { "id": "cloud", "label": "Cloud", "icon": "cloud" },
+    { "id": "data", "label": "Data tier", "icon": "database", "parentId": "cloud" }
+  ],
+  "services": [
+    { "id": "gateway", "label": "Gateway", "icon": "internet", "groupId": "cloud" },
+    { "id": "app", "label": "App server", "icon": "server", "groupId": "cloud" },
+    { "id": "db", "label": "Orders DB", "icon": "database", "groupId": "data" },
+    { "id": "files", "label": "File store", "icon": "disk", "groupId": "data" },
+    { "id": "client", "label": "Client" }
+  ],
+  "junctions": [{ "id": "hub", "groupId": "cloud" }],
+  "edges": [
+    { "id": "client--gateway", "source": "client", "target": "gateway", "sourceSide": "right", "targetSide": "left", "targetArrow": true },
+    { "id": "gateway--hub", "source": "gateway", "target": "hub", "sourceSide": "right", "targetSide": "left" },
+    { "id": "hub--app", "source": "hub", "target": "app", "sourceSide": "right", "targetSide": "left", "targetArrow": true },
+    { "id": "hub--files", "source": "hub", "target": "files", "sourceSide": "bottom", "targetSide": "top", "targetArrow": true },
+    {
+      "id": "app--db",
+      "source": "app",
+      "target": "db",
+      "sourceSide": "bottom",
+      "targetSide": "top",
+      "sourceArrow": true,
+      "targetArrow": true,
+      "sourceGroup": true,
+      "targetGroup": true
+    },
+    { "id": "app--files", "source": "app", "target": "files", "sourceSide": "right", "targetSide": "left", "label": "audit" }
+  ]
+}

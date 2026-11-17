@@ -1,0 +1,50 @@
+{
+  "name": "@archer/ui",
+  "private": true,
+  "license": "Apache-2.0",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "bench": "node bench/layout-bench.mjs",
+    "build": "node scripts/check-prod-strip.mjs --refuse-debug-env && node scripts/generate-validator.mjs --check && vite build && vite build --mode mcp --outDir dist/mcp && node scripts/check-prod-strip.mjs dist/index.html dist/mcp/index.html",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:browser:ts": "playwright test -c tests/browser-ts",
+    "test:repeat": "node scripts/repeat-suite.mjs",
+    "typecheck": "tsc --noEmit",
+    "check:validator": "node scripts/generate-validator.mjs --check",
+    "build:debug": "ARCHER_DEBUG_UI=1 vite build --outDir dist/debug",
+    "test:playground": "playwright test -c tests/playground-browser"
+  },
+  "dependencies": {
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/lint": "6.9.7",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@lezer/highlight": "1.2.5",
+    "@modelcontextprotocol/ext-apps": "1.7.4",
+    "@xyflow/react": "^12.11.2",
+    "ajv": "8.20.0",
+    "elkjs": "^0.11.1",
+    "markdown-it": "15.0.3",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/markdown-it": "14.2.0",
+    "@types/node": "20.19.25",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "jsdom": "^25.0.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "4.1.12"
+  }
+}

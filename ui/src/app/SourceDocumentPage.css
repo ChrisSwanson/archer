@@ -1,0 +1,15 @@
+/* The document's own messages (loading, unavailable) are panel text on the ramp, and Try again is a
+   touch target on a phone (round 1, V1 and G7 [H]). */
+.archer-source-reader>:is([role="alert"],[role="status"]){font-size:var(--type-body)}
+/* A document that could not be read: the fact, then Try again in the same quiet link-like button as Project
+   settings' load error (round 1, D18), not the browser's default grey button. */
+.archer-source-error{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;max-width:60ch;margin:24px 0;color:var(--text)}
+.archer-source-error p{margin:0}
+.archer-source-error button{flex:none;padding:4px 0;border:0;background:transparent;color:inherit;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+@media (pointer:coarse){.archer-source-reader>[role="alert"] button{min-width:var(--icon-touch);min-height:var(--icon-touch)}}
+.archer-source-readonly{font-size:var(--type-small);color:var(--text-dim);white-space:nowrap}
+.archer-source-reader .primary-note-document-column{position:relative}
+.archer-source-figure{margin:24px 0;max-width:100%;overflow:auto}
+.archer-source-figure figcaption{font-weight:600;margin-bottom:12px}
+.archer-source-figure svg{display:block;width:100%;height:auto;min-width:0}
+.archer-source-figure pre{max-width:100%;overflow:auto}

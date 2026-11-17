@@ -1,0 +1,99 @@
+/* The project browser (SearchPage.tsx): search field, filter dialog, tabs and document previews. */
+.archer-browser-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--scrim); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.archer-browser-dialog { box-sizing: border-box; width: min(1040px, 100%); height: min(820px, calc(100dvh - 48px)); max-height: calc(100dvh - 48px); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "heading" "content"; gap: 28px 40px; overflow: hidden; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-dialog); padding: 32px; color: var(--text); background: var(--surface); box-shadow: var(--shadow-modal); }
+.archer-browser-dialog-heading { grid-area: heading; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.archer-browser-dialog-heading h2 { margin: 0; font-size: var(--type-title); }
+.archer-browser-dialog button { min-height: 36px; padding: 6px 12px; border: var(--line-chrome) solid var(--border); border-radius: var(--radius-control); background: var(--surface-2); color: var(--text); font: inherit; cursor: pointer; }
+.archer-browser-dialog button.archer-browser-close { display: grid; place-items: center; width: 36px; min-height: 36px; padding: 0; border: 0; background: transparent; color: var(--text-dim); }
+.archer-browser-dialog button.archer-browser-close:hover { background: var(--surface-2); color: var(--text); }
+.archer-browser-dialog button.archer-browser-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-browser-content { grid-area: content; min-height: 0; overflow-y: auto; padding-right: 24px; scrollbar-gutter: stable; overscroll-behavior: contain; }
+.archer-browser-content > .archer-browser-filter-content,
+.archer-browser-filter-content { grid-area: content; display: block; }
+.archer-browser-filter-content fieldset { min-width: 0; }
+.archer-browser-filter-button { min-height: 36px; padding: 6px 12px; border: var(--line-chrome) solid var(--border); border-radius: var(--radius-control); background: var(--surface-2); color: var(--text); font: inherit; cursor: pointer; }
+.archer-project-browser .archer-search-bar { display: flex; align-items: center; gap: 8px; width: min(852px, 100%); }
+.archer-project-browser .archer-browser-search-field { position: relative; flex: 1 1 auto; min-width: 0; }
+/* The field holds its two trailing controls, Search then Filters (round 1 pass 5 O1): the typed text stops
+   before them. 36px buttons 6px in from the edge, 2px apart (`--icon-gap`) with a hairline between; 44px and 2px
+   in on a touch screen. */
+.archer-project-browser .archer-browser-search-field .archer-search-input { min-height: 48px; padding: 8px calc(6px + 2 * var(--icon-button) + 9px + 8px) 8px 16px; }
+.archer-project-browser .archer-search-input::placeholder { color: var(--text-dim); opacity: 1; }
+.archer-project-browser .archer-search-submit { position: absolute; top: 6px; right: calc(6px + var(--icon-button) + 9px); display: grid; place-items: center; width: var(--icon-button); min-height: var(--icon-button); padding: 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--text-dim); cursor: pointer; }
+.archer-project-browser .archer-search-submit:hover { background: var(--surface-2); color: var(--text); }
+.archer-project-browser .archer-search-submit:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.archer-project-browser .archer-browser-search-field button.archer-browser-filter-button.archer-filter-variant { position: absolute; inset: 6px 6px auto auto; display: grid; place-items: center; width: var(--icon-button); min-height: var(--icon-button); padding: 0; }
+.archer-project-browser .archer-browser-search-field button.archer-browser-filter-button.archer-filter-variant::before { content: ""; position: absolute; top: 25%; bottom: 25%; left: -5px; width: 1px; background: var(--border); pointer-events: none; }
+.archer-project-browser .archer-browser-search-field button.archer-browser-filter-button.archer-filter-variant { border: 0; border-radius: var(--radius-control); background: transparent; color: var(--text-dim); }
+.archer-project-browser .archer-browser-search-field button.archer-browser-filter-button.archer-filter-variant:hover { background: var(--surface-2); color: var(--text); }
+.archer-project-browser .archer-filter-variant:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-project-browser .archer-filter-count { font-size: var(--type-floor); position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: var(--radius-pill); background: var(--accent); color: transparent; overflow: hidden; }
+@media (max-width: 640px) { .archer-browser-overlay { padding: 12px; } .archer-browser-dialog { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "heading" "content"; height: calc(100dvh - 24px); max-height: calc(100dvh - 24px); padding: 20px; gap: 20px; } }
+.archer-document-preview-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.archer-document-preview-state { color: var(--text-dim); font-size: var(--type-small); text-align: center; }
+.archer-document-preview-note { align-self: flex-start; }
+.archer-browser-search-field { position: relative; width: 100%; }
+.archer-document-preview-note { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
+.archer-document-preview-note svg { flex: none; }
+
+@media (pointer: coarse) {
+  .archer-browser-dialog button, .archer-browser-filter-button { min-height: 44px; }
+  .archer-browser-dialog button.archer-browser-close { width: 44px; min-height: 44px; }
+  .archer-project-browser .archer-browser-search-field .archer-search-input { padding-right: calc(2px + 2 * var(--icon-touch) + 9px + 8px); }
+  .archer-project-browser .archer-search-submit { top: 2px; right: calc(2px + var(--icon-touch) + 9px); width: var(--icon-touch); min-height: var(--icon-touch); }
+  .archer-project-browser .archer-browser-search-field button.archer-browser-filter-button.archer-filter-variant { inset: 2px 2px auto auto; width: var(--icon-touch); min-height: var(--icon-touch); }
+}
+
+.archer-document-preview-note p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
+
+@media (max-width: 640px) { .archer-search-summary-line { flex-wrap: wrap; } }
+
+@media (min-width: 721px) {
+  /* A narrower result set retains the same metadata schedule. */
+  .archer-project-browser .archer-files { table-layout: fixed; min-width: 840px; }
+  .archer-project-browser .archer-files-head[data-column="name"] { width: 32%; }
+  .archer-project-browser .archer-files-head[data-column="type"] { width: 10%; }
+  .archer-project-browser .archer-files-head[data-column="folder"] { width: 22%; }
+  .archer-project-browser .archer-files-head[data-column="edited"] { width: 12%; }
+  .archer-project-browser .archer-files-head[data-column="created"] { width: 12%; }
+}
+
+/* Each facet keeps its own height beside longer option lists. */
+
+/* The project browser's tabs: Folders, Diagrams, Notes, each with its count. */
+/* The row ends with the project's own actions (New); the tabs scroll (wrap on the narrowest phone), the actions never wrap off a phone. */
+.archer-project-tab-row { display: flex; align-items: stretch; min-width: 0; margin: 4px 0 16px; }
+/* The rule under the tabs is an inset shadow, so the selected tab's underline covers it without overflowing (an overflow here showed a scrollbar). */
+.archer-project-tabs { display: flex; flex: 1 1 auto; min-width: 0; gap: 4px; box-shadow: inset 0 -1px 0 var(--border); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.archer-project-tabs::-webkit-scrollbar { display: none; }
+.archer-project-tab-actions { display: flex; flex: none; align-items: center; padding-left: 8px; box-shadow: inset 0 -1px 0 var(--border); }
+.archer-project-tab-actions:empty { display: none; }
+/* A phone keeps the tabs whole: what stands in for New ("Editing is on desktop", "Read & comment") takes its own line under them. */
+@media (max-width: 720px) { .archer-project-tab-row { flex-wrap: wrap; } .archer-project-tab-actions { order: 2; flex-basis: 100%; justify-content: flex-end; padding: 6px 0 0; box-shadow: none; } }
+.archer-project-tab { display: inline-flex; flex: none; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border: 0; border-bottom: var(--line-chrome-strong) solid transparent; background: transparent; color: var(--text-dim); font: inherit; font-size: var(--type-body); cursor: pointer; }
+.archer-project-tab:hover { color: var(--text); }
+.archer-project-tab[aria-selected="true"] { border-bottom-color: var(--accent); color: var(--text); font-weight: 500; }
+.archer-project-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* Two digits' width kept from the first frame, so "…" becoming the count moves no tab (S6; codex-205, claude-206).
+   The text starts at the box's start: centred (the button's default), "…" becoming "12" moved the text 3 px, a layout
+   shift of the count's own text (O223). The search pill centres its count; it never shows "…".
+   The width is two of the count's own digits ("00" under it, unseen and of no height), not 2ch: `ch` is the font's
+   default "0", and where those digits are proportional (macOS's system font) its tabular digits are wider, so "12"
+   outgrew 2ch and moved every tab after it on a Mac. */
+.archer-project-tab-count { display: inline-flex; flex-direction: column; text-align: start; color: var(--text-faint); font-size: var(--type-small); font-weight: 400; font-variant-numeric: tabular-nums; }
+.archer-project-tab-count::after { content: "00"; height: 0; overflow: hidden; visibility: hidden; }
+.archer-project-tab-count[data-searching="true"] { padding: 1px 8px; border-radius: var(--radius-pill); background: var(--accent-fill); color: var(--accent-on-fill); font-weight: 500; text-align: center; }
+.archer-project-tab-count[data-searching="true"][data-zero="true"] { background: var(--surface-2); color: var(--text-faint); }
+/* At a phone's narrowest (320 CSS px, WCAG 1.4.10) every tab stays in view: the tabs tighten and, if they still
+   do not fit, wrap to a second row rather than scroll sideways with one out of view (round 1, R3-15). */
+@media (max-width: 480px) {
+  .archer-project-tabs { flex-wrap: wrap; overflow: visible; gap: 0 2px; }
+  .archer-project-tab { padding: 0 10px; }
+}
+.archer-search-page .archer-project-title + .archer-search-bar,
+.archer-search-page .archer-project-readme + .archer-search-bar { margin-top: 24px; }
+.archer-search-page .archer-project-title + .archer-project-readme { margin-top: 24px; }
+/* The tree is wider than a phone: it scrolls inside its frame, never the page. */
+.archer-search-page .archer-search-results,
+.archer-project-tab-panel,
+.archer-project-documents { min-width: 0; max-width: 100%; }

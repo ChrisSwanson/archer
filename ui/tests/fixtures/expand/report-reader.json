@@ -1,0 +1,40 @@
+{
+  "origin": "reader",
+  "viewId": "context",
+  "expand": [
+    {
+      "element": "shop",
+      "source": "containers"
+    },
+    {
+      "element": "api",
+      "source": "deploy"
+    }
+  ],
+  "frames": [
+    {
+      "source": "containers",
+      "title": "Containers",
+      "touches": [
+        "shop"
+      ],
+      "boxes": 2
+    },
+    {
+      "source": "deploy",
+      "title": "deploy",
+      "touches": [
+        "api"
+      ],
+      "boxes": 1
+    }
+  ],
+  "selection": [
+    {
+      "source": "deploy",
+      "kind": "node",
+      "id": "queue",
+      "label": "Jobs"
+    }
+  ]
+}

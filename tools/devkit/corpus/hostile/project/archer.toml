@@ -1,0 +1,105 @@
+# Hostile content for the security rubric's G7 probe (P6): docs/quality/rubrics/security.md.
+# Every payload, when it runs, writes window.__xss (or opens a dialog, or reaches the canary
+# host xss-canary.invalid), so ui/tests/browser-ts/xss-corpus.e2e.ts can tell which one ran.
+# `*-inert` diagrams must compile and be drawn as text; `*-refused` diagrams must be refused.
+# A sandbox: node tools/devkit/sandbox.mjs up --name sec-b --tls --corpus tools/devkit/corpus/hostile
+# This project sits one level down so the default devkit corpus (tools/devkit/corpus) does not pick it up.
+version = 1
+name = "Hostile corpus"
+folder = ".archer"
+
+[[views]]
+id = "flow-inert"
+kind = "freeform"
+title = "Flow x\" onmouseover=\"window.__xss='toml-title'"
+source = ".archer/diagrams/flow-inert.mmd"
+
+[[views]]
+id = "flow-refused"
+kind = "freeform"
+title = "Flow refused"
+source = ".archer/diagrams/flow-refused.mmd"
+
+[[views]]
+id = "flow-directives"
+kind = "freeform"
+title = "Flow directives"
+source = ".archer/diagrams/flow-directives.mmd"
+
+[[views]]
+id = "flow-styles"
+kind = "freeform"
+title = "Flow styles with url()"
+source = ".archer/diagrams/flow-styles.mmd"
+
+[[views]]
+id = "seq-inert"
+kind = "sequence"
+title = "Sequence inert"
+source = ".archer/diagrams/seq-inert.mmd"
+
+[[views]]
+id = "seq-refused"
+kind = "sequence"
+title = "Sequence refused"
+source = ".archer/diagrams/seq-refused.mmd"
+
+[[views]]
+id = "state-inert"
+kind = "state"
+title = "State inert"
+source = ".archer/diagrams/state-inert.mmd"
+
+[[views]]
+id = "state-refused"
+kind = "state"
+title = "State refused"
+source = ".archer/diagrams/state-refused.mmd"
+
+[[views]]
+id = "er-inert"
+kind = "entity-relationship"
+title = "ER inert"
+source = ".archer/diagrams/er-inert.mmd"
+
+[[views]]
+id = "er-refused"
+kind = "entity-relationship"
+title = "ER refused"
+source = ".archer/diagrams/er-refused.mmd"
+
+[[views]]
+id = "c4-inert"
+kind = "c4"
+title = "C4 inert"
+source = ".archer/diagrams/c4-inert.mmd"
+
+[[views]]
+id = "c4-refused"
+kind = "c4"
+title = "C4 refused"
+source = ".archer/diagrams/c4-refused.mmd"
+
+[[views]]
+id = "arch-inert"
+kind = "architecture"
+title = "Architecture inert"
+source = ".archer/diagrams/arch-inert.mmd"
+
+[[views]]
+id = "arch-refused"
+kind = "architecture"
+title = "Architecture refused"
+source = ".archer/diagrams/arch-refused.mmd"
+
+[[views]]
+id = "journey-inert"
+kind = "journey"
+title = "Journey inert"
+source = ".archer/diagrams/journey-inert.mmd"
+
+[[views]]
+id = "journey-refused"
+kind = "journey"
+title = "Journey refused"
+source = ".archer/diagrams/journey-refused.mmd"

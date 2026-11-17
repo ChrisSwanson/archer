@@ -1,0 +1,7 @@
+.archer-settings-launcher{display:flex;align-items:center;gap:14px;width:44px;min-height:44px;flex:none;padding:10px 12px;border:0;border-radius:var(--radius-control);background:transparent;color:var(--text-dim);font:inherit;text-align:left;cursor:pointer}
+.archer-settings-launcher:hover,.archer-settings-launcher[aria-expanded=true]{background:var(--surface-2);color:var(--text)}
+.archer-settings-launcher svg{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.archer-settings-launcher span{white-space:nowrap}
+.primary-navigation .archer-settings-launcher span{visibility:hidden;opacity:0}
+.primary-navigation[data-expanded=true] .archer-settings-launcher span{visibility:visible;opacity:1}
+.archer-settings-launcher:focus-visible{outline:2px solid var(--accent);outline-offset:2px}

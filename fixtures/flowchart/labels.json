@@ -1,0 +1,68 @@
+{
+  "type": "freeform-graph",
+  "direction": "rl",
+  "nodes": [
+    {
+      "id": "bare",
+      "label": "API (v2)",
+      "shape": "rectangle"
+    },
+    {
+      "id": "commented",
+      "label": "Commented",
+      "shape": "rectangle"
+    },
+    {
+      "id": "literal",
+      "label": "(Db)",
+      "shape": "rectangle"
+    },
+    {
+      "id": "nested_bracket",
+      "label": "Bracket [inner]",
+      "shape": "rectangle"
+    },
+    {
+      "id": "nested_paren",
+      "label": "API (v2)",
+      "shape": "rounded"
+    },
+    {
+      "id": "padded",
+      "label": "Padded",
+      "shape": "rectangle"
+    },
+    {
+      "id": "percent",
+      "label": "50 %% off",
+      "shape": "rectangle"
+    },
+    {
+      "id": "punctuated",
+      "label": "Orders API, v2: read - write/replay (EU)",
+      "shape": "rectangle"
+    },
+    {
+      "id": "quoted",
+      "label": "API (v2)",
+      "shape": "rectangle"
+    },
+    {
+      "id": "store",
+      "label": "Orders (primary)",
+      "shape": "cylinder"
+    },
+    {
+      "id": "tabbed",
+      "label": "Indented with a tab",
+      "shape": "rectangle"
+    },
+    {
+      "id": "unbalanced",
+      "label": "API (v2",
+      "shape": "rounded"
+    }
+  ],
+  "edges": [],
+  "groups": []
+}

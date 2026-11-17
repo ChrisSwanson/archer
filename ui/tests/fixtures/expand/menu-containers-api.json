@@ -1,0 +1,110 @@
+{
+ "schemaVersion": 1,
+ "viewId": "containers",
+ "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+ "modelGeneration": 3,
+ "canvas": [],
+ "dropped": [],
+ "limits": {
+  "maxAddedSources": 5,
+  "maxAddedBoxes": 60,
+  "maxAddedWires": 120,
+  "maxMenuCandidates": 12,
+  "maxRelationshipsPerElement": 24,
+  "maxPieceBoxes": 40,
+  "maxResponseBytes": 65536,
+  "maxExpansions": 24,
+  "maxExpandParamChars": 4096
+ },
+ "remaining": {
+  "sources": 5,
+  "boxes": 60,
+  "wires": 120
+ },
+ "element": {
+  "id": "api",
+  "name": "API",
+  "readings": [
+   {
+    "kind": "container",
+    "parent": "shop",
+    "views": [
+     "containers"
+    ]
+   },
+   {
+    "kind": "container",
+    "views": [
+     "notes/deploy.md#deploy"
+    ]
+   }
+  ],
+  "conflicting": false
+ },
+ "diagrams": {
+  "items": [
+   {
+    "source": "notes/deploy.md#deploy",
+    "title": "Deploy (proposed)",
+    "family": "flowchart",
+    "sourceRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "reading": 1,
+    "proposed": true,
+    "onCanvas": false,
+    "relation": "draws",
+    "adds": {
+     "boxes": 1,
+     "wires": 1
+    },
+    "piece": {
+     "source": "notes/deploy.md#deploy",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "flowchart",
+     "touches": "api",
+     "opens": false,
+     "kind": "freeform",
+     "model": {
+      "type": "freeform-graph",
+      "direction": "lr",
+      "nodes": [
+       {
+        "id": "queue",
+        "label": "Jobs",
+        "shape": "rectangle",
+        "classes": [
+         "container"
+        ],
+        "groupId": null
+       }
+      ],
+      "edges": [],
+      "groups": []
+     },
+     "attach": [
+      {
+       "key": "e1",
+       "from": "api",
+       "to": "queue",
+       "direction": "forward"
+      }
+     ],
+     "boxes": 1,
+     "wires": 1,
+     "total": {
+      "boxes": 1,
+      "wires": 1
+     },
+     "truncated": false
+    }
+   }
+  ],
+  "total": 1,
+  "truncated": false
+ },
+ "neighbours": {
+  "items": [],
+  "total": 0,
+  "truncated": false
+ },
+ "bytesTruncated": false
+}

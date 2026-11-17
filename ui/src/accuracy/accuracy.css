@@ -1,0 +1,80 @@
+.accuracy-compare {
+  width: min(42rem, 100%);
+  max-height: min(76vh, 54rem);
+  overflow: auto;
+  padding: 1.25rem;
+  color: var(--text);
+  background: var(--surface);
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-dialog);
+  font-size: var(--type-body);
+  line-height: 1.5;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.accuracy-header { display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 1.25rem; }
+.accuracy-header h2 { margin: 0; font-size: var(--type-title); }
+.accuracy-header p { margin: .25rem 0 0; overflow-wrap: anywhere; color: var(--text-dim); }
+.accuracy-compare button, .accuracy-compare input { font: inherit; color: inherit; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface-2); padding: .5rem .75rem; }
+/* A field keeps its border; a button is a soft tint (see `.archer-review-button`),
+   and Compare, the panel's one action, the primary one. */
+.accuracy-compare button { border: 0; cursor: pointer; min-height: 2.5rem; }
+.accuracy-compare button:hover:not(:disabled) { background: var(--border); }
+.accuracy-compare button[type="submit"]:not(:disabled) { background: var(--accent-fill); color: var(--accent-on-fill); font-weight: 600; }
+.accuracy-compare button[type="submit"]:hover:not(:disabled) { background: var(--accent); color: var(--accent-ink); }
+.accuracy-compare button:disabled { cursor: default; background: var(--surface-2); color: var(--text-faint); }
+.accuracy-compare :is(button, input, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.accuracy-refs, .accuracy-histories, .accuracy-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.accuracy-refs label { display: grid; gap: .375rem; }
+.accuracy-refs input { width: 100%; box-sizing: border-box; min-width: 0; }
+.accuracy-hint { color: var(--text-dim); margin: .75rem 0; }
+.accuracy-result { margin-top: 1.5rem; }
+.accuracy-histories { padding-bottom: 1rem; border-bottom: var(--line-chrome) solid var(--border); }
+.accuracy-history h3 { font-size: var(--type-body); margin: 0 0 .5rem; }
+.accuracy-history h3 code { overflow-wrap: anywhere; }
+.accuracy-commit, .accuracy-path { display: block; overflow-wrap: anywhere; font-size: var(--type-small); color: var(--text-dim); margin: .375rem 0; }
+.accuracy-changes { list-style: none; padding: 0; margin: 1rem 0; }
+.accuracy-changes > li { border-top: var(--line-chrome) solid var(--border); }
+.accuracy-changes > li:last-child { border-bottom: var(--line-chrome) solid var(--border); }
+.accuracy-changes summary { padding: .75rem .125rem; cursor: pointer; overflow-wrap: anywhere; }
+.accuracy-values { padding-bottom: 1rem; }
+.accuracy-values h4 { margin: .375rem 0; font-size: var(--type-small); color: var(--text-dim); }
+.accuracy-values pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; padding: .75rem; background: var(--surface-2); border-radius: var(--radius-control); font-size: var(--type-small); }
+.accuracy-order { margin: 0 0 .75rem; color: var(--text-dim); }
+.accuracy-compare [role="alert"] { color: var(--danger-text); }
+@media (max-width: 560px) {
+  .accuracy-compare { padding: 1rem; }
+  .accuracy-refs, .accuracy-histories, .accuracy-values { grid-template-columns: minmax(0, 1fr); }
+}
+/* Only the actual panel covers the canvas. No viewport-sized event layer. */
+.archer-comparison-panel {
+  position: fixed;
+  top: 5rem;
+  right: 1rem;
+  z-index: 30;
+  width: min(42rem, calc(100vw - 2rem));
+}
+.archer-comparison-panel .accuracy-compare {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 6rem);
+}
+@media (max-width: 560px) {
+  /* Beside the canvas's tool column, not over it: the column runs down the left of a phone's drawing, and the
+     panel laid over it hid the zoom, Fit, Select and Hand buttons that keep taking focus (R1-codex-21). The
+     column is React Flow's 15px panel margin, a 44px touch button, its inset and border; then a gap. */
+  .archer-comparison-panel {
+    top: 8rem;
+    right: .5rem;
+    left: calc(15px + var(--icon-touch) + 2 * var(--icon-group-inset) + 2px + .5rem);
+    width: auto;
+  }
+  .archer-comparison-panel .accuracy-compare { max-height: min(65dvh, calc(100dvh - 9rem)); }
+}
+.archer-comparison-panel .accuracy-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+
+/* Round 1, G7 [H]: Close, Compare and the two revision fields are touch targets on a phone. */
+@media (pointer: coarse) { .accuracy-compare :is(button, input) { min-height: var(--icon-touch); min-width: var(--icon-touch); } }

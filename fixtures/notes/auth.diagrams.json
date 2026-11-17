@@ -1,0 +1,60 @@
+{
+  "problems": [],
+  "diagrams": [
+    {
+      "name": "login-flow",
+      "address": "notes/auth.md#login-flow",
+      "explicit": false,
+      "ordinal": 1,
+      "heading": "Login flow",
+      "kind": "freeform",
+      "line": 11,
+      "bodyLine": 12,
+      "writable": true
+    },
+    {
+      "name": "login-flow-2",
+      "address": "notes/auth.md#login-flow-2",
+      "explicit": false,
+      "ordinal": 2,
+      "heading": "Login flow",
+      "kind": "sequence",
+      "line": 19,
+      "bodyLine": 20,
+      "writable": true
+    },
+    {
+      "name": "refresh",
+      "address": "notes/auth.md#refresh",
+      "explicit": true,
+      "ordinal": 3,
+      "heading": "Tokens",
+      "kind": "freeform",
+      "line": 28,
+      "bodyLine": 29,
+      "writable": true
+    },
+    {
+      "name": "tokens",
+      "address": "notes/auth.md#tokens",
+      "explicit": false,
+      "ordinal": 4,
+      "heading": "Tokens",
+      "kind": "freeform",
+      "line": 36,
+      "bodyLine": 37,
+      "writable": false
+    },
+    {
+      "name": "broken",
+      "address": "notes/auth.md#broken",
+      "explicit": false,
+      "ordinal": 5,
+      "heading": "Broken",
+      "kind": "freeform",
+      "line": 43,
+      "bodyLine": 44,
+      "writable": true
+    }
+  ]
+}

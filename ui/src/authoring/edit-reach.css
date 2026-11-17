@@ -1,0 +1,22 @@
+/* Editing reach (D6): the explanation New, Edit and "Read & comment" open, and the phone's note. */
+.archer-reach { position: relative; display: inline-flex; align-items: center; }
+.archer-reach-popup {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; box-sizing: border-box;
+  width: min(340px, calc(100vw - 32px)); padding: 14px 16px; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-card);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-panel); text-align: left; white-space: normal;
+}
+.archer-reach-title { margin: 0 0 6px; font-size: var(--type-body); font-weight: 600; }
+.archer-reach-text { margin: 0; color: var(--text-dim); font-size: var(--type-small); line-height: 1.45; }
+.archer-reach-text code { font-size: inherit; color: var(--text); }
+.archer-reach-request { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 8px 10px; border-radius: var(--radius-control); background: var(--surface-2); }
+.archer-reach-quote { flex: 1; min-width: 0; margin: 0; font-size: var(--type-small); line-height: 1.4; user-select: all; }
+.archer-reach-copy {
+  flex: none; font: inherit; font-size: var(--type-small); padding: 3px 10px; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-control);
+  background: var(--surface); color: var(--text); cursor: pointer;
+}
+.archer-reach-copy:hover { border-color: var(--border-hover); }
+.archer-reach-status { min-height: 1.2em; margin: 4px 0 2px; color: var(--text-dim); font-size: var(--type-small); }
+.archer-reach-link { font-size: var(--type-small); color: var(--accent); }
+.archer-reach :is(.archer-reach-copy, .archer-reach-link):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-new-desktop { align-self: center; color: var(--text-faint); font-size: var(--type-small); white-space: nowrap; }
+.archer-reach-retry { margin-top: 10px; }

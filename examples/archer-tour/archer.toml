@@ -1,0 +1,53 @@
+# The Archer Tour: Archer explained in Archer's own format. Open this folder in Archer
+# (`archer present` from here) to read the notes and replay the walkthroughs.
+version = 1
+name = "Archer Tour"
+folder = ".archer"
+
+[[views]]
+id = "system-context"
+kind = "c4"
+title = "Archer System Context"
+source = ".archer/diagrams/system-context.mmd"
+
+[[views]]
+id = "containers"
+kind = "c4"
+title = "Archer Containers"
+source = ".archer/diagrams/containers.mmd"
+
+[[views]]
+id = "deployment"
+kind = "architecture"
+title = "Where Archer Runs"
+source = ".archer/diagrams/deployment.mmd"
+
+[[views]]
+id = "heartbeat"
+kind = "freeform"
+title = "The Heartbeat Loop"
+source = ".archer/diagrams/heartbeat.mmd"
+
+[[views]]
+id = "feedback-loop"
+kind = "sequence"
+title = "Designing a Feature Together"
+source = ".archer/diagrams/feedback-loop.mmd"
+
+[[views]]
+id = "answer-by-showing"
+kind = "sequence"
+title = "How Does Checkout Work?"
+source = ".archer/diagrams/answer-by-showing.mmd"
+
+[[views]]
+id = "comment-thread"
+kind = "state"
+title = "Life of a Comment Thread"
+source = ".archer/diagrams/comment-thread.mmd"
+
+[[views]]
+id = "working-session"
+kind = "journey"
+title = "A Working Session With Archer"
+source = ".archer/diagrams/working-session.mmd"

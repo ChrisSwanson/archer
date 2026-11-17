@@ -1,0 +1,55 @@
+%% archer-id: library-pricing
+flowchart LR
+    user[User]
+    agent[Agent]
+    subgraph frontDoors[User And Agent Entry Points]
+        cli[Useai CLI]
+        memzCli[Memz CLI]
+        desktop["Desktop (Planned)"]
+        mcp[Read Only MCP]
+        http[Loopback HTTP API]
+    end
+    subgraph appHosts[Useai Application]
+        applicationHost[Application Host]
+        store[(SQLite Store)]
+    end
+    subgraph otherHosts[Embedded Applications]
+        memz[Memz]
+        memzHistory[(Memz History And Search)]
+        foreignApps[Foreign Applications]
+        foreignBindings[C ABI Bindings]
+    end
+    subgraph sdk[Embeddable Rust SDK]
+        sdkFacade[SDK Entry Point]
+        adapters[Provider Registry]
+        traces[Trace Library]
+        pricing[Pricing Library]
+    end
+    subgraph dataSources[Data Sources]
+        upstream[Provider APIs And CLIs]
+        localTraces[Local Trace Files]
+        rateCatalog[Versioned Rate Catalog]
+    end
+    user user_cli@-->|Runs commands| cli
+    user user_desktop@-->|Views dashboard| desktop
+    user user_memz_cli@-->|Runs commands| memzCli
+    memzCli user_memz@-->|Searches history| memz
+    agent agent_mcp@-->|Calls tools| mcp
+    agent agent_http@-->|Calls HTTP| http
+    agent agent_cli@-->|Runs commands| cli
+    cli cli_host@-->|Calls| applicationHost
+    desktop desktop_host@-->|Calls| applicationHost
+    http http_host@-->|Calls| applicationHost
+    mcp mcp_host@-->|Reads through| applicationHost
+    applicationHost app_store@-->|Uses storage| store
+    applicationHost app_sdk@-->|Calls library| sdkFacade
+    memz memz_sdk@-->|Calls Rust| sdkFacade
+    memz memz_history@-->|Stores and searches| memzHistory
+    foreignApps foreign_call@-->|Calls| foreignBindings
+    foreignBindings ffi_sdk@-->|Calls library| sdkFacade
+    sdkFacade sdk_collect@-->|Collects usage| adapters
+    sdkFacade sdk_trace@-->|Reads traces| traces
+    sdkFacade sdk_price@-->|Values usage| pricing
+    adapters fetch@-->|Reads provider data| upstream
+    traces trace_read@-->|Optionally reads| localTraces
+    pricing catalog_read@-->|Loads catalog| rateCatalog

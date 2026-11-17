@@ -1,0 +1,42 @@
+{
+ "origin": "reader",
+ "viewId": "hub",
+ "expand": [
+  {
+   "element": "a",
+   "source": "star",
+   "neighbour": "b"
+  },
+  {
+   "element": "a",
+   "source": "star",
+   "neighbour": "c"
+  }
+ ],
+ "frames": [
+  {
+   "source": "star",
+   "title": "Star",
+   "touches": [
+    "a"
+   ],
+   "boxes": 2
+  }
+ ],
+ "selection": [
+  {
+   "source": "star",
+   "kind": "node",
+   "id": "b",
+   "label": "Bravo"
+  }
+ ],
+ "dropped": [
+  {
+   "element": "a",
+   "source": "star",
+   "neighbour": "c",
+   "reason": "duplicate"
+  }
+ ]
+}

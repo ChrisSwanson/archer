@@ -1,0 +1,5 @@
+sequenceDiagram
+  participant a as <img src=x onerror=window.__xss='sr1'>
+  participant b as B
+  a->>b: <script>window.__xss='sr2'</script>
+  Note over a: #lt;svg onload=alert('sr3')#gt;

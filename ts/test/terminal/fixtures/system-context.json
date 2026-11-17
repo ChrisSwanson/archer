@@ -1,0 +1,87 @@
+{
+  "type": "architecture-graph",
+  "direction": "tb",
+  "nodes": [
+    {
+      "id": "agent",
+      "label": "Coding agent",
+      "shape": "rectangle",
+      "classes": ["person"]
+    },
+    {
+      "id": "archer",
+      "label": "Archer (architecture diagram MCP server)",
+      "shape": "rectangle",
+      "classes": ["system"]
+    },
+    {
+      "id": "browser",
+      "label": "Web browser",
+      "shape": "rectangle",
+      "classes": ["external"]
+    },
+    {
+      "id": "dev",
+      "label": "Developer",
+      "shape": "rectangle",
+      "classes": ["person"]
+    },
+    {
+      "id": "host",
+      "label": "MCP client (Claude Code, IDE, desktop app)",
+      "shape": "rectangle",
+      "classes": ["external"]
+    },
+    {
+      "id": "repo",
+      "label": "Workspace repository (archer.toml and .mmd sources)",
+      "shape": "rectangle",
+      "classes": ["external"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "asks",
+      "source": "dev",
+      "target": "agent",
+      "label": "asks for a diagram"
+    },
+    {
+      "id": "compiles",
+      "source": "archer",
+      "target": "repo",
+      "label": "reads and writes diagram sources"
+    },
+    {
+      "id": "launches",
+      "source": "host",
+      "target": "archer",
+      "label": "runs Archer in the repo directory"
+    },
+    {
+      "id": "looks",
+      "source": "dev",
+      "target": "browser",
+      "label": "reads the rendered diagram"
+    },
+    {
+      "id": "renders",
+      "source": "archer",
+      "target": "browser",
+      "label": "serves the interactive canvas"
+    },
+    {
+      "id": "reports",
+      "source": "archer",
+      "target": "host",
+      "label": "compiled model, diagnostics, selection"
+    },
+    {
+      "id": "writes",
+      "source": "agent",
+      "target": "host",
+      "label": "authors Mermaid, calls Archer tools"
+    }
+  ],
+  "groups": []
+}

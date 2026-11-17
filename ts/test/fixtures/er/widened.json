@@ -1,0 +1,68 @@
+{
+  "type": "entity-relationship",
+  "direction": "lr",
+  "entities": [
+    {
+      "id": "CUSTOMER",
+      "label": "Customer",
+      "attributes": [
+        { "name": "name", "type": "string", "keys": ["PK"], "comment": "full name" },
+        { "name": "email", "type": "string", "keys": ["UK"] },
+        { "name": "age", "type": "int" }
+      ]
+    },
+    {
+      "id": "ORDER",
+      "label": "ORDER",
+      "attributes": [
+        { "name": "id", "type": "int", "keys": ["PK"] },
+        { "name": "customer_id", "type": "int", "keys": ["FK"], "comment": "the buyer" },
+        { "name": "status", "type": "varchar(32)" },
+        { "name": "tags", "type": "string[]" }
+      ]
+    },
+    {
+      "id": "LINE-ITEM",
+      "label": "Order line",
+      "attributes": [{ "name": "order_id", "type": "int", "keys": ["PK", "FK"] }]
+    },
+    { "id": "PRODUCT", "label": "PRODUCT", "attributes": [] }
+  ],
+  "relationships": [
+    {
+      "id": "CUSTOMER--ORDER",
+      "source": "CUSTOMER",
+      "target": "ORDER",
+      "sourceCardinality": "exactly-one",
+      "targetCardinality": "zero-or-more",
+      "identifying": true,
+      "label": "places"
+    },
+    {
+      "id": "ORDER--LINE-ITEM",
+      "source": "ORDER",
+      "target": "LINE-ITEM",
+      "sourceCardinality": "exactly-one",
+      "targetCardinality": "one-or-more",
+      "identifying": true,
+      "label": "is made of"
+    },
+    {
+      "id": "LINE-ITEM--PRODUCT",
+      "source": "LINE-ITEM",
+      "target": "PRODUCT",
+      "sourceCardinality": "zero-or-more",
+      "targetCardinality": "exactly-one",
+      "identifying": false,
+      "label": "refers"
+    },
+    {
+      "id": "CUSTOMER--PRODUCT",
+      "source": "CUSTOMER",
+      "target": "PRODUCT",
+      "sourceCardinality": "zero-or-one",
+      "targetCardinality": "zero-or-more",
+      "identifying": false
+    }
+  ]
+}

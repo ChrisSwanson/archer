@@ -1,0 +1,15 @@
+{
+  "viewId": "brew-decisions",
+  "id": "optional-refusal",
+  "title": "An Optional Refusal",
+  "groups": [
+    {
+      "id": "choice",
+      "style": "highlight",
+      "label": "Unavailable Additions",
+      "description": "A 406 is permitted when the operator cannot comply; it is not mandatory.",
+      "nodes": ["additions", "unavailable", "error406", "unspecified"],
+      "edges": ["additions_refusal"]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+flowchart LR
+  user[User]:::person
+  web([Web App])
+  api[API Service]
+  subgraph backend[Backend]
+    api
+  end
+  user browses@-->|uses| web
+  web calls@-->|HTTP| api

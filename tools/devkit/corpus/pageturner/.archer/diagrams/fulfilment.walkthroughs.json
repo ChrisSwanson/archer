@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "target": "view:fulfilment",
+  "walkthroughs": [
+    {
+      "id": "order-to-courier",
+      "title": "From Order to Courier",
+      "description": "Follow a paid order from the shop floor to the courier.",
+      "revision": 1,
+      "modelRevision": "sha256:7fd5af9a3f62042929ca8c02b47184b18ceadb109c7a56190037497f790ecccc",
+      "author": "agent",
+      "writtenAt": "2026-11-02T13:50:30.612Z",
+      "note": "notes/0001-hosted-payment-page.md",
+      "steps": [
+        {
+          "id": "take-the-order",
+          "title": "Take the order",
+          "kind": "sends",
+          "what": "A placed order goes to the payment check.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "order",
+              "label": "Order Placed"
+            },
+            {
+              "kind": "node",
+              "id": "pay",
+              "label": "Payment accepted?"
+            }
+          ],
+          "edges": [
+            {
+              "id": "placed",
+              "source": "order",
+              "target": "pay"
+            }
+          ]
+        },
+        {
+          "id": "check-the-payment",
+          "title": "Check the payment",
+          "kind": "sends",
+          "what": "An accepted payment sends the order to the shelves.",
+          "why": "Stock is picked only for paid orders.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "pay",
+              "label": "Payment accepted?"
+            },
+            {
+              "kind": "node",
+              "id": "pick",
+              "label": "Pick from Shelf"
+            }
+          ],
+          "edges": [
+            {
+              "id": "accepted",
+              "source": "pay",
+              "target": "pick",
+              "label": "yes"
+            }
+          ]
+        },
+        {
+          "id": "pick-and-pack",
+          "title": "Pick and pack",
+          "kind": "sends",
+          "what": "Staff pick the books from the shelf and pack the parcel.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "pick",
+              "label": "Pick from Shelf"
+            },
+            {
+              "kind": "node",
+              "id": "pack",
+              "label": "Pack Parcel"
+            }
+          ],
+          "edges": [
+            {
+              "id": "picked",
+              "source": "pick",
+              "target": "pack"
+            }
+          ]
+        },
+        {
+          "id": "hand-to-courier",
+          "title": "Hand to the courier",
+          "kind": "sends",
+          "what": "The packed parcel is handed to the courier.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "pack",
+              "label": "Pack Parcel"
+            },
+            {
+              "kind": "node",
+              "id": "ship",
+              "label": "Handed to Courier"
+            }
+          ],
+          "edges": [
+            {
+              "id": "packed",
+              "source": "pack",
+              "target": "ship"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

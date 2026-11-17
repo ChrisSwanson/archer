@@ -1,0 +1,58 @@
+flowchart LR
+  %% archer-key dotted: Through the shell
+  %% The modules of ts/src and who calls whom (import direction).
+  agent[Coding agent]:::person
+  subgraph doors[Front doors]
+    mcpModule["mcp: MCP server over stdio (server.ts)"]:::component
+    bin["bin: CLI commands and archer call"]:::component
+    api["api.ts: openArcher for embedding"]:::component
+  end
+  subgraph core[Shared operations]
+    application["application: 30 operations, schemas, refusals, text rendering"]:::component
+    projectModule["project: archer.toml, inventory, envelope, writeConfined"]:::component
+    notes["notes: embedded diagrams, freshness"]:::component
+    comments["comments: threads store, bakery lock, agent side"]:::component
+    accuracy["accuracy: git runner, covers, staleness, history, compare"]:::component
+    exporter["export: SVG via the page painter, PNG via resvg"]:::component
+  end
+  subgraph compiler[Compiler]
+    mermaid["mermaid: preamble, per-family scan, Mermaid 12.1.0 db, adapt, validate"]:::component
+    model["model: envelope, model types, ids, kinds"]:::component
+  end
+  subgraph service[Background service]
+    serviceModule["service: socket, HTTP, watch, project-state, emphasis, selection"]:::component
+    stateModule["state: account recovery store"]:::component
+  end
+  subgraph cli_only[CLI only]
+    terminal["terminal: ELK layout in character cells"]:::component
+    migrate["migrate: Archer 0.3 to real Mermaid"]:::component
+  end
+  shared["shared/: note fences, addresses, note text"]:::component
+  painter["ui/src/export/painter.ts"]:::component
+  agent tools@-->|tool calls| mcpModule
+  agent shell@-.->|shell| bin
+  mcpModule m_app@--> application
+  bin b_app@--> application
+  api a_app@--> application
+  bin b_term@--> terminal
+  bin b_mig@--> migrate
+  bin b_proj@--> projectModule
+  application ap_proj@--> projectModule
+  application ap_notes@--> notes
+  application ap_comments@--> comments
+  application ap_acc@--> accuracy
+  application ap_exp@--> exporter
+  application ap_svc@-->|service client| serviceModule
+  serviceModule s_app@-->|page operations| application
+  serviceModule s_proj@--> projectModule
+  serviceModule s_notes@--> notes
+  serviceModule s_comments@--> comments
+  serviceModule s_state@--> stateModule
+  projectModule p_mermaid@-->|compile| mermaid
+  notes n_proj@--> projectModule
+  notes n_shared@--> shared
+  comments c_shared@--> shared
+  mermaid mm_model@--> model
+  exporter e_painter@-->|aliased import| painter
+  terminal t_model@--> model
+  projectModule p_model@--> model

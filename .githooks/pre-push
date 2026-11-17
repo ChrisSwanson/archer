@@ -1,0 +1,29 @@
+#!/bin/sh
+# Refuses to push a branch whose commit `npm run pr-check` has not passed (its tree has no stamp).
+# Tags, main, deletions and docs-only branches pass: a docs-only change by CI's own rule
+# (scripts/ci-docs-only.sh, against its merge base with origin/main) runs no gates there either. Installed by `npm run hooks:install` (core.hooksPath .githooks).
+# Emergencies: git push --no-verify.
+stamps="$(git rev-parse --git-common-dir)/archer-pr-check"
+status=0
+while read -r _local_ref local_sha remote_ref _remote_sha; do
+  case "$remote_ref" in
+    refs/tags/*|refs/heads/main) continue ;;
+  esac
+  case "$local_sha" in
+    *[!0]*) ;;
+    *) continue ;; # a deletion
+  esac
+  tree="$(git rev-parse "$local_sha^{tree}" 2>/dev/null)" || tree=""
+  if [ -z "$tree" ] || [ ! -f "$stamps/$tree" ]; then
+    if [ -x scripts/ci-docs-only.sh ] && base="$(git merge-base origin/main "$local_sha" 2>/dev/null)" &&
+      [ "$(git diff --name-only --no-renames "$base" "$local_sha" | scripts/ci-docs-only.sh 2>/dev/null)" = true ]; then
+      continue
+    fi
+    short="$(printf '%.12s' "$local_sha")"
+    echo "pre-push: ${remote_ref#refs/heads/} at $short has not passed pr-check (no stamp for its tree)." >&2
+    echo "          Run: npm run pr-check   (on that commit; it stamps the tree when every gate passes)" >&2
+    echo "          Emergency only: git push --no-verify" >&2
+    status=1
+  fi
+done
+exit "$status"

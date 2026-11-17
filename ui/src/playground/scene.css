@@ -1,0 +1,104 @@
+.playground-scene {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  min-width: 0;
+  color: var(--text);
+  background: var(--bg);
+}
+.playground-scene-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 16px 0;
+}
+.playground-scene-head h1 {
+  margin: 0;
+  font-size: var(--type-body);
+  font-weight: 600;
+}
+.playground-scene-provenance {
+  margin: 0;
+  padding: 0 16px 8px;
+  font-size: var(--type-small);
+  color: var(--text-dim);
+}
+.playground-scene-drawing {
+  position: relative;
+  min-height: 0;
+  border-block: var(--line-chrome) solid var(--border);
+}
+.playground-scene-controls {
+  padding: 8px 16px;
+  background: var(--surface);
+}
+.playground-scene-controls .archer-walk-transport {
+  margin: 0;
+  border: 0;
+}
+.playground-scene-discussion {
+  position: absolute;
+  z-index: 10;
+  top: 12px;
+  right: 12px;
+  width: min(320px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  padding: 12px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+.playground-scene-discussion > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.playground-scene-discussion h2 {
+  margin: 0;
+  font-size: var(--type-body);
+}
+.playground-scene-discussion > header button {
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  cursor: pointer;
+}
+.playground-scene-discussion > header button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.playground-scene :is(button, a):focus-visible {
+  outline: var(--line-chrome-strong) solid var(--accent);
+  outline-offset: 3px;
+}
+.playground-scene-explanation {
+  margin: 4px 0 0;
+  max-width: 75ch;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  line-height: 1.5;
+}
+.playground-scene-error {
+  position: absolute;
+  inset: 12px 12px auto;
+  z-index: 20;
+  margin: 0;
+  padding: 8px 16px;
+  color: var(--danger-text);
+  background: var(--danger-bg);
+}
+@media (pointer: coarse) {
+  .playground-scene-discussion > header button {
+    min-height: 44px;
+  }
+}

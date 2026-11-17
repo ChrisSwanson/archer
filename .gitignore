@@ -1,0 +1,44 @@
+node_modules/
+/ui/node_modules
+/ui/dist
+/ts/dist
+*.tmp
+/dist
+
+# The browser suite's traces, screenshots and HTML report (npm --workspace ui run test:browser:ts)
+/ui/test-results
+/ui/playwright-report
+
+# Playwright MCP scratch output (screenshots, console logs)
+/.playwright-mcp
+
+# Agent worktrees created by Claude Code (isolation: worktree)
+/.claude/worktrees/
+/ts/plugin/dist
+
+# Local files that never belong in a commit
+.DS_Store
+.env
+.env.*
+coverage/
+*.log
+
+# Documentation site: derived guides, exported diagrams, build cache and local captures.
+/site/.vitepress/dist/
+/site/.vitepress/cache/
+/site/.cache/
+/site/generated/
+/site/public/generated/
+/site/install.md
+/site/supported-mermaid.md
+/site/security/network-access.md
+/site/security/known-limits.md
+/.shots/
+
+/site/supported-mermaid/
+/site/public/llms.txt
+/site/public/llms-full.txt
+
+/site/public/playground/
+/site/public/fonts/
+__pycache__/

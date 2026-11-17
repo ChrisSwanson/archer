@@ -1,0 +1,14 @@
+{
+  "type": "state-machine",
+  "states": [
+    { "id": "Idle", "label": "Idle" },
+    { "id": "Busy", "label": "Busy" },
+    { "id": "root_start", "label": "start", "kind": "initial" },
+    { "id": "root_end", "label": "end", "kind": "final" }
+  ],
+  "transitions": [
+    { "id": "root_start--Idle", "source": "root_start", "target": "Idle" },
+    { "id": "Idle--Busy", "source": "Idle", "target": "Busy", "label": "start" },
+    { "id": "Busy--root_end", "source": "Busy", "target": "root_end" }
+  ]
+}

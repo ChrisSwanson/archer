@@ -1,0 +1,22 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": ["ui/src/app/WorkspaceNavigation.css"],
+        "createdAt": "2026-10-13T23:38:52.115Z",
+        "reason": "Decision: retain sidebar hover widening. This existing width transition is intentional and unchanged by the navigation fix."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": ["ts/test/bin/bundle.test.ts"],
+        "createdAt": "2026-10-15T17:57:25.360Z",
+        "reason": "Codex: intentional DOMPurify security fixture contains <img onerror=x> as input/output strings; this test file does not render product images."
+      }
+    ]
+  }
+}

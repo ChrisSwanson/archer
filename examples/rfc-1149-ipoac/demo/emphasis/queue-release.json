@@ -1,0 +1,15 @@
+{
+  "viewId": "qos-queues",
+  "id": "queue-release",
+  "title": "What permits departure?",
+  "groups": [
+    {
+      "id": "release-condition",
+      "label": "Gate until proper time",
+      "description": "The source gives a release condition, but no scheduling algorithm.",
+      "style": "highlight",
+      "nodes": ["gate", "departure"],
+      "edges": ["depart"]
+    }
+  ]
+}

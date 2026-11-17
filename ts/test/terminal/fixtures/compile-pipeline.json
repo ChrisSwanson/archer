@@ -1,0 +1,111 @@
+{
+  "type": "freeform-graph",
+  "direction": "tb",
+  "nodes": [
+    {
+      "id": "canvas",
+      "label": "React Flow canvas",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "diag",
+      "label": "Diagnostics to the agent",
+      "shape": "rectangle",
+      "classes": ["external"]
+    },
+    {
+      "id": "elk",
+      "label": "ELK layout",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "envelope",
+      "label": "Diagram envelope (JSON)",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "lexer",
+      "label": "Lexer",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "model",
+      "label": "Compiled model",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "parser",
+      "label": "Parser",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "projection",
+      "label": "Projection",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "src",
+      "label": "Mermaid source (.mmd)",
+      "shape": "rectangle",
+      "classes": ["external"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "compile",
+      "source": "parser",
+      "target": "model",
+      "label": "validated model"
+    },
+    {
+      "id": "draw",
+      "source": "elk",
+      "target": "canvas",
+      "label": "routed points"
+    },
+    {
+      "id": "emit",
+      "source": "model",
+      "target": "envelope",
+      "label": "ids and labels"
+    },
+    {
+      "id": "errs",
+      "source": "parser",
+      "target": "diag",
+      "label": "syntax diagnostics"
+    },
+    {
+      "id": "lex",
+      "source": "src",
+      "target": "lexer",
+      "label": "source text"
+    },
+    {
+      "id": "measure",
+      "source": "projection",
+      "target": "elk",
+      "label": "node and edge sizes"
+    },
+    {
+      "id": "parse",
+      "source": "lexer",
+      "target": "parser",
+      "label": "token stream"
+    },
+    {
+      "id": "serve",
+      "source": "envelope",
+      "target": "projection",
+      "label": "HTTP or MCP"
+    }
+  ],
+  "groups": []
+}

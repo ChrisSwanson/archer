@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "target": "view:qos-queues",
+  "walkthroughs": [
+    {
+      "id": "wing-to-departure",
+      "title": "From wing mark to departure",
+      "description": "Read the queue strategy without inventing its missing scheduler.",
+      "revision": 1,
+      "modelRevision": "sha256:1f02f78fcbda659c181697ab5f68af34e3c8056d436b0f93b0b54e76b2888205",
+      "commit": "d8e78b64ed8b8c7c5627d797952c35e90e652e63",
+      "author": "agent",
+      "writtenAt": "2026-11-13T01:48:16.221Z",
+      "note": "notes/reading-guide.md",
+      "steps": [
+        {
+          "id": "read-the-wing",
+          "title": "Read the wing marking",
+          "kind": "does",
+          "what": "RFC 2549 marks the service level on each carrier's wing. This strategy scans the carrier as it enters the router.",
+          "why": "The bar code supplies a class, not a departure time.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "barcode",
+              "label": "Wing Bar Code"
+            },
+            {
+              "kind": "node",
+              "id": "scan",
+              "label": "Bar-Code Reader"
+            }
+          ],
+          "edges": [
+            {
+              "id": "read_marking",
+              "source": "barcode",
+              "target": "scan",
+              "label": "Scan on entry"
+            }
+          ]
+        },
+        {
+          "id": "classify-the-carrier",
+          "title": "Assign a service class",
+          "kind": "does",
+          "what": "The four queue boxes apply the proper-queue strategy to Concorde, First, Business and Coach.",
+          "why": "Separate classes do not establish a strict-priority scheduler or a numeric weight.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "level",
+              "label": "Service Level?"
+            },
+            {
+              "kind": "node",
+              "id": "concorde",
+              "label": "Concorde Queue"
+            },
+            {
+              "kind": "node",
+              "id": "first",
+              "label": "First Queue"
+            },
+            {
+              "kind": "node",
+              "id": "business",
+              "label": "Business Queue"
+            },
+            {
+              "kind": "node",
+              "id": "coach",
+              "label": "Coach Queue"
+            }
+          ],
+          "edges": [
+            {
+              "id": "assign_concorde",
+              "source": "level",
+              "target": "concorde",
+              "label": "Concorde"
+            },
+            {
+              "id": "assign_first",
+              "source": "level",
+              "target": "first",
+              "label": "First"
+            },
+            {
+              "id": "assign_business",
+              "source": "level",
+              "target": "business",
+              "label": "Business"
+            },
+            {
+              "id": "assign_coach",
+              "source": "level",
+              "target": "coach",
+              "label": "Coach"
+            }
+          ]
+        },
+        {
+          "id": "hold-at-the-gate",
+          "title": "Hold at the gate",
+          "kind": "does",
+          "what": "The gate prevents exit until the proper time. Carriers may sleep while enqueued; RED paint and WFQ scales are optional queue mechanisms.",
+          "why": "The optional branches belong while queued, not after departure.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "gate",
+              "label": "Gated Queue"
+            },
+            {
+              "kind": "node",
+              "id": "red",
+              "label": "RED Paint"
+            },
+            {
+              "kind": "node",
+              "id": "scales",
+              "label": "Scales for WFQ"
+            }
+          ],
+          "edges": [
+            {
+              "id": "deletion_option",
+              "source": "gate",
+              "target": "red",
+              "label": "Mark while enqueued"
+            },
+            {
+              "id": "wfq_option",
+              "source": "gate",
+              "target": "scales",
+              "label": "Weigh carriers"
+            }
+          ]
+        },
+        {
+          "id": "ask-about-the-time",
+          "title": "Ask what proper time means",
+          "kind": "does",
+          "what": "The departure edge repeats the source's condition. The memo supplies no formula for deciding when it becomes true.",
+          "why": "Ask your agent to identify this gap before proposing an explicitly hypothetical scheduling policy.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "gate",
+              "label": "Gated Queue"
+            },
+            {
+              "kind": "node",
+              "id": "departure",
+              "label": "Departure"
+            }
+          ],
+          "edges": [
+            {
+              "id": "depart",
+              "source": "gate",
+              "target": "departure",
+              "label": "Proper time"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

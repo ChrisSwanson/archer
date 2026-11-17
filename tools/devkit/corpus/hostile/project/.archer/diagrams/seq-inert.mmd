@@ -1,0 +1,11 @@
+%%{init: {"securityLevel": "loose", "sequence": {"htmlLabels": true}}}%%
+sequenceDiagram
+  participant root as x" onmouseover="window.__xss='sq'
+  participant location as <img src=x onerror=window.__xss='su'
+  actor u as javascript:window.__xss='sj'
+  root->>location: x" onclick="window.__xss='sm' <svg/onload=alert('sm')
+  location-->>u: #38;lt#59;img src=x onerror=alert('se')#38;gt#59;
+  Note over root,location: ' onfocus='window.__xss=1 <img src=x onerror=alert('sn')
+  loop javascript:alert('sl') <img src=x onerror=alert('sl')
+    u->>root: again
+  end

@@ -1,0 +1,1315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DiagramEnvelope",
+  "type": "object",
+  "properties": {
+    "model": {
+      "$ref": "#/$defs/DiagramModel"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "const": 2
+    },
+    "view": {
+      "$ref": "#/$defs/ViewMetadata"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["schemaVersion", "view", "revision", "model"],
+  "$defs": {
+    "ArchitectureEdge": {
+      "description": "An edge between services or junctions; its ID is `<source>--<target>`.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": ["string", "null"]
+        },
+        "line": {
+          "$ref": "#/$defs/EdgeLine"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "sourceArrow": {
+          "type": "boolean"
+        },
+        "sourceGroup": {
+          "type": "boolean"
+        },
+        "sourceSide": {
+          "$ref": "#/$defs/ArchitectureSide"
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "targetArrow": {
+          "type": "boolean"
+        },
+        "targetGroup": {
+          "type": "boolean"
+        },
+        "targetSide": {
+          "$ref": "#/$defs/ArchitectureSide"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "sourceSide", "targetSide"]
+    },
+    "ArchitectureGroup": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArchitectureIcon"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "parentId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label"]
+    },
+    "ArchitectureIcon": {
+      "type": "string",
+      "enum": ["cloud", "database", "disk", "internet", "server"]
+    },
+    "ArchitectureJunction": {
+      "type": "object",
+      "properties": {
+        "groupId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id"]
+    },
+    "ArchitectureService": {
+      "type": "object",
+      "properties": {
+        "groupId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArchitectureIcon"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label"]
+    },
+    "ArchitectureSide": {
+      "type": "string",
+      "enum": ["left", "right", "top", "bottom"]
+    },
+    "AttributeKey": {
+      "type": "string",
+      "enum": ["PK", "FK", "UK"]
+    },
+    "C4Boundary": {
+      "description": "A boundary, by its alias.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "kind": {
+          "$ref": "#/$defs/C4BoundaryKind"
+        },
+        "label": {
+          "type": "string"
+        },
+        "parentId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "kind", "label"]
+    },
+    "C4BoundaryKind": {
+      "type": "string",
+      "enum": ["enterprise", "system", "container", "generic"]
+    },
+    "C4Element": {
+      "description": "A person, system, container or component, by its alias.",
+      "type": "object",
+      "properties": {
+        "boundaryId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "description": {
+          "type": ["string", "null"]
+        },
+        "external": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "kind": {
+          "$ref": "#/$defs/C4ElementKind"
+        },
+        "label": {
+          "type": "string"
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/C4ElementShape"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "technology": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "kind", "label"]
+    },
+    "C4ElementKind": {
+      "type": "string",
+      "enum": ["person", "system", "container", "component"]
+    },
+    "C4ElementShape": {
+      "type": "string",
+      "enum": ["database", "queue"]
+    },
+    "C4Level": {
+      "type": "string",
+      "enum": ["context", "container", "component"]
+    },
+    "C4Relationship": {
+      "description": "A relationship; its ID is `<source>--<target>`.",
+      "type": "object",
+      "properties": {
+        "bidirectional": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": ["string", "null"]
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": ["string", "null"]
+        },
+        "line": {
+          "$ref": "#/$defs/EdgeLine"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "technology": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "source", "target"]
+    },
+    "Cardinality": {
+      "type": "string",
+      "enum": ["zero-or-one", "exactly-one", "zero-or-more", "one-or-more"]
+    },
+    "Category": {
+      "description": "An authored classDef category and what it declares to draw: the page draws the palette family nearest the colour, never the hex itself.",
+      "type": "object",
+      "properties": {
+        "dashed": {
+          "type": "boolean"
+        },
+        "fill": {
+          "type": "string",
+          "pattern": "^#[0-9a-f]{6}$"
+        },
+        "meaning": {
+          "description": "What the category means, in its author's words (`%% archer-key <name>: <meaning>`): what the Key and the drawing's legend call it. Absent when unstated; the page then uses the name as written.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "stroke": {
+          "type": "string",
+          "pattern": "^#[0-9a-f]{6}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name"]
+    },
+    "DiagramKind": {
+      "type": "string",
+      "enum": [
+        "c4-context",
+        "c4-container",
+        "c4-component",
+        "c4-code",
+        "data-flow",
+        "sequence",
+        "freeform",
+        "state",
+        "entity-relationship",
+        "c4",
+        "architecture",
+        "journey"
+      ]
+    },
+    "DiagramModel": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "categories": {
+              "description": "The authored classDef categories its nodes and groups wear, in declaration order (ADR 0009, amended 2026-11-11). Absent when none is used.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Category"
+              }
+            },
+            "direction": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Direction"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Edge"
+              }
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Group"
+              }
+            },
+            "lineKey": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/LineKeyEntry"
+              }
+            },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Node"
+              }
+            },
+            "sourceOrder": {
+              "description": "The order the source writes things in, which the id-sorted lists lose: nodes and groups by where each is first written (a node's first mention, a group's `subgraph` line), and edge ids as written. For the layout's model order and the Key's rows, never a colour's input (ADR 0009, amended 2026-11-12). A flowchart always carries it.",
+              "$ref": "#/$defs/SourceOrder"
+            },
+            "type": {
+              "type": "string",
+              "const": "architecture-graph"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "nodes", "edges", "groups"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "categories": {
+              "description": "The authored classDef categories its nodes and groups wear, in declaration order (ADR 0009, amended 2026-11-11). Absent when none is used.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Category"
+              }
+            },
+            "direction": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Direction"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Edge"
+              }
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Group"
+              }
+            },
+            "lineKey": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/LineKeyEntry"
+              }
+            },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Node"
+              }
+            },
+            "sourceOrder": {
+              "description": "The order the source writes things in, which the id-sorted lists lose: nodes and groups by where each is first written (a node's first mention, a group's `subgraph` line), and edge ids as written. For the layout's model order and the Key's rows, never a colour's input (ADR 0009, amended 2026-11-12). A flowchart always carries it.",
+              "$ref": "#/$defs/SourceOrder"
+            },
+            "type": {
+              "type": "string",
+              "const": "data-flow-graph"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "nodes", "edges", "groups"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "categories": {
+              "description": "The authored classDef categories its nodes and groups wear, in declaration order (ADR 0009, amended 2026-11-11). Absent when none is used.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Category"
+              }
+            },
+            "direction": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Direction"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Edge"
+              }
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Group"
+              }
+            },
+            "lineKey": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/LineKeyEntry"
+              }
+            },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Node"
+              }
+            },
+            "sourceOrder": {
+              "description": "The order the source writes things in, which the id-sorted lists lose: nodes and groups by where each is first written (a node's first mention, a group's `subgraph` line), and edge ids as written. For the layout's model order and the Key's rows, never a colour's input (ADR 0009, amended 2026-11-12). A flowchart always carries it.",
+              "$ref": "#/$defs/SourceOrder"
+            },
+            "type": {
+              "type": "string",
+              "const": "freeform-graph"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "nodes", "edges", "groups"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "autonumber": {
+              "type": "boolean"
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SequenceEvent"
+              }
+            },
+            "participants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Participant"
+              }
+            },
+            "type": {
+              "type": "string",
+              "const": "sequence-trace"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "participants", "events"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Direction"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lineKey": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/LineKeyEntry"
+              }
+            },
+            "states": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/StateNode"
+              }
+            },
+            "transitions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/StateTransition"
+              }
+            },
+            "type": {
+              "type": "string",
+              "const": "state-machine"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "states", "transitions"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Direction"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "entities": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Entity"
+              }
+            },
+            "relationships": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Relationship"
+              }
+            },
+            "type": {
+              "type": "string",
+              "const": "entity-relationship"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "entities", "relationships"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "boundaries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/C4Boundary"
+              }
+            },
+            "elements": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/C4Element"
+              }
+            },
+            "level": {
+              "$ref": "#/$defs/C4Level"
+            },
+            "lineKey": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/LineKeyEntry"
+              }
+            },
+            "relationships": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/C4Relationship"
+              }
+            },
+            "title": {
+              "type": ["string", "null"]
+            },
+            "type": {
+              "type": "string",
+              "const": "c4-model"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "level", "elements", "boundaries", "relationships"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "edges": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ArchitectureEdge"
+              }
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ArchitectureGroup"
+              }
+            },
+            "junctions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ArchitectureJunction"
+              }
+            },
+            "lineKey": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/LineKeyEntry"
+              }
+            },
+            "services": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ArchitectureService"
+              }
+            },
+            "title": {
+              "type": ["string", "null"]
+            },
+            "type": {
+              "type": "string",
+              "const": "service-architecture"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "groups", "services", "junctions", "edges"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "actors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JourneySection"
+              }
+            },
+            "title": {
+              "type": ["string", "null"]
+            },
+            "type": {
+              "type": "string",
+              "const": "user-journey"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "actors", "sections"]
+        }
+      ]
+    },
+    "Direction": {
+      "description": "The flow direction a graph's source declared in its header.\n\nAbsent from a model means top to bottom. It is a property of the semantic\nsource, not of any layout: no coordinate ever accompanies it.",
+      "type": "string",
+      "enum": ["tb", "bt", "lr", "rl"]
+    },
+    "Edge": {
+      "type": "object",
+      "properties": {
+        "bidirectional": {
+          "description": "An arrowhead at each end (`<-->`, `<-.->`, `<==>`). Absent means false: the arrowhead is at the target.",
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": ["string", "null"]
+        },
+        "line": {
+          "$ref": "#/$defs/EdgeLine"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "source", "target"]
+    },
+    "EdgeLine": {
+      "description": "How an edge's line is drawn: `-->`, `-.->` or `==>` in a flowchart, a flowchart edge class `dashed` or `dashdot`, or `%% archer-line` in C4, architecture and state diagrams (ADR 0030).",
+      "type": "string",
+      "enum": ["solid", "dotted", "thick", "dashed", "dashdot"]
+    },
+    "Entity": {
+      "description": "An entity, by the name written in Mermaid.",
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EntityAttribute"
+          }
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label", "attributes"]
+    },
+    "EntityAttribute": {
+      "description": "An attribute of an entity; it has no ID of its own.",
+      "type": "object",
+      "properties": {
+        "comment": {
+          "type": ["string", "null"]
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AttributeKey"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "type"]
+    },
+    "FragmentKind": {
+      "type": "string",
+      "enum": ["loop", "alt", "opt", "par"]
+    },
+    "FragmentSection": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SequenceEvent"
+          }
+        },
+        "label": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["events"]
+    },
+    "Group": {
+      "type": "object",
+      "properties": {
+        "classes": {
+          "description": "Its kind or authored category (`class groupId name`); at most one. Absent means none.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "parentId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label"]
+    },
+    "JourneySection": {
+      "description": "A section; its ID is `section-` and its name made an ID.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JourneyTask"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label", "tasks"]
+    },
+    "JourneyTask": {
+      "description": "A task; its ID is derived from its name.",
+      "type": "object",
+      "properties": {
+        "actors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "maximum": 5,
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label", "score", "actors"]
+    },
+    "LineKeyEntry": {
+      "description": "What a line pattern means in this diagram, in its author's words (`%% archer-key <pattern>: <meaning>`, ADR 0030).",
+      "type": "object",
+      "properties": {
+        "meaning": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "pattern": {
+          "type": "string",
+          "enum": ["dotted", "dashed", "dashdot", "thick"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["pattern", "meaning"]
+    },
+    "MessageKind": {
+      "type": "string",
+      "enum": ["sync", "reply", "async"]
+    },
+    "Node": {
+      "type": "object",
+      "properties": {
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "groupId": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeShape"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label"]
+    },
+    "NodeShape": {
+      "type": "string",
+      "enum": ["rectangle", "rounded", "stadium", "circle", "diamond", "cylinder", "hexagon", "subroutine"]
+    },
+    "NotePosition": {
+      "description": "Where a note sits relative to the lifelines it names.",
+      "type": "string",
+      "enum": ["left-of", "right-of", "over"]
+    },
+    "Participant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "kind": {
+          "$ref": "#/$defs/ParticipantKind"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label"]
+    },
+    "ParticipantKind": {
+      "description": "Whether a participant was declared with `participant` or `actor`.",
+      "type": "string",
+      "enum": ["participant", "actor"]
+    },
+    "Relationship": {
+      "description": "A relationship; its ID is `<source>--<target>`. Each cardinality is the\nmarker written beside that end.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "identifying": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": ["string", "null"]
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "sourceCardinality": {
+          "$ref": "#/$defs/Cardinality"
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "targetCardinality": {
+          "$ref": "#/$defs/Cardinality"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "sourceCardinality", "targetCardinality", "identifying"]
+    },
+    "SequenceEvent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "bidirectional": {
+              "description": "An arrowhead at each end (`<<->>`, `<<-->>`). Absent means false.",
+              "type": "boolean"
+            },
+            "from": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "id": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "kind": {
+              "$ref": "#/$defs/MessageKind"
+            },
+            "label": {
+              "type": ["string", "null"]
+            },
+            "to": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "type": {
+              "type": "string",
+              "const": "message"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "id", "from", "to", "kind"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "kind": {
+              "$ref": "#/$defs/FragmentKind"
+            },
+            "label": {
+              "type": "string"
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/FragmentSection"
+              }
+            },
+            "type": {
+              "type": "string",
+              "const": "fragment"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "id", "kind", "label", "sections"]
+        },
+        {
+          "description": "A `Note` annotation: free text placed beside one lifeline, or over one or\ntwo of them.",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "participants": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+              }
+            },
+            "position": {
+              "$ref": "#/$defs/NotePosition"
+            },
+            "text": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "const": "note"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["type", "id", "position", "participants", "text"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "participant": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "type": {
+              "type": "string",
+              "const": "activate"
+            }
+          },
+          "required": ["type", "participant"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "participant": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            },
+            "type": {
+              "type": "string",
+              "const": "deactivate"
+            }
+          },
+          "required": ["type", "participant"]
+        }
+      ]
+    },
+    "SourceOrder": {
+      "description": "Where a graph's nodes, groups and edges are written in the source (`sourceOrder`).",
+      "type": "object",
+      "properties": {
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+          }
+        },
+        "elements": {
+          "description": "Nodes and groups, interleaved as written; tagged, because a subgraph may share its id with a node.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["node", "group"]
+              }
+            },
+            "additionalProperties": false,
+            "required": ["id", "kind"]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["elements", "edges"]
+    },
+    "StateKind": {
+      "description": "What a state is; absent means `state`.",
+      "type": "string",
+      "enum": ["state", "initial", "final", "choice", "fork", "join"]
+    },
+    "StateNode": {
+      "description": "A state, pseudo-state or composite state, by the ID written in Mermaid.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateNote"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentId": {
+          "description": "The composite state this one is inside; absent at the top level.",
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "label"]
+    },
+    "StateNote": {
+      "description": "A note attached to one state.",
+      "type": "object",
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/StateNotePosition"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["position", "text"]
+    },
+    "StateNotePosition": {
+      "type": "string",
+      "enum": ["left-of", "right-of"]
+    },
+    "StateTransition": {
+      "description": "A transition; its ID is `<source>--<target>`.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "label": {
+          "type": ["string", "null"]
+        },
+        "line": {
+          "$ref": "#/$defs/EdgeLine"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "source", "target"]
+    },
+    "ViewMetadata": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A view id (ADR 0012): a stable ID naming a .mmd or archer.toml view, or a diagram address, <note path>#<name>, naming a mermaid block in a note.",
+          "type": "string",
+          "maxLength": 1200,
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+              "maxLength": 128
+            },
+            {
+              "pattern": "^(?:[^.\\\\/#?:\\u0000-\\u001f\\u007f][^\\\\/#?:\\u0000-\\u001f\\u007f]*/)*[^.\\\\/#?:\\u0000-\\u001f\\u007f][^\\\\/#?:\\u0000-\\u001f\\u007f]*\\.md#[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/DiagramKind"
+        },
+        "summary": {
+          "type": ["string", "null"]
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "kind", "title"]
+    }
+  }
+}

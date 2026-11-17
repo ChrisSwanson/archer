@@ -1,0 +1,31 @@
+sequenceDiagram
+    %% Participants named to start with keywords and declared below their first
+    %% use, activations that stack and stay open, and fragments inside fragments.
+    %% Mermaid refuses a bare keyword (`actor`, `note`, `rect`, `box`) as a
+    %% message endpoint, so each name carries a suffix.
+    actors->>notes: declared below
+    participant actors as Actor
+    participant notes as Note
+    actor rects as Rect
+    participant boxes as Box
+    notes->>boxes: hello
+    activate boxes
+    activate boxes
+    boxes->>+rects: stacked, and one left open
+    rects-->>-boxes: the shorthand closes its own
+    deactivate boxes
+    activate rects
+    rects-->>-actors: the shorthand closes an explicit activate
+    alt outer
+        opt inner
+            par first
+                actors-)notes: one
+            and second
+                notes-)actors: two
+            end
+        end
+    else otherwise
+        loop retry
+            boxes->>rects: again
+        end
+    end

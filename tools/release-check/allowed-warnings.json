@@ -1,0 +1,54 @@
+{
+  "$comment": "Every ui.*/svc.* warning code fails npm run release-check unless an entry here covers it. Entry: {code, reason, match?, max?}. match = regex on the warning message (it cannot cover a lab warning, which has no message); max = total allowed across one gate run. An entry is either a detector false positive (say why the detector is wrong and what judges the real case) or known debt (name the ledger id); debt entries are printed on every run. Delete an entry the day its cause is fixed.",
+  "allow": [
+    {
+      "code": "svc.request-burst",
+      "kind": "false-positive",
+      "reason": "Journeys open views far faster than a person (editor-entry: 20 editors in ~40 s), so one grant passes 60 requests / 5 s. Over-fetching is gated per page view by budgets.maxApiRequestsPerPage instead."
+    },
+    {
+      "code": "ui.edit.edit-refused",
+      "kind": "false-positive",
+      "reason": "Journeys provoke refusals on purpose (delete-referenced, last-in-boundary, styling dependency) and assert the message themselves. An unexpected refusal fails that journey's own assertion."
+    },
+    {
+      "code": "svc.duplicate-request",
+      "match": "^GET /projects/",
+      "run": "^(lab|scale-[SML])$",
+      "kind": "false-positive",
+      "reason": "The lab logs in, then loads each page cold and reloads it warm: the same document URL three times within 2 s by design. The scale gates log each measured page's fresh browser context in by the same link (O9). A document navigation carries no page-load id, so the service sees one client. Their duplicate API requests are gated per load by the budget block."
+    },
+    {
+      "code": "ui.long-task",
+      "match": "^a [2-9]\\d\\d ms task",
+      "kind": "debt",
+      "reason": "Debt (ledger: render-storm, perf#7, perf#3:d): 200-999 ms tasks while the 3.5 MB page parses and ELK lays out. A task of 1 s or more fails."
+    },
+    {
+      "code": "ui.long-task",
+      "run": "^lab$",
+      "kind": "false-positive",
+      "reason": "Lab warnings carry no message, so the 1 s threshold above cannot apply; the lab gates long tasks per load by longTaskMs in lab-budgets.json instead."
+    },
+    {
+      "code": "svc.event-loop-lag",
+      "match": "blocked up to [1-4]\\d\\d ms",
+      "kind": "debt",
+      "reason": "Debt: 100-499 ms event-loop stalls (first compiles load Mermaid synchronously; worse on a loaded machine). A stall of 500 ms or more fails: that is work to move off the loop."
+    },
+    {
+      "code": "svc.slow-compile",
+      "match": "the first of its family",
+      "max": 7,
+      "kind": "false-positive",
+      "reason": "The first compile of each family loads its parser (data.cold); at most one per family (seven) per sandbox. A warm slow compile stays gated."
+    },
+    {
+      "code": "svc.watch-storm",
+      "run": "^smoke-a-flow-existing$",
+      "max": 2,
+      "kind": "false-positive",
+      "reason": "macOS's watcher (FSEvents) reports about four events per atomic rewrite (the temp file made, written and renamed over the target) where Linux's inotify reports about two, and smoke-a-flow-existing commits edits at machine speed, so a burst passes 50 file events in 1 s on a Mac (1 of 3 isolated runs, 2026-11-11; never on Linux CI). The detector itself is right for a real storm (a write loop), which far exceeds max 2 or appears in other runs; that every rewrite is reported once is judged by ts/test/service/watch.test.ts."
+    }
+  ]
+}

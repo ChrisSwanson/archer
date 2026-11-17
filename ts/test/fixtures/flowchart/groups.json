@@ -1,0 +1,79 @@
+{
+  "type": "freeform-graph",
+  "direction": "bt",
+  "nodes": [
+    {
+      "id": "api",
+      "label": "API",
+      "shape": "rectangle",
+      "groupId": "backend"
+    },
+    {
+      "id": "click",
+      "label": "Click",
+      "shape": "rectangle",
+      "groupId": "api"
+    },
+    {
+      "id": "db",
+      "label": "Orders",
+      "shape": "cylinder",
+      "groupId": "data"
+    },
+    {
+      "id": "worker",
+      "label": "Worker",
+      "shape": "rectangle",
+      "groupId": "backend"
+    }
+  ],
+  "edges": [],
+  "groups": [
+    {
+      "id": "api",
+      "label": "Shares its ID with a node"
+    },
+    {
+      "id": "backend",
+      "label": "Backend services (core)"
+    },
+    {
+      "id": "data",
+      "label": "data",
+      "parentId": "backend"
+    }
+  ],
+  "sourceOrder": {
+    "elements": [
+      {
+        "id": "api",
+        "kind": "node"
+      },
+      {
+        "id": "db",
+        "kind": "node"
+      },
+      {
+        "id": "backend",
+        "kind": "group"
+      },
+      {
+        "id": "data",
+        "kind": "group"
+      },
+      {
+        "id": "worker",
+        "kind": "node"
+      },
+      {
+        "id": "api",
+        "kind": "group"
+      },
+      {
+        "id": "click",
+        "kind": "node"
+      }
+    ],
+    "edges": []
+  }
+}

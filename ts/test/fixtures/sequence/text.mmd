@@ -1,0 +1,19 @@
+%% Free text in the sequence profile: aliases, message text, notes and
+%% fragment labels all run to the end of the line. Mermaid has no trailing
+%% comment in a sequence diagram: `%%` after a statement would be label text.
+
+sequenceDiagram
+    participant web as Web (EU)
+    participant quoted as Web (EU)
+    participant main as Web (EU) - main, v2
+    participant taker as Note taker
+    web->>quoted: GET /resource?id=1 (cached), please
+    quoted-->>web: 100% complete
+    web-)main: "100 %% pure"
+    main->>web: POST /refresh
+    note RIGHT OF taker: keywords match in any case
+    Note over web,quoted: TLS 1.3, mutual auth
+    loop token refresh (every 15 min)
+        web->>main: POST /refresh (refresh_token)
+    end
+    main-)taker:   trimmed

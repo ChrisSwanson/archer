@@ -1,0 +1,144 @@
+# The gates of `npm run pr-check` on every pull request and push to main: the unit gates in one job,
+# the unit suites again on macOS, the two browser suites in two shards, and a reported (never
+# blocking) `npm audit`.
+# docs/agents/quality-gates.md lists the gates; keep the two in step.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --fund=false
+      # Reported, never blocking (docs/security/advisories.md): a finding or a registry outage is not
+      # a red gate; a new advisory gets a dated decision in that file.
+      - name: npm audit (reported, not blocking)
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          echo "### npm audit (shipped dependencies)"
+          timeout 120 npm audit --omit=dev || echo "::warning::npm audit (shipped) reports advisories: decide each in docs/security/advisories.md"
+          echo "### npm audit (all dependencies)"
+          timeout 120 npm audit || echo "::warning::npm audit (all) reports advisories: decide each in docs/security/advisories.md"
+          echo "### npm audit signatures"
+          timeout 120 npm audit signatures || echo "::warning::npm audit signatures did not verify"
+          exit 0
+      - name: scripts contract tests
+        run: scripts/ci-docs-only_test.sh && scripts/pr-check_test.sh
+      - name: format and lint
+        run: npm run biome:ci
+      # GitHub's Ubuntu runners ship shellcheck, so the shell lint may not skip here.
+      - name: shell lint
+        run: ARCHER_SHELLCHECK_REQUIRED=1 npm run lint:shell
+      - name: ts typecheck
+        run: npm --workspace ts run typecheck
+      - name: ui typecheck
+        run: npm run typecheck
+      - name: ui build
+        run: npm run build
+      - name: ts bundle
+        run: npm --workspace ts run bundle && node ts/dist/archer.js --version
+      - name: ui tests
+        run: npm test
+      - name: ts tests
+        run: npm --workspace ts test -- --maxWorkers=3
+
+  # macOS has no /proc: file confinement runs on the path anchor there (ADR 0018, amended 2026-11-10).
+  # Linux passing says nothing about it, so the unit suites run on a Mac too.
+  macos:
+    name: Unit tests (macOS)
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --fund=false
+      - name: ui build
+        run: npm run build
+      - name: ts bundle
+        run: npm --workspace ts run bundle && node ts/dist/archer.js --version
+      - name: ui tests
+        run: npm test
+      - name: ts tests
+        run: npm --workspace ts test -- --maxWorkers=3
+
+  # Chromium against the page just built, served by the TypeScript service. Two halves in parallel
+  # (about 600 tests); the service's own three browser tests run once, on the first shard.
+  browser:
+    name: Browser tests (${{ matrix.shard }}/2)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --fund=false
+      - name: ui build
+        run: npm run build
+      # The browser binary is cached on the lockfile, which pins the Playwright version; the system
+      # libraries are installed every run. DejaVu by name: the layout's text-width estimates are
+      # calibrated to it.
+      - name: Cache Chromium
+        id: chromium
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Chromium's system libraries and fonts
+        run: |
+          npx playwright install-deps chromium
+          sudo apt-get install -y --no-install-recommends fonts-dejavu-core
+          fc-match sans-serif
+      - name: Install Chromium
+        if: steps.chromium.outputs.cache-hit != 'true'
+        run: npx playwright install --only-shell chromium
+      - name: ts test:browser
+        if: matrix.shard == 1
+        run: npm --workspace ts run test:browser -- --forbid-only
+      # --max-failures=3: a shard stops three failures in and reports at once.
+      - name: ui test:browser:ts
+        run: npm --workspace ui run test:browser:ts -- --shard=${{ matrix.shard }}/2 --max-failures=3
+      - name: Playwright traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-results-${{ matrix.shard }}
+          path: /tmp/archer-ui-ts-browser-results
+          if-no-files-found: ignore
+          retention-days: 14

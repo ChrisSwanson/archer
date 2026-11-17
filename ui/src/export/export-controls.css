@@ -1,0 +1,27 @@
+.archer-artifact-wrapper { position: fixed; top: 5rem; right: 1rem; z-index: 30; width: min(28rem, calc(100vw - 2rem)); }
+.archer-artifact-panel { box-sizing: border-box; max-height: calc(100dvh - 6rem); overflow: auto; padding: 1.25rem; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-dialog); background: var(--surface); color: var(--text); font-size: var(--type-body); line-height: 1.5; scrollbar-color: var(--border-strong) transparent; }
+.archer-artifact-header { position: sticky; top: -1.25rem; z-index: 1; display: flex; align-items: start; justify-content: space-between; gap: 1rem; margin-top: -1.25rem; padding-top: 1.25rem; padding-bottom: .75rem; background: var(--surface); }
+.archer-artifact-header h2 { margin: 0; font-size: var(--type-title); }
+.archer-artifact-header p { margin: .25rem 0 0; color: var(--text-dim); overflow-wrap: anywhere; }
+/* A field keeps its border; a button is a soft tint (see `.archer-review-button`). */
+.archer-artifact-panel button, .archer-artifact-panel select { font: inherit; color: inherit; background: var(--surface-2); border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-control); min-height: 2.5rem; padding: .5rem .75rem; }
+.archer-artifact-panel button { border: 0; cursor: pointer; }
+.archer-artifact-panel button:hover:not(:disabled) { background: var(--border); }
+.archer-artifact-panel .archer-artifact-primary:not(:disabled) { background: var(--accent-fill); color: var(--accent-on-fill); font-weight: 600; }
+.archer-artifact-panel .archer-artifact-primary:hover:not(:disabled) { background: var(--accent); color: var(--accent-ink); }
+.archer-artifact-panel button:disabled { background: var(--surface-2); color: var(--text-faint); cursor: default; }
+.archer-artifact-panel :is(button, select, input):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.archer-export-choices { display: grid; gap: .75rem; }
+.archer-export-choices label { display: grid; gap: .375rem; }
+.archer-export-option { display: flex; gap: .5rem; align-items: center; margin: .75rem 0; }
+.archer-export-option input { accent-color: var(--accent); }
+.archer-artifact-panel code { overflow-wrap: anywhere; }
+.archer-artifact-panel h3 { font-size: var(--type-body); margin: 1.25rem 0 .5rem; }
+.archer-artifact-detail { color: var(--text-dim); }
+.archer-artifact-panel [role="alert"] { color: var(--danger-text); }
+/* On a phone, beside the canvas's tool column, not over it, as Compare is (accuracy.css; round 1 pass 5, R4-01). What
+   it still lies over cannot take focus while it is open (`useCoveredInert` in WebShell.tsx). */
+@media (max-width: 560px) { .archer-artifact-wrapper { top: 8rem; right: .5rem; left: calc(15px + var(--icon-touch) + 2 * var(--icon-group-inset) + 2px + .5rem); width: auto; } .archer-artifact-panel { padding: 1rem; max-height: min(65dvh, calc(100dvh - 9rem)); } .archer-artifact-header { top: -1rem; margin-top: -1rem; padding-top: 1rem; } }
+
+/* Round 1, G7 [H]: Close, Refresh and the export choices are touch targets on a phone (R4-04). */
+@media (pointer: coarse) { .archer-artifact-panel :is(button, select) { min-height: var(--icon-touch); min-width: var(--icon-touch); } }

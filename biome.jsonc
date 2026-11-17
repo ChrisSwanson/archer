@@ -1,0 +1,128 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mts",
+      "**/*.cts",
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.cjs",
+      "**/*.json",
+      "**/*.css",
+      "**/*.vue",
+      "!**/node_modules",
+      "!**/dist",
+      "!site/.vitepress/cache",
+      "!site/.cache",
+      "!site/generated",
+      "!site/public/generated",
+      "!.shots",
+      "!package-lock.json",
+      "!**/*.generated.*",
+      "!fixtures",
+      "!**/test/fixtures",
+      "!**/tests/fixtures",
+      "!tools/devkit/corpus",
+      "!docs/quality/evidence",
+      "!docs/prototypes",
+      "!docs/evaluations/baseline"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        // It asks for <fieldset> wherever role="group" names a cluster of controls (toolbars,
+        // confirm bars, canvas controls: not forms), for HTML elements inside SVG, and for <hr>
+        // on a focusable splitter. ARIA roles are the page's deliberate semantics (UI_UX.md);
+        // axe (chrome.e2e.ts, a11y-sweep.e2e.ts) checks them in the browser.
+        "useSemanticElements": "off",
+        // Explicit roles that equal the implicit ones are kept on purpose: FileTable's rows turn
+        // display: block at phone width, which drops table semantics unless the roles are stated
+        // (ProjectPages.css), and the devkit harness selects some regions by [role="region"].
+        "noRedundantRoles": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useTemplate": "off",
+        "noDescendingSpecificity": "off",
+        "noParameterAssign": "off"
+      },
+      "complexity": {
+        "useLiteralKeys": "off",
+        "noImportantStyles": "off",
+        "noForEach": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "noVoidTypeReturn": "off",
+        // A Playwright rule that matches any call named `describe` (local helpers, Vitest suites);
+        // it is switched back on for the Playwright files in `overrides`.
+        "usePlaywrightValidDescribeCallback": "off"
+      },
+      "suspicious": {
+        "noControlCharactersInRegex": "off",
+        "noFocusedTests": "off",
+        "noAssignInExpressions": "off",
+        "noExplicitAny": "warn",
+        "noThenProperty": "off",
+        // ts/ and ui/ compile with strict TypeScript, which types an unannotated `let` from its
+        // assignments and rejects one it cannot type (TS7034); the rule only duplicated that.
+        "noImplicitAnyLet": "off",
+        // Map/filter/find callbacks must still return; a forEach arrow that returns its
+        // expression's value (`xs.forEach((x) => set.add(x))`) is the codebase's idiom.
+        "useIterableCallbackReturn": { "level": "error", "options": { "checkForEach": false } }
+      }
+    }
+  },
+  "overrides": [
+    {
+      // No React outside ui/: `useCompilePool` and friends are plain functions, not hooks.
+      "includes": ["ts/**", "tools/**", "shared/**", "scripts/**"],
+      "linter": {
+        "rules": {
+          "correctness": { "useHookAtTopLevel": "off", "noComponentHookFactories": "off" }
+        }
+      }
+    },
+    {
+      // Test harness components are declared inside a test body and rendered once by it.
+      "includes": ["ui/tests/**"],
+      "linter": { "rules": { "correctness": { "noComponentHookFactories": "off" } } }
+    },
+    {
+      "includes": ["**/*.e2e.ts", "**/*.spec.ts"],
+      "linter": { "rules": { "correctness": { "usePlaywrightValidDescribeCallback": "error" } } }
+    }
+  ],
+  "assist": {
+    "enabled": false
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true
+  },
+  "css": {
+    "formatter": {
+      "enabled": false
+    }
+  }
+}

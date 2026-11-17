@@ -1,0 +1,7 @@
+C4Context
+    title Small context
+    Person(user, "User")
+    System(app, "App", "Does the thing")
+    System_Ext(mail, "Mail service")
+    Rel(user, app, "Uses")
+    Rel(app, mail, "Sends email through", "SMTP")

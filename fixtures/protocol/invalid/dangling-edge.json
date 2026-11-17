@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 2,
+  "view": { "id": "valid", "kind": "c4-context", "title": "Invalid" },
+  "revision": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "model": {
+    "type": "architecture-graph",
+    "nodes": [{ "id": "source", "label": "Source" }],
+    "edges": [{ "id": "broken", "source": "source", "target": "missing" }],
+    "groups": []
+  }
+}

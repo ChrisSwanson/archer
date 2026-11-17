@@ -1,0 +1,17 @@
+%% description: Who and what Archer works with: the person, their coding agent, its host and the repository.
+C4Context
+    title Archer System Context
+    %% archer-key dashed: Opt-in MCP path
+    %% archer-line dashed: mcp_host--archer
+    Person(developer, "Developer", "Thinks in pictures; works with coding agents")
+    System_Ext(coding_agent, "Coding Agent", "Claude Code, Codex or another agent")
+    System_Ext(mcp_host, "MCP Host", "An agent app that runs MCP servers and Apps")
+    System(archer, "Archer", "Shows, explains and keeps the project's diagrams and notes")
+    System_Ext(repository, "Project Repository", "Code, archer.toml and .archer/ in Git")
+    Rel(developer, coding_agent, "Describes and agrees with")
+    Rel(developer, archer, "Reads, selects, comments", "Browser")
+    Rel(coding_agent, archer, "Writes, presents, points", "archer CLI")
+    Rel(coding_agent, repository, "Changes code in")
+    Rel(coding_agent, mcp_host, "Runs inside")
+    Rel(mcp_host, archer, "Calls tools, shows App", "MCP")
+    Rel(archer, repository, "Keeps diagrams and notes in", "Files, Git")

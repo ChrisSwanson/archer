@@ -1,0 +1,51 @@
+{
+  "type": "c4-model",
+  "level": "container",
+  "title": "Web shop containers",
+  "elements": [
+    { "id": "customer", "kind": "person", "label": "Customer", "description": "Buys things" },
+    { "id": "courier", "kind": "person", "label": "Courier", "external": true },
+    {
+      "id": "web",
+      "kind": "container",
+      "label": "Web app",
+      "technology": "TypeScript",
+      "description": "Serves the pages",
+      "boundaryId": "shop"
+    },
+    { "id": "orders", "kind": "container", "label": "Orders", "shape": "database", "technology": "PostgreSQL", "boundaryId": "shop" },
+    {
+      "id": "events",
+      "kind": "container",
+      "label": "Events",
+      "shape": "queue",
+      "technology": "Kafka",
+      "description": "Order events",
+      "boundaryId": "shop"
+    },
+    { "id": "crm", "kind": "container", "label": "CRM", "external": true, "boundaryId": "ops" },
+    { "id": "payments", "kind": "system", "label": "Payment provider", "external": true, "description": "Takes the money" },
+    { "id": "ledger", "kind": "system", "label": "Ledger", "external": true, "shape": "database" }
+  ],
+  "boundaries": [
+    { "id": "company", "kind": "enterprise", "label": "Shop Ltd" },
+    { "id": "shop", "kind": "system", "label": "Web shop", "parentId": "company" },
+    { "id": "ops", "kind": "generic", "label": "Operations", "parentId": "company" }
+  ],
+  "relationships": [
+    { "id": "customer--web", "source": "customer", "target": "web", "label": "Orders from", "technology": "HTTPS" },
+    {
+      "id": "web--orders",
+      "source": "web",
+      "target": "orders",
+      "label": "Reads and writes",
+      "technology": "SQL",
+      "description": "every request"
+    },
+    { "id": "web--events", "source": "web", "target": "events", "label": "Publishes" },
+    { "id": "web--payments", "source": "web", "target": "payments", "label": "Pays through", "bidirectional": true },
+    { "id": "events--crm", "source": "events", "target": "crm", "label": "Feeds" },
+    { "id": "payments--ledger", "source": "payments", "target": "ledger", "label": "Records in" },
+    { "id": "crm--courier", "source": "crm", "target": "courier", "label": "Books" }
+  ]
+}

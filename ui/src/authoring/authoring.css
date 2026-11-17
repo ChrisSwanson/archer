@@ -1,0 +1,263 @@
+.authoring-workspace{display:flex;flex-direction:column;min-height:0;flex:1;overflow:auto;background:var(--bg);color:var(--text);font-size:var(--type-body)}.authoring-workspace button,.authoring-workspace input,.authoring-workspace select,.authoring-workspace textarea{font:inherit;color:inherit}.authoring-workspace button{padding:6px 10px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface-2);cursor:pointer}.authoring-workspace button:hover{border-color:var(--border-hover)}.authoring-workspace button:disabled{color:var(--text-faint);cursor:default}.authoring-workspace :is(input,select,textarea){background:var(--surface);border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-control);padding:7px;min-width:0;max-width:100%;caret-color:var(--accent)}.authoring-workspace select{padding-right:26px}.authoring-workspace :is(button,a,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:2px}.authoring-path{font-family:var(--font-mono);--type-tracking:0;overflow-wrap:anywhere}.authoring-toolbar{display:flex;justify-content:space-between;gap:10px;padding:10px 18px;background:var(--surface);border-bottom:var(--line-chrome) solid var(--border)}.authoring-toolbar>div{display:flex;flex-wrap:wrap;gap:8px}.authoring-workspace .authoring-primary{background:var(--accent-fill);color:var(--accent-on-fill);border-color:var(--accent)}.authoring-body{display:grid;grid-template-columns:300px minmax(0,1fr);flex:1;min-height:550px}.authoring-panel{background:var(--surface);border-right:var(--line-chrome) solid var(--border);padding:20px 16px;overflow:auto}.authoring-panel h2{font-size:var(--type-body);font-weight:600;margin:0 0 12px}.authoring-panel h3{font-size:var(--type-small);color:var(--text-dim);font-weight:600;margin:25px 0 12px}.authoring-inline{display:inline-flex;align-items:center;gap:2px;min-width:0;max-width:100%;flex:1}.authoring-workspace .authoring-pencil{display:inline-flex;align-items:center;justify-content:center;background:transparent;border-color:transparent;min-width:28px;min-height:30px;padding:5px;flex:none;color:var(--text-dim)}.authoring-pencil svg{width:var(--icon-indicator);height:var(--icon-indicator);fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}.authoring-workspace .authoring-pencil:hover{color:var(--accent)}.authoring-inline>span{overflow-wrap:anywhere}.authoring-inline>input{width:100%;min-width:0;padding:4px}.authoring-inline>select{max-width:160px;font-size:var(--type-small)}.authoring-workspace .authoring-select{padding:5px 1px;background:transparent;border-color:transparent;text-align:left;overflow-wrap:anywhere}.authoring-item{border:var(--line-chrome) solid transparent;border-radius:var(--radius-control);margin-bottom:5px;padding:2px 6px 2px 0}.authoring-item.selected{border-color:var(--border-strong);background:var(--surface-2)}.authoring-item.selected .authoring-select{color:var(--accent)}.authoring-row{display:flex;align-items:center;gap:5px;min-width:0}.authoring-row code{font-size:var(--type-small);color:var(--text-faint);margin-left:auto;overflow-wrap:anywhere}.authoring-properties{padding:2px 8px 8px 30px;font-size:var(--type-small);display:flex;align-items:center;flex-wrap:wrap;gap:8px}.authoring-properties>span:first-child{color:var(--text-dim)}.authoring-workspace .authoring-delete{font-size:var(--type-small);background:transparent;border-color:transparent;color:var(--danger-text);padding:4px 0}.authoring-connection{margin:0 2px 15px}.authoring-workspace .authoring-endpoints{font-size:var(--type-small);text-align:left;padding:2px 0;background:transparent;border-color:transparent;display:block}.authoring-connection .authoring-row{font-size:var(--type-small);color:var(--text-dim)}.authoring-direction{font-size:var(--type-small)}.authoring-panel details{border-top:var(--line-chrome) solid var(--border);margin-top:24px;padding-top:12px;font-size:var(--type-small)}.authoring-panel summary{cursor:pointer;color:var(--text-dim);padding:3px 0}.authoring-panel form,.authoring-panel label{display:grid;gap:7px}.authoring-panel form{gap:12px;margin-top:12px}.authoring-panel textarea{width:100%;resize:vertical;margin-top:12px}.authoring-secondary{font-size:var(--type-small);color:var(--text-dim)}.authoring-panel a{color:var(--accent);text-underline-offset:3px}.authoring-canvas-column{display:flex;flex-direction:column;min-width:0}.authoring-preview{position:relative;min-height:480px;flex:1;display:flex;flex-direction:column}.authoring-preview>.archer-emph-surface,.authoring-preview>.react-flow{position:absolute;inset:0}.authoring-checking{position:absolute;top:8px;left:16px;z-index:2;background:var(--surface);padding:5px 8px;font-size:var(--type-small);color:var(--text-dim)}.authoring-source{border-top:var(--line-chrome) solid var(--border);padding:14px 18px}.authoring-source label{display:block;margin-bottom:8px;font-size:var(--type-small)}.authoring-source textarea{width:100%;height:240px;resize:vertical;font-family:var(--font-mono);--type-tracking:0;line-height:1.6;font-size:var(--type-small)}.authoring-status{padding:12px 18px;border-top:var(--line-chrome) solid var(--border);background:var(--surface);color:var(--text-dim);font-size:var(--type-small)}.authoring-error{color:var(--danger-text);background:var(--danger-bg);margin:0;padding:10px 18px;font-size:var(--type-small)}.authoring-error a{color:inherit;text-underline-offset:3px}.authoring-recovery-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.authoring-diagnostics{margin:0;padding:12px 18px 12px 36px;background:var(--surface);color:var(--danger-text);font-size:var(--type-small)}.authoring-denied{padding:24px;color:var(--text)}.authoring-denied h2{font-size:var(--type-title)}.authoring-workspace dialog{max-width:560px;width:calc(100% - 36px);padding:24px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-dialog);background:var(--surface);color:var(--text);box-shadow:var(--shadow-modal)}.authoring-workspace dialog::backdrop{background:var(--scrim)}.authoring-workspace dialog h2{font-size:var(--type-title);margin-top:0}.authoring-workspace dialog>div{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}.authoring-workspace dialog label{display:grid;gap:8px}.authoring-phone{background:var(--accent-fill);color:var(--accent-on-fill);margin:0;padding:12px 16px;font-size:var(--type-small)}.authoring-sr{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+@media(max-width:720px){.authoring-body{display:flex;flex-direction:column}.authoring-panel{order:2;border-right:0;border-top:var(--line-chrome) solid var(--border);overflow:visible}.authoring-canvas-column{order:1}.authoring-preview{min-height:400px}.authoring-workspace .authoring-pencil{display:none}.authoring-inline>span,.authoring-inline>.authoring-select{padding-left:6px}.authoring-item{min-height:44px}.authoring-toolbar{display:none}.authoring-properties{padding-left:8px}.authoring-workspace button{min-height:44px}}.authoring-entry{color:var(--accent);text-underline-offset:3px}
+.authoring-pencil{opacity:0;transition:opacity 100ms ease-out}.authoring-inline:hover>.authoring-pencil,.authoring-inline:focus-within>.authoring-pencil{opacity:1}
+@media(hover:none) and (min-width:721px){.authoring-pencil{opacity:1}}@media(prefers-reduced-motion:reduce){.authoring-pencil{transition:none}}
+.authoring-secondary-actions{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-block:12px}
+.primary-document-local-tools{min-width:0;max-width:100%}.primary-document-local-tools .authoring-toolbar{padding:0;border:0;background:transparent;gap:20px}.authoring-toolbar button{font:inherit;font-size:var(--type-body);color:var(--text);padding:6px 10px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface-2);cursor:pointer}.authoring-toolbar button:disabled{color:var(--text-faint);cursor:default}.authoring-toolbar .authoring-primary{background:var(--accent-fill);color:var(--accent-on-fill);border-color:var(--accent)}.authoring-toolbar :is(button,a):focus-visible{outline:2px solid var(--accent);outline-offset:2px}.authoring-workspace{min-width:0;overflow-x:clip}
+.authoring-workspace .authoring-pencil[aria-disabled=true]{color:var(--text-faint);cursor:default}
+@media(max-width:720px){.authoring-body{flex:none;min-height:0}.authoring-canvas-column,.authoring-panel{flex:none}.authoring-preview{flex:none;min-height:400px;height:400px}}
+
+.authoring-panel-collapsed{grid-template-columns:minmax(0,1fr)}.authoring-panel-collapsed>.authoring-panel{display:none}
+
+
+/* Edit in place: header tools, parts bar, rail and new-diagram row. */
+.authoring-toolbar{align-items:center}
+.primary-document-local-tools .authoring-toolbar{gap:6px;justify-content:flex-end}
+.authoring-editing-tag{padding:2px 9px;border-radius:var(--radius-pill);background:var(--accent-quiet);color:var(--accent-ink);font-size:var(--type-small);font-weight:500;line-height:1.5}
+.authoring-toolbar .authoring-primary{font-weight:600}
+/* Cancel and Save are a pair: one width, whatever their words. */
+.authoring-toolbar>button[type=button]{min-width:72px;text-align:center;justify-content:center}
+/* ...and one apparent size: Save's edge is as quiet as Cancel's (a full-accent ring read as a bigger
+   button); its fill and weight say it is the primary one. */
+.authoring-toolbar>.authoring-primary:not(:disabled){border-color:color-mix(in srgb,var(--accent) 40%,var(--accent-fill))}
+.authoring-statusline{display:flex;flex-wrap:wrap;gap:4px 12px;padding:8px 18px;border-bottom:var(--line-chrome) solid var(--border);color:var(--text-dim);font-size:var(--type-small)}
+.authoring-copies{padding:8px 18px;border-bottom:var(--line-chrome) solid var(--border);color:var(--text-dim);font-size:var(--type-small)}
+.authoring-copies p{margin:0 0 4px}
+.authoring-copies ol{margin:0;padding-left:20px;display:grid;gap:2px}
+.authoring-new-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px 18px;border-bottom:var(--line-chrome) solid var(--border);font-size:var(--type-small);color:var(--text-dim)}
+.authoring-new-row label{display:flex;align-items:center;gap:8px}
+.authoring-new-row input{width:260px}
+.authoring-new-row .authoring-path-input input{font-family:var(--font-mono);--type-tracking:0}
+.authoring-new-row select{min-width:180px}
+.authoring-parts{position:absolute;z-index:8;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:0;padding:5px 6px;max-width:calc(100% - 120px);overflow-x:auto;background:var(--surface);border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-dialog);box-shadow:var(--shadow-panel)}
+.authoring-parts-group{display:flex;gap:2px}
+.authoring-parts-group+.authoring-parts-group{border-left:var(--line-chrome) solid var(--border);margin-left:6px;padding-left:6px}
+.authoring-workspace .authoring-part{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:62px;padding:5px 5px 4px;border:var(--line-chrome) solid transparent;border-radius:var(--radius-card);background:transparent;font-size:var(--type-small);white-space:nowrap}
+.authoring-workspace .authoring-part:hover:not(:disabled){background:var(--surface-2);color:var(--text);border-color:var(--border)}
+.authoring-workspace .authoring-part[aria-pressed=true]{background:var(--accent-fill);color:var(--accent-on-fill);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:600}
+.authoring-workspace .authoring-part[aria-disabled=true]{color:var(--text-faint);cursor:default}
+.authoring-part-glyph{width:34px;height:20px;overflow:visible}
+.authoring-glyph-fill{fill:var(--node-bg);stroke-width:1.2}
+.authoring-glyph-line{fill:none;stroke-width:1.3}
+.authoring-glyph-line.dashed{stroke-dasharray:3 3}
+.authoring-glyph-line.thick{stroke-width:3}
+.authoring-glyph-solid{fill:var(--text-dim)}
+.authoring-part[aria-pressed=true] :is(.authoring-glyph-fill,.authoring-glyph-line){stroke:var(--accent-on-fill)}.authoring-part[aria-pressed=true] .authoring-glyph-solid{fill:var(--accent-on-fill)}
+.authoring-empty-hint{position:absolute;z-index:3;left:50%;top:48%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:var(--text-faint);pointer-events:none;font-size:var(--type-small)}
+.authoring-empty-hint strong{color:var(--text-dim);font-size:var(--type-body);font-weight:500}
+.authoring-workspace .authoring-danger{color:var(--danger-text);border-color:var(--danger-border);background:var(--danger-bg);font-weight:600}
+.authoring-workspace .authoring-dismiss{margin-left:12px;padding:2px 8px;font-size:var(--type-small)}
+.authoring-workspace dialog p{color:var(--text-dim);line-height:1.5}
+/* The top band above the drawing: the editing cluster on the left, the parts bar centred in what remains.
+   It follows the drawing in the DOM (keyboard order: canvas, then tools) and is drawn first (`order:-1`).
+   It is in the column's flow, so when the room runs out the parts bar drops to a row of its own (and its
+   groups wrap) and the drawing simply starts lower: nothing is clipped, nothing overlaps. Its dot grid
+   continues the canvas's (88px, the one-row band, is four 22px cells). */
+.authoring-canvas-column{position:relative}
+.authoring-tools-row{order:-1;position:relative;z-index:8;flex:none;display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 12px;padding:14px 15px 12px;pointer-events:none;background-color:var(--bg);background-image:radial-gradient(color-mix(in srgb,var(--border) 75%,transparent) 1px,transparent 1.2px);background-size:22px 22px;anchor-name:--authoring-band}
+.authoring-tools-row>*{pointer-events:auto}
+.authoring-tools-row .authoring-edit-cluster{position:static;flex:none;flex-direction:row;align-items:center}
+.authoring-tools-row .authoring-parts{position:static;transform:none;margin:0 auto;flex:0 0 auto;min-width:0;max-width:100%;flex-wrap:wrap;row-gap:6px;border-color:var(--border-strong);box-shadow:var(--shadow-panel)}
+.authoring-workspace .authoring-part{color:var(--text)}
+.authoring-glyph-fill{stroke:var(--text)}
+.authoring-glyph-line{stroke:var(--text)}
+.authoring-glyph-solid{fill:var(--text)}
+.authoring-part[aria-disabled=true] :is(.authoring-glyph-fill,.authoring-glyph-line){stroke:var(--text-faint)}
+/* Editing canvas: a quiet dot grid says "this is a drawing surface". */
+.authoring-preview{background-color:var(--bg);background-image:radial-gradient(color-mix(in srgb,var(--border) 75%,transparent) 1px,transparent 1.2px);background-size:22px 22px}
+.authoring-preview .react-flow{--xy-background-color:transparent;background:transparent}
+/* The editing cluster: the zoom cluster's look (`.archer-canvas-controls`), its own place. */
+.authoring-edit-cluster button{width:var(--icon-button);height:var(--icon-button);min-height:var(--icon-button)}
+.authoring-edit-cluster button:disabled{color:var(--text-faint);cursor:default;background:transparent}
+.authoring-edit-cluster button[aria-pressed=true]{background:var(--accent-fill);color:var(--accent-on-fill)}
+.authoring-edit-cluster svg{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.authoring-edit-cluster-rule{display:block;height:1px;margin:2px 4px;background:var(--border)}
+/* Canvas clusters keep the reading page's look: icon buttons with a shaded tile on hover, no boxes. */
+.authoring-workspace :is(.react-flow__controls,.archer-canvas-controls) button:not([aria-pressed=true]){padding:0;border:0;background:transparent;color:var(--text-dim)}
+.authoring-workspace :is(.react-flow__controls,.archer-canvas-controls) button{padding:0;border:0}
+.authoring-workspace :is(.react-flow__controls,.archer-canvas-controls) button:hover:not(:disabled){background:var(--surface-2);color:var(--text);border:0}
+.authoring-workspace :is(.react-flow__controls,.archer-canvas-controls) button[aria-pressed=true]{background:var(--accent-fill);color:var(--accent-on-fill)}
+/* A label typed inside its own shape: same face and place as the label, a caret and a quiet underline. */
+.archer-node-label-input,.authoring-workspace .archer-node-label-input{font:inherit;font-weight:inherit;color:inherit;text-align:center;background:transparent;border:0;border-radius:0;padding:0;margin:0;min-width:3ch;max-width:100%;outline:none;caret-color:var(--accent);position:relative;z-index:1}
+.authoring-workspace .archer-node-label-input:focus-visible,.archer-node-label-input:focus{outline:none;box-shadow:none}
+/* While a label is typed, the shape keeps its plain fill (an accent ring says "editing")
+   and the selected text takes the solid accent, so the highlight never blends into the shape. */
+.archer-node:not(.archer-shape-diamond):not(.archer-shape-hexagon):has(.archer-node-label-input){background:var(--node-bg)!important;color:var(--node-text)!important;border:var(--line-node) solid var(--accent)!important;box-shadow:var(--node-shadow-selected)!important}
+.archer-shape-diamond:has(.archer-node-label-input){color:var(--node-text)!important}
+.archer-shape-diamond:has(.archer-node-label-input) .archer-node-diamond{background:var(--node-bg)!important;border:var(--line-node) solid var(--accent)!important}
+.archer-node-label-input::selection{background:var(--accent);color:var(--accent-ink)}
+/* The label being renamed sits over its neighbours: connection labels share one layer, and a later one would cover it. */
+.archer-edge-label:has(.archer-node-label-input){outline:2px solid var(--accent);outline-offset:1px;z-index:1}
+/* The drawing fills the preview, which starts below the band: a diagram is never framed under the parts bar. */
+.authoring-preview>.archer-emph-surface,.authoring-preview>.react-flow{top:0;bottom:0;height:auto}
+.authoring-preview{min-height:392px}
+.authoring-tools-row .authoring-edit-cluster .authoring-edit-cluster-rule{width:1px;height:var(--icon);margin:0 4px}
+/* "Connect to…": the keyboard way to draw a connection from the selected element. */
+.authoring-connect-to{position:relative;display:inline-flex}
+.authoring-connect-menu{position:absolute;top:calc(100% + 8px);left:0;z-index:20;min-width:220px;max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:2px;padding:6px;background:var(--surface);border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-card);box-shadow:var(--shadow-panel)}
+.authoring-edit-cluster{overflow:visible!important}
+.authoring-workspace .archer-canvas-controls .authoring-connect-menu button[role=menuitem]{width:auto;height:auto;display:block;text-align:left;padding:7px 10px;border:0;border-radius:var(--radius-control);background:transparent;color:var(--text);font-size:var(--type-small)}
+.authoring-workspace .archer-canvas-controls .authoring-connect-menu button[role=menuitem]:hover,.authoring-workspace .archer-canvas-controls .authoring-connect-menu button[role=menuitem]:focus-visible{background:var(--surface-2)}
+.authoring-connect-menu-title{margin:2px 8px 6px;font-size:var(--type-small);color:var(--text-dim)}
+.authoring-source-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.authoring-source-bar label{margin:0!important}
+.authoring-workspace .authoring-copy{font-size:var(--type-small);padding:4px 10px}
+
+/* The selected sequence message, as controls. */
+/* biome-ignore lint/suspicious/noDuplicateProperties: the first top is the fallback where anchor() is unsupported */
+.authoring-message-panel{position:absolute;z-index:9;top:100px;top:calc(anchor(--authoring-band bottom) + 12px);right:15px;width:240px;display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--surface);border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-card);box-shadow:var(--shadow-panel);font-size:var(--type-small);pointer-events:auto}
+.authoring-message-panel h2{margin:0 0 2px;font-size:var(--type-small);font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.authoring-message-panel h2 span{font-weight:400;color:var(--text-dim)}
+.authoring-message-panel label{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:8px;color:var(--text-dim)}
+.authoring-message-position{display:flex;align-items:center;gap:6px;color:var(--text-dim)}
+.authoring-message-position>span:first-child{width:56px}
+.authoring-workspace .authoring-message-position input{width:52px;padding:4px 6px}
+.authoring-workspace .authoring-message-position button{padding:3px 8px;min-height:24px;min-width:44px}
+.authoring-message-actions{display:flex;gap:6px;justify-content:flex-end}
+.authoring-workspace .authoring-message-actions button{padding:4px 10px;font-size:var(--type-small)}
+
+/* Parts bar groups. "Add" parts drop a shape in; "Connect with" is a sticky mode for the next drag, so it
+   reads as a segmented control on a tinted track, not as another row of buttons. The labels come from the
+   group's own heading (`.authoring-parts-label`, written by AuthoringWorkspace). */
+.authoring-parts{padding-top:3px}
+.authoring-parts-group{position:relative;padding-top:13px}
+.authoring-parts-label{position:absolute;top:0;left:4px;font-size:var(--type-floor);line-height:13px;font-weight:600;text-transform:uppercase;color:var(--text-dim);white-space:nowrap;pointer-events:none}
+.authoring-parts-group:has(>.authoring-part[aria-pressed]){background:var(--surface-2);border-radius:var(--radius-cluster);padding-inline:3px;row-gap:1px;box-shadow:inset 0 0 0 1px var(--border);border-left:0}
+.authoring-parts-group:has(>.authoring-part[aria-pressed])>.authoring-parts-label{left:7px}
+.authoring-parts-group:has(>.authoring-part[aria-pressed]) .authoring-part[aria-pressed=false]{border-color:transparent}
+.authoring-parts-group:has(>.authoring-part[aria-pressed])+.authoring-parts-group{margin-left:10px}
+.authoring-workspace .authoring-part{padding-top:3px;padding-bottom:3px}
+/* A parts bar wider than its room scrolls: fade the cut edge (the fades vanish at the scroll ends). */
+.authoring-parts{scrollbar-width:thin;background:
+ linear-gradient(to right,var(--surface) 30%,transparent) left center/32px 100% no-repeat local,
+ linear-gradient(to left,var(--surface) 30%,transparent) right center/32px 100% no-repeat local,
+ radial-gradient(farthest-side at 0 50%,color-mix(in srgb,var(--text) 30%,transparent),transparent) left center/12px 100% no-repeat scroll,
+ radial-gradient(farthest-side at 100% 50%,color-mix(in srgb,var(--text) 30%,transparent),transparent) right center/12px 100% no-repeat scroll,
+ var(--surface)}
+.authoring-tools-row .authoring-parts{background:
+ linear-gradient(to right,var(--surface) 30%,transparent) left center/32px 100% no-repeat local,
+ linear-gradient(to left,var(--surface) 30%,transparent) right center/32px 100% no-repeat local,
+ radial-gradient(farthest-side at 0 50%,color-mix(in srgb,var(--text) 30%,transparent),transparent) left center/12px 100% no-repeat scroll,
+ radial-gradient(farthest-side at 100% 50%,color-mix(in srgb,var(--text) 30%,transparent),transparent) right center/12px 100% no-repeat scroll,
+ var(--surface)}
+@media(max-width:1100px){.authoring-workspace .authoring-part{min-width:54px}}
+/* Pointer targets: 24px minimum for every handle (WCAG 2.5.8) by an invisible halo, 44px for touch. */
+.archer-authoring-canvas .react-flow__handle::after{content:"";position:absolute;inset:-8px;border-radius:50%}
+.archer-authoring-canvas .react-flow__edge.selected .react-flow__edgeupdater{r:11}
+@media(pointer:coarse){
+ .authoring-toolbar button{min-height:44px;min-width:44px}
+ .authoring-panel details>summary{box-sizing:border-box;min-height:44px;padding-block:14px}
+ .authoring-workspace :is(.authoring-part,.authoring-message-panel button,.authoring-message-panel input,.authoring-message-panel select,.authoring-connect-menu button,.authoring-new-row :is(input,select,button),.authoring-copy,.authoring-dismiss){min-height:44px;min-width:44px}
+ .authoring-workspace :is(.authoring-edit-cluster,.authoring-rail) button{width:44px;height:44px}
+ .archer-authoring-canvas .react-flow__handle::after{inset:-16px}
+ .archer-authoring-canvas .react-flow__edge.selected .react-flow__edgeupdater{r:14}
+ .archer-seq-end-handles circle{r:14}
+}
+/* A drawing kept from the last valid source while the text doesn't compile: greyed and not interactive. */
+.authoring-preview-stale>.react-flow,.authoring-preview-stale>.archer-emph-surface{opacity:.45;pointer-events:none}
+/* A group's heading is a row of its own above its parts, so a long one ("Connect with (stays on)") widens
+   its group instead of running past it. Eight columns cover the largest group; more add columns. */
+.authoring-parts-group{display:grid;grid-template-columns:repeat(8,auto);column-gap:0;padding-top:0;align-items:end}
+.authoring-parts-group>.authoring-part{grid-row:2;margin-inline:1px}
+.authoring-parts-label,.authoring-parts-group:has(>.authoring-part[aria-pressed])>.authoring-parts-label{position:static;grid-row:1;grid-column:1/span 8;padding:0 4px 1px}
+/* One part under a heading wider than it ("Connect" over Transition): the part fills the group and the
+   heading centres over it, so the spare width is not all on the right. */
+.authoring-parts-group:has(>.authoring-part:only-of-type){grid-template-columns:auto}
+.authoring-parts-group>.authoring-part:only-of-type{justify-self:stretch}
+.authoring-parts-group:has(>.authoring-part:only-of-type)>.authoring-parts-label{grid-column:1;text-align:center}
+/* The editing header stays one row down to tablet width: the trail and title give way, the tools do not. */
+@media(min-width:721px){
+ .primary-document-bar:has(.authoring-toolbar){flex-wrap:nowrap}
+ .primary-document-bar:has(.authoring-toolbar) .primary-document-identity{flex:1 1 auto;min-width:0}
+ .primary-document-bar:has(.authoring-toolbar) .primary-document-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+ .primary-document-bar:has(.authoring-toolbar) :is(.primary-document-local-tools,.primary-document-actions){flex:none}
+ .primary-document-bar:has(.authoring-toolbar) .primary-breadcrumb{flex-wrap:nowrap;min-width:0;overflow:hidden}
+ .primary-document-bar:has(.authoring-toolbar) .primary-breadcrumb>*{flex:none;white-space:nowrap}
+ .primary-document-bar:has(.authoring-toolbar) .primary-breadcrumb>[aria-current=page]{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+}
+@media(min-width:721px) and (max-width:960px){
+ .primary-document-bar:has(.authoring-toolbar) .primary-document-actions{gap:4px}
+}
+/* Save with nothing to save, or blocked: plainly off (no accent fill), still readable, its reason in the title. */
+.authoring-toolbar .authoring-primary:disabled,.authoring-workspace .authoring-primary:disabled{background:transparent;color:var(--text-faint);border-color:var(--border);font-weight:500;cursor:not-allowed}
+.authoring-toolbar .authoring-primary:disabled[title]{cursor:help}
+/* The one feedback callout: pinned bottom-centre over the drawing, clear of the zoom cluster, wrapping. */
+.authoring-feedback{position:absolute;z-index:9;bottom:16px;left:50%;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:min(640px,calc(100% - 420px));display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:8px 8px 8px 14px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-card);background:var(--surface);color:var(--text);box-shadow:var(--shadow-panel);font-size:var(--type-small);line-height:1.45;pointer-events:auto}
+.authoring-feedback>span{flex:1 1 220px;min-width:0;overflow-wrap:anywhere}
+.authoring-feedback.authoring-error,.authoring-feedback-error{background:var(--danger-bg);color:var(--danger-text);border-color:var(--danger-border)}
+.authoring-feedback-info{background:var(--surface);color:var(--text-dim);border-color:var(--border-strong)}
+.authoring-phone-notice{margin:0;padding:10px 18px;font-size:var(--type-small);border-bottom:var(--line-chrome) solid var(--border)}
+.authoring-feedback-success{background:var(--surface);color:var(--text);border:var(--line-chrome-strong) solid var(--accent);box-shadow:var(--shadow-panel)}
+.authoring-feedback-warning{background:var(--surface);color:var(--text);border:var(--line-chrome-strong) solid var(--text-dim);box-shadow:var(--shadow-panel)}
+.authoring-workspace .authoring-feedback button{padding:4px 10px;font-size:var(--type-small);color:var(--text)}
+.authoring-workspace .authoring-feedback .authoring-dismiss{margin-left:0}
+.authoring-feedback-details{order:1;flex-basis:100%;font-size:var(--type-small)}
+.authoring-feedback-details summary{cursor:pointer;color:inherit}
+.authoring-feedback-details code{display:block;margin-top:4px;font-family:var(--font-mono);--type-tracking:0;overflow-wrap:anywhere;white-space:pre-wrap;color:var(--text-dim)}
+@media(max-width:960px){.authoring-feedback{max-width:calc(100% - 140px)}}
+/* The how-to line for a family's first edit: the feedback callout's place and look, quieter; a message
+   in that place takes precedence. */
+.authoring-coach{position:absolute;z-index:8;bottom:16px;left:50%;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:min(640px,calc(100% - 420px));margin:0;padding:7px 12px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-card);background:var(--surface);color:var(--text-dim);box-shadow:var(--shadow-panel);font-size:var(--type-small);line-height:1.45;text-align:center;pointer-events:auto}
+.authoring-coach .authoring-link-button{margin-left:6px}
+/* Source at the drawing's bottom-right, opening the Mermaid below it; left of the chat button when that is
+   shown (fixed, 52px, 16px in). The coach keeps clear of it. */
+.authoring-workspace .authoring-preview-source{position:absolute;z-index:8;right:16px;bottom:16px;background:var(--surface);border-color:var(--border-strong);color:var(--text);box-shadow:var(--shadow-panel)}
+.authoring-workspace .authoring-preview-source:hover{background:var(--surface-2)}
+.authoring-workspace .authoring-preview-source[aria-pressed=true]{background:var(--accent-fill);border-color:var(--accent);color:var(--accent-on-fill)}
+:root:has(.archer-chat-fab) .authoring-workspace .authoring-preview-source{right:80px}
+.authoring-coach:has(~.authoring-feedback){display:none}
+@media(max-width:960px){.authoring-coach{max-width:calc(100% - 140px)}}
+/* "Showing the last valid drawing": a quiet chip at the drawing's top-left, over the greyed canvas. */
+/* The greyed drawing's own "N more… Show all" cannot be used, so it gives its place to the note. */
+.authoring-preview-stale :is(.archer-offscreen-cue,.archer-overview-cue){visibility:hidden}
+.authoring-stale-note{position:absolute;z-index:7;top:8px;left:16px;margin:0;padding:5px 9px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--text-dim);font-size:var(--type-small);box-shadow:var(--shadow-panel)}
+/* Compiler notes that do not block Save (an ignored directive, a shape not yet connected): neutral, folded. */
+.authoring-diagnostics-notes{margin:0;padding:8px 18px;border-top:var(--line-chrome) solid var(--border);background:var(--surface);color:var(--text-dim);font-size:var(--type-small)}
+.authoring-diagnostics-notes summary{cursor:pointer;color:var(--text-dim);width:max-content;max-width:100%}
+.authoring-diagnostics-notes summary:hover{color:var(--text)}
+.authoring-diagnostics-notes ul{margin:6px 0 2px;padding-left:20px;line-height:1.5}
+.authoring-diagnostics{border-top:var(--line-chrome) solid var(--danger-border);background:var(--danger-bg)}
+/* A text-style action inside a sentence (the status line's "Discard them", "Resume them"). */
+.authoring-workspace .authoring-link-button{display:inline;padding:0;margin:0;min-height:0;border:0;border-radius:var(--radius-mark);background:none;color:var(--accent);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.authoring-workspace .authoring-link-button:hover{color:var(--text);border:0}
+.authoring-workspace .authoring-link-button:disabled{color:var(--text-faint);text-decoration:none;cursor:default}
+/* The element a dragged connection would land on: an accent ring with a soft halo (≥3:1 on both canvases). */
+.archer-connect-target,.react-flow__node.archer-connect-target{outline:2px solid var(--accent);outline-offset:3px;border-radius:var(--radius-mark);box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent)}
+/* A selected sequence note or fragment header: the accent outline around it (a fragment's dashed, like its frame). */
+.archer-seq-part{cursor:pointer}
+.archer-seq-part-selection{fill:none;stroke:var(--accent);stroke-width:2;pointer-events:none}
+.archer-seq-part-selection-fragment{stroke-dasharray:6 4}
+/* Multi-line label fields: grow with their lines (Shift+Enter), never resized or scrolled by hand. */
+.archer-node-label-input{display:inline-block;vertical-align:top;resize:none;overflow:hidden;line-height:inherit;white-space:pre-wrap;overflow-wrap:anywhere;box-sizing:content-box}
+.authoring-panel .authoring-inline>textarea{width:100%;min-width:0;margin:0;padding:4px;resize:none;line-height:1.4}
+/* The selected connection's or message's arrowheads: a segmented choice of three. */
+.authoring-arrow{border:0;margin:0;padding:0;display:grid;grid-template-columns:56px 1fr;align-items:center;gap:4px 8px;color:var(--text-dim);min-width:0}
+.authoring-arrow legend{float:left;padding:0}
+.authoring-arrow-choices{display:flex;min-width:0}
+.authoring-workspace .authoring-arrow-choices button{flex:1 1 auto;min-width:0;padding:4px 3px;white-space:nowrap;font-size:var(--type-small);border-radius:0;margin-left:-1px}
+.authoring-workspace .authoring-arrow-choices button:first-child{border-radius:var(--radius-control) 0 0 var(--radius-control);margin-left:0}
+.authoring-workspace .authoring-arrow-choices button:last-child{border-radius:0 var(--radius-control) var(--radius-control) 0}
+.authoring-workspace .authoring-arrow-choices button[aria-pressed=true]{background:var(--accent-fill);color:var(--accent-on-fill);border-color:var(--accent);position:relative}
+.authoring-arrow>p{grid-column:2;margin:0}
+/* A fix the compiler names (pasted Mermaid without edge IDs): one primary action above the problems. */
+.authoring-fix{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0;padding:10px 18px;border-top:var(--line-chrome) solid var(--border);box-shadow:inset 0 0 0 1px var(--accent);background:var(--surface);color:var(--text);font-size:var(--type-small);line-height:1.45}
+.authoring-fix>span{flex:1 1 280px;min-width:0}
+.authoring-fix strong{font-weight:600}
+/* The source drawer's CodeMirror editor (batch CM): the text area's box, resizable the same way. */
+.authoring-source-editor{height:240px;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-control);overflow:hidden;resize:vertical}
+.authoring-source-bar span{font-size:var(--type-small)}
+/* A connection being drawn or reattached sees through the floating panels and callouts to the shapes under them: they fade and let the drop land. */
+.authoring-canvas-column:has(.archer-connecting) :is(.authoring-message-panel,.authoring-feedback,.authoring-coach){pointer-events:none;opacity:.2;transition:opacity .12s}
+/* The editor never scrolls its chrome away (parts bar under the page header): on a desktop the canvas column fits the
+   window, the canvas takes what is left, and only what sits under it (Source, notes, fixes) scrolls, in its own box. */
+@media(min-width:721px){.authoring-workspace{overflow:hidden}.authoring-body{min-height:0}.authoring-canvas-column{min-height:0}.authoring-preview{flex:1 1 0;min-height:220px}.authoring-below{flex:0 1 auto;min-height:0;overflow:auto}}
+.authoring-off{margin:0 0 8px;padding:8px 12px;border:var(--line-chrome) solid var(--border);border-radius:var(--radius-card);color:var(--text-dim);font-size:var(--type-small)}
+/* The reading page's diagram key, at the same place and size over the drawing being edited (ux:F13:b). */
+.authoring-preview{--diagram-key-height:176px;--diagram-key-inset:12px}
+/* The bottom-centre hint and feedback stay clear of the key on either side of the centre; on a narrow canvas they
+   keep a readable width and sit over the key (they are drawn above it). */
+.authoring-preview:has(>.archer-diagram-key)>:is(.authoring-coach,.authoring-feedback){max-width:max(min(280px,calc(100% - 24px)),calc(100% - 2*(var(--diagram-key-inset) + 236px)))}
+
+/* A part picked while the parts bar is busy runs once the edit or layout it waits for settles. */
+.authoring-parts[aria-busy="true"] .authoring-part{cursor:progress}
+.authoring-missing{padding:24px;gap:12px;max-width:72ch}.authoring-missing h2{font-size:var(--type-title);margin:0}.authoring-missing p{margin:0}.authoring-missing-source{display:grid;gap:8px;font-size:var(--type-small)}.authoring-missing-source textarea{box-sizing:border-box;width:100%;resize:vertical;font-family:var(--font-mono);--type-tracking:0;line-height:1.6;font-size:var(--type-small)}

@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "target": "view:containers",
+  "walkthroughs": [
+    {
+      "id": "diagram-to-person",
+      "title": "A Diagram Reaches the Person",
+      "description": "Follow one diagram from the agent's command to the person's screen and their comments back.",
+      "revision": 1,
+      "modelRevision": "sha256:9df7aa651409879e00b4159fb05cf52d91e83a0f2b28079b9d445b7681e8ffc4",
+      "author": "agent",
+      "writtenAt": "2026-11-12T23:09:08.447Z",
+      "steps": [
+        {
+          "id": "skill",
+          "title": "The skill sets the habits",
+          "kind": "does",
+          "what": "The agent reads the Archer skill: big picture first, answer by showing, keep the docs current.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "coding_agent",
+              "label": "Coding Agent"
+            },
+            {
+              "kind": "node",
+              "id": "skill",
+              "label": "Archer Skill"
+            }
+          ],
+          "edges": [
+            {
+              "id": "coding_agent--skill",
+              "source": "coding_agent",
+              "target": "skill",
+              "label": "Learns the workflow from"
+            }
+          ]
+        },
+        {
+          "id": "run-a-command",
+          "title": "The agent runs a command",
+          "kind": "sends",
+          "what": "The agent calls an operation through the archer command, such as validate_diagram or present_diagram.",
+          "why": "The CLI and the MCP server run the same operations, so either way gives the same result.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "cli",
+              "label": "Archer CLI"
+            }
+          ],
+          "edges": [
+            {
+              "id": "coding_agent--cli",
+              "source": "coding_agent",
+              "target": "cli",
+              "label": "Runs commands"
+            }
+          ]
+        },
+        {
+          "id": "write-the-file",
+          "title": "The diagram lands in the repository",
+          "kind": "sends",
+          "what": "The diagram is a Mermaid file in .archer/, written atomically and versioned in Git like the code.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "repository",
+              "label": "Project Repository"
+            }
+          ],
+          "edges": [
+            {
+              "id": "cli--repository",
+              "source": "cli",
+              "target": "repository",
+              "label": "Reads and writes diagrams"
+            }
+          ]
+        },
+        {
+          "id": "present",
+          "title": "Present it",
+          "kind": "sends",
+          "what": "present_diagram tells the background service what to show, with any emphasis, and returns the page URL.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "archer_service",
+              "label": "Background Service"
+            }
+          ],
+          "edges": [
+            {
+              "id": "cli--archer_service",
+              "source": "cli",
+              "target": "archer_service",
+              "label": "Presents and points"
+            }
+          ]
+        },
+        {
+          "id": "show",
+          "title": "The page shows it, live",
+          "kind": "sends",
+          "what": "The service compiles the diagram and pushes it to the open page, which redraws without a reload.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "web_page",
+              "label": "Archer Page"
+            }
+          ],
+          "edges": [
+            {
+              "id": "archer_service--web_page",
+              "source": "archer_service",
+              "target": "web_page",
+              "label": "Serves page, live events"
+            }
+          ]
+        },
+        {
+          "id": "person-comments",
+          "title": "The person selects and comments",
+          "kind": "does",
+          "what": "The person reads the diagram, selects the parts they mean and writes comments on them.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "developer",
+              "label": "Developer"
+            }
+          ],
+          "edges": [
+            {
+              "id": "developer--web_page",
+              "source": "developer",
+              "target": "web_page",
+              "label": "Reads, selects, comments"
+            }
+          ]
+        },
+        {
+          "id": "comments-kept",
+          "title": "Comments go back and are kept",
+          "kind": "sends",
+          "what": "Sent comments reach the service, which keeps them in a comments file beside the diagram.",
+          "edges": [
+            {
+              "id": "web_page--archer_service",
+              "source": "web_page",
+              "target": "archer_service",
+              "label": "Sends selection, comments"
+            },
+            {
+              "id": "archer_service--repository",
+              "source": "archer_service",
+              "target": "repository",
+              "label": "Watches; keeps comments"
+            }
+          ]
+        },
+        {
+          "id": "agent-reads",
+          "title": "The agent reads them back",
+          "kind": "sends",
+          "what": "The agent fetches the comments with get_comments, changes the diagram, then replies and resolves each thread.",
+          "edges": [
+            {
+              "id": "coding_agent--cli",
+              "source": "coding_agent",
+              "target": "cli",
+              "label": "Runs commands"
+            }
+          ],
+          "messages": [
+            {
+              "from": "cli",
+              "to": "coding_agent",
+              "label": "get_comments"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

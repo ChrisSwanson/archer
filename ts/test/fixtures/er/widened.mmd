@@ -1,0 +1,23 @@
+erDiagram
+    %% Every construct the ER profile reads.
+    direction LR
+    CUSTOMER["Customer"] {
+        string name PK "full name"
+        string email UK
+        int age
+    }
+    ORDER {
+        int id PK
+        int customer_id FK "the buyer"
+        varchar(32) status
+        string[] tags
+    }
+    LINE-ITEM["Order line"] {
+        int order_id PK, FK
+    }
+    PRODUCT
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : "is made of"
+    LINE-ITEM }o..|| PRODUCT : refers
+    CUSTOMER |o..o{ PRODUCT : ""
+    classDef key font-weight:bold

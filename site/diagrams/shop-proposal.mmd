@@ -1,0 +1,18 @@
+%% description: Proposed checkout: the Orders API hands card capture to a payment worker behind a job queue.
+flowchart TB
+  %% archer-key new: New in this proposal
+  web[Web App]
+  api[Orders API]
+  db[(Orders Database)]:::database
+  subgraph boundary[Proposed Boundary]
+    queue[Job Queue]:::new
+    worker[Payment Worker]:::new
+  end
+  provider[Payment Provider]:::external
+  web place@--> api
+  api save@-->|Save| db
+  api enqueue@-->|Capture job| queue
+  queue take@-->|Next job| worker
+  worker charge@-->|Charge| provider
+  worker record@-->|Record result| db
+  classDef new fill:#26a69a,stroke:#00695c

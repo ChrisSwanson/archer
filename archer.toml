@@ -1,0 +1,120 @@
+# Archer: diagrams and notes for this project live in the folder below.
+# Start with .archer/notes/start-here.md. The views below are the durable diagrams; each
+# lists the code it describes in `covers`, so list_stale_diagrams can say when it may be out
+# of date. Diagrams not listed here (and those embedded in notes) are still shown.
+version = 1
+name = "Archer"
+folder = ".archer"
+mode = "docs"
+
+[[views]]
+id = "system-context"
+kind = "c4"
+title = "Archer in its environment"
+source = ".archer/diagrams/overview/system-context.mmd"
+covers = ["ts/src/service/**", "ts/src/mcp/**", "ts/src/accuracy/git.ts", "ts/plugin/**"]
+
+[[views]]
+id = "containers"
+kind = "c4"
+title = "Containers: one bundle, several processes"
+source = ".archer/diagrams/overview/containers.mmd"
+covers = ["ts/src/**", "ts/plugin/**", "ts/scripts/bundle.ts", "ui/src/app/**"]
+
+[[views]]
+id = "runtime-topology"
+kind = "architecture"
+title = "Runtime topology: one service, many projects"
+source = ".archer/diagrams/overview/runtime-topology.mmd"
+covers = ["ts/src/service/**", "ts/src/state/**"]
+
+[[views]]
+id = "application-components"
+kind = "freeform"
+title = "Modules of ts/src"
+source = ".archer/diagrams/service/application-components.mmd"
+covers = ["ts/src/**", "shared/**"]
+
+[[views]]
+id = "service-lifecycle"
+kind = "sequence"
+title = "Starting the service and attaching a project"
+source = ".archer/diagrams/service/service-lifecycle.mmd"
+covers = ["ts/src/service/client.ts", "ts/src/service/service.ts", "ts/src/service/paths.ts", "ts/src/service/protocol.ts", "ts/src/state/**"]
+
+[[views]]
+id = "project-reload"
+kind = "freeform"
+title = "From a file change to page events"
+source = ".archer/diagrams/service/project-reload.mmd"
+covers = ["ts/src/service/watch.ts", "ts/src/service/project-state.ts"]
+
+[[views]]
+id = "view-compile-states"
+kind = "state"
+title = "A view's compile state in the service"
+source = ".archer/diagrams/service/view-compile-states.mmd"
+covers = ["ts/src/service/project-state.ts", "ui/src/app/CompileNotice.tsx"]
+
+[[views]]
+id = "compile-pipeline"
+kind = "freeform"
+title = "Mermaid compile pipeline"
+source = ".archer/diagrams/compiler/compile-pipeline.mmd"
+covers = ["ts/src/mermaid/**", "ts/src/model/**", "ts/src/project/envelope.ts"]
+
+[[views]]
+id = "agent-write-live-update"
+kind = "sequence"
+title = "Agent write to live update"
+source = ".archer/diagrams/flows/agent-write-live-update.mmd"
+covers = ["ts/src/application/index.ts", "ts/src/service/project-state.ts", "ts/src/service/watch.ts", "ui/src/app/host-bridge.ts"]
+
+[[views]]
+id = "present-emphasis-selection"
+kind = "sequence"
+title = "Present, emphasis and the reader's selection"
+source = ".archer/diagrams/flows/present-emphasis-selection.mmd"
+covers = ["ts/src/application/index.ts", "ts/src/service/emphasis.ts", "ts/src/service/selection-check.ts", "ui/src/selection/**", "ui/src/emphasis/**"]
+
+[[views]]
+id = "comment-round-trip"
+kind = "sequence"
+title = "Comment round trip"
+source = ".archer/diagrams/flows/comment-round-trip.mmd"
+covers = ["ts/src/comments/**", "ui/src/comments/**"]
+
+[[views]]
+id = "edit-embedded-diagram"
+kind = "sequence"
+title = "Opening and editing a diagram in a note"
+source = ".archer/diagrams/flows/edit-embedded-diagram.mmd"
+covers = ["ts/src/notes/**", "shared/**", "ts/src/application/index.ts"]
+
+[[views]]
+id = "persistence"
+kind = "entity-relationship"
+title = "What is stored where"
+source = ".archer/diagrams/data/persistence.mmd"
+covers = ["ts/src/state/**", "ts/src/comments/contract.ts", "ts/src/project/**", "ts/src/service/paths.ts"]
+
+[[views]]
+id = "page-components"
+kind = "c4"
+title = "The Archer page"
+source = ".archer/diagrams/ui/page-components.mmd"
+covers = ["ui/src/**"]
+
+[[views]]
+id = "render-pipeline"
+kind = "freeform"
+title = "Page render pipeline"
+source = ".archer/diagrams/ui/render-pipeline.mmd"
+covers = ["ui/src/diagrams/**", "ui/src/layout/**", "ui/src/protocol/**", "ui/src/app/App.tsx"]
+
+[[views]]
+id = "ci-gates"
+kind = "freeform"
+title = "CI gates"
+source = ".archer/diagrams/delivery/ci-gates.mmd"
+covers = [".github/workflows/ci.yml", "AGENTS.md", "docs/agents/quality-gates.md"]

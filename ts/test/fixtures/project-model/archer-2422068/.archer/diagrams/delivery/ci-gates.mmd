@@ -1,0 +1,33 @@
+flowchart LR
+  %% archer-key dotted: On failure
+  %% .forgejo/workflows/ci.yml: on pull_request and workflow_dispatch, never on push
+  pr([Pull request to main]):::person
+  subgraph image_jobs[CI image]
+    preflight["image preflight: tag matches sources, docker, registry read and write"]:::component
+    ciimage["CI image: build and push only if the tag is missing"]:::component
+  end
+  subgraph gate_jobs["Gate jobs, in the CI image (Node 24)"]
+    mirror["GitHub mirror script: github-mirror_test.sh"]:::component
+    ui["UI gates: workflow contract, typecheck, tests as isolated UID, build"]:::component
+    ts["TypeScript gates: typecheck, bundle, archer.js --version, vitest as isolated UID on tmpfs"]:::component
+    browser["Browser tests: build ui, Chromium, tests as isolated UID with axe"]:::component
+  end
+  all{{"all gates: every job must report success; skipped counts as red"}}
+  report[["report-failure.sh: one-line status and the log as a PR comment"]]:::external
+  merge([Ready to merge]):::person
+  pr open@--> preflight
+  preflight build@--> ciimage
+  ciimage m@--> mirror
+  ciimage u@--> ui
+  ciimage t@--> ts
+  ciimage b@--> browser
+  mirror m_all@--> all
+  ui u_all@--> all
+  ts t_all@--> all
+  browser b_all@--> all
+  preflight p_all@--> all
+  ciimage c_all@--> all
+  ui u_fail@-.->|on failure| report
+  ts t_fail@-.->|on failure| report
+  browser b_fail@-.->|on failure| report
+  all green@-->|success| merge

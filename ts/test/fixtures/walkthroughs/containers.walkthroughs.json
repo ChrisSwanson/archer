@@ -1,0 +1,662 @@
+{
+  "schemaVersion": 1,
+  "target": "view:containers",
+  "walkthroughs": [
+    {
+      "id": "checkout-and-payment",
+      "title": "Checkout and payment",
+      "description": "How a basket becomes a paid order.",
+      "revision": 1,
+      "modelRevision": "sha256:325ed1ea0bb393980445b3f152c8899e0612d5b3f90c4193f84ee69df6517b04",
+      "author": "agent",
+      "writtenAt": "2026-10-18T10:00:00Z",
+      "steps": [
+        {
+          "id": "check-out",
+          "title": "Check out",
+          "kind": "sends",
+          "what": "A basket of 2 books to checkout.",
+          "why": "Checkout starts in the browser; nothing is held yet.",
+          "code": [
+            "storefront/src/checkout/CheckoutPage.tsx"
+          ],
+          "edges": [
+            {
+              "id": "customer--web",
+              "source": "customer",
+              "target": "web",
+              "label": "Browses and buys from"
+            }
+          ],
+          "messages": [
+            {
+              "from": "customer",
+              "to": "web",
+              "label": "Check out 2 books"
+            }
+          ]
+        },
+        {
+          "id": "place-the-order",
+          "title": "Place the order",
+          "kind": "sends",
+          "what": "POST /orders with the basket.",
+          "why": "The Shop API owns orders, stock and payments; the Storefront only asks.",
+          "code": [
+            "api/src/orders/routes.ts"
+          ],
+          "edges": [
+            {
+              "id": "web--api",
+              "source": "web",
+              "target": "api",
+              "label": "Calls"
+            }
+          ],
+          "messages": [
+            {
+              "from": "web",
+              "to": "api",
+              "label": "POST /orders"
+            }
+          ]
+        },
+        {
+          "id": "reserve-the-stock",
+          "title": "Reserve the stock",
+          "kind": "does",
+          "what": "Reserves both copies and saves the order as Pending payment.",
+          "why": "Nobody else can buy the last copy while the customer pays.",
+          "code": [
+            "api/src/orders/create-order.ts",
+            "api/src/stock/reserve.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--db",
+              "source": "api",
+              "target": "db",
+              "label": "Reads and writes"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Reserve stock"
+            }
+          ]
+        },
+        {
+          "id": "open-a-payment-session",
+          "title": "Open a payment session",
+          "kind": "sends",
+          "what": "A payment session request; the provider answers with the page URL.",
+          "why": "Card details never reach Pageturner (decision 0001).",
+          "code": [
+            "api/src/payments/create-session.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--payments",
+              "source": "api",
+              "target": "payments",
+              "label": "Creates payment sessions with"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "payments",
+              "label": "Create session"
+            }
+          ]
+        },
+        {
+          "id": "pay-on-the-hosted-page",
+          "title": "Pay on the hosted page",
+          "kind": "does",
+          "what": "The Storefront redirects the customer, who pays by card on the provider's page.",
+          "why": "The provider handles the card, so PCI scope stays with them.",
+          "code": [
+            "storefront/src/checkout/redirect.ts"
+          ],
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "customer",
+              "label": "Customer"
+            },
+            {
+              "kind": "node",
+              "id": "payments",
+              "label": "Payment provider"
+            }
+          ],
+          "messages": [
+            {
+              "from": "customer",
+              "to": "payments",
+              "label": "Pay by card"
+            }
+          ]
+        },
+        {
+          "id": "hear-the-outcome",
+          "title": "Hear the outcome",
+          "kind": "sends",
+          "what": "Webhook payment.succeeded.",
+          "why": "The webhook is the source of truth: a closed tab still gets a Paid order.",
+          "code": [
+            "api/src/payments/webhook.ts"
+          ],
+          "edges": [
+            {
+              "id": "payments--api",
+              "source": "payments",
+              "target": "api",
+              "label": "Reports payment outcomes to"
+            }
+          ],
+          "messages": [
+            {
+              "from": "payments",
+              "to": "api",
+              "label": "payment.succeeded"
+            }
+          ]
+        },
+        {
+          "id": "mark-it-paid",
+          "title": "Mark it Paid",
+          "kind": "does",
+          "what": "Marks the order Paid.",
+          "why": "Only now does the order leave Pending payment.",
+          "code": [
+            "api/src/orders/mark-paid.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--db",
+              "source": "api",
+              "target": "db",
+              "label": "Reads and writes"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Mark Paid"
+            }
+          ]
+        },
+        {
+          "id": "queue-the-side-effects",
+          "title": "Queue the side effects",
+          "kind": "sends",
+          "what": "The confirmation email and the courier booking, as two jobs.",
+          "why": "A slow courier never holds up checkout (decision 0002).",
+          "code": [
+            "api/src/jobs/enqueue.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--jobs",
+              "source": "api",
+              "target": "jobs",
+              "label": "Queues emails and courier bookings on"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "jobs",
+              "label": "Queue email, courier"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "declined-card",
+      "title": "Declined card",
+      "revision": 1,
+      "modelRevision": "sha256:325ed1ea0bb393980445b3f152c8899e0612d5b3f90c4193f84ee69df6517b04",
+      "author": "agent",
+      "writtenAt": "2026-10-18T10:00:00Z",
+      "note": "notes/scenario-declined-card.md",
+      "steps": [
+        {
+          "id": "amira-checks-out",
+          "title": "Amira checks out",
+          "kind": "sends",
+          "what": "Two books; the Storefront places the order.",
+          "why": "Every checkout starts the same way.",
+          "code": [
+            "api/src/orders/routes.ts"
+          ],
+          "edges": [
+            {
+              "id": "customer--web",
+              "source": "customer",
+              "target": "web",
+              "label": "Browses and buys from"
+            },
+            {
+              "id": "web--api",
+              "source": "web",
+              "target": "api",
+              "label": "Calls"
+            }
+          ],
+          "messages": [
+            {
+              "from": "customer",
+              "to": "web",
+              "label": "Check out"
+            },
+            {
+              "from": "web",
+              "to": "api",
+              "label": "POST /orders"
+            }
+          ]
+        },
+        {
+          "id": "copies-held-payment-page-opened",
+          "title": "Copies held, payment page opened",
+          "kind": "does",
+          "what": "Reserves both copies (Pending payment) and creates a payment session.",
+          "why": "The copies are held only while she pays.",
+          "code": [
+            "api/src/orders/create-order.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--db",
+              "source": "api",
+              "target": "db",
+              "label": "Reads and writes"
+            },
+            {
+              "id": "api--payments",
+              "source": "api",
+              "target": "payments",
+              "label": "Creates payment sessions with"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Reserve stock"
+            },
+            {
+              "from": "api",
+              "to": "payments",
+              "label": "Create session"
+            }
+          ]
+        },
+        {
+          "id": "the-card-is-declined",
+          "title": "The card is declined",
+          "kind": "sends",
+          "what": "Webhook payment.failed.",
+          "why": "Her bank declined. The provider tells the Shop API, never the Storefront.",
+          "code": [
+            "api/src/payments/webhook.ts"
+          ],
+          "edges": [
+            {
+              "id": "payments--api",
+              "source": "payments",
+              "target": "api",
+              "label": "Reports payment outcomes to"
+            }
+          ],
+          "messages": [
+            {
+              "from": "payments",
+              "to": "api",
+              "label": "payment.failed"
+            }
+          ]
+        },
+        {
+          "id": "stock-back-on-the-shelf",
+          "title": "Stock back on the shelf",
+          "kind": "does",
+          "what": "Releases both copies and marks the order Payment failed.",
+          "why": "Another customer can buy the last copy at once.",
+          "code": [
+            "api/src/stock/release.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--db",
+              "source": "api",
+              "target": "db",
+              "label": "Reads and writes"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Release stock"
+            }
+          ]
+        },
+        {
+          "id": "try-another-card",
+          "title": "Try another card",
+          "kind": "does",
+          "what": "The provider returns her to the Storefront with \"try another card\".",
+          "why": "If she doesn't come back within 24 hours the order is Cancelled.",
+          "code": [
+            "storefront/src/checkout/ReturnPage.tsx"
+          ],
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "payments",
+              "label": "Payment provider"
+            },
+            {
+              "kind": "node",
+              "id": "customer",
+              "label": "Customer"
+            },
+            {
+              "kind": "node",
+              "id": "web",
+              "label": "Storefront"
+            }
+          ],
+          "messages": [
+            {
+              "from": "payments",
+              "to": "customer",
+              "label": "Try another card"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "order-shipped",
+      "title": "Order shipped",
+      "revision": 1,
+      "modelRevision": "sha256:23c95af15695f0f61efc4ba2dd1e8b9ca1e15b43fc25818d6be0580db3e590e4",
+      "author": "agent",
+      "writtenAt": "2026-10-02T10:00:00Z",
+      "open": [
+        "pageturner"
+      ],
+      "steps": [
+        {
+          "id": "pack-the-order",
+          "title": "Pack the order",
+          "kind": "does",
+          "what": "Staff mark the order packed.",
+          "why": "Packing is the only manual part of shipping.",
+          "code": [
+            "backoffice/src/orders/PackScreen.tsx"
+          ],
+          "edges": [
+            {
+              "id": "staff--backoffice",
+              "source": "staff",
+              "target": "backoffice",
+              "label": "Manages orders in"
+            }
+          ],
+          "messages": [
+            {
+              "from": "staff",
+              "to": "backoffice",
+              "label": "Mark packed"
+            }
+          ]
+        },
+        {
+          "id": "book-the-courier",
+          "title": "Book the courier",
+          "kind": "does",
+          "what": "Staff book the parcel collection by hand.",
+          "why": "There was no courier integration yet.",
+          "code": [
+            "backoffice/src/courier/BookingForm.tsx"
+          ],
+          "edges": [
+            {
+              "id": "backoffice--courier",
+              "source": "backoffice",
+              "target": "courier",
+              "label": "Books collections with"
+            }
+          ],
+          "messages": [
+            {
+              "from": "backoffice",
+              "to": "courier",
+              "label": "Book collection"
+            }
+          ]
+        },
+        {
+          "id": "mark-it-shipped",
+          "title": "Mark it Shipped",
+          "kind": "sends",
+          "what": "The order is Shipped, with the tracking number.",
+          "why": "The Shop API owns the order's state.",
+          "code": [
+            "api/src/orders/mark-shipped.ts"
+          ],
+          "edges": [
+            {
+              "id": "backoffice--api",
+              "source": "backoffice",
+              "target": "api",
+              "label": "Calls"
+            }
+          ],
+          "messages": [
+            {
+              "from": "backoffice",
+              "to": "api",
+              "label": "Mark Shipped"
+            }
+          ]
+        },
+        {
+          "id": "queue-the-dispatch-email",
+          "title": "Queue the dispatch email",
+          "kind": "sends",
+          "what": "A dispatch email job.",
+          "why": "The email service can be slow; shipping should not wait (decision 0002).",
+          "code": [
+            "api/src/jobs/enqueue.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--jobs",
+              "source": "api",
+              "target": "jobs",
+              "label": "Queues emails and courier bookings on"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "jobs",
+              "label": "Queue email"
+            }
+          ]
+        },
+        {
+          "id": "the-worker-picks-it-up",
+          "title": "The worker picks it up",
+          "kind": "does",
+          "what": "Takes the job off the queue.",
+          "why": "Retries with backoff if the email service is down.",
+          "code": [
+            "worker/src/run.ts"
+          ],
+          "edges": [
+            {
+              "id": "worker--jobs",
+              "source": "worker",
+              "target": "jobs",
+              "label": "Takes work from"
+            }
+          ],
+          "messages": [
+            {
+              "from": "worker",
+              "to": "jobs",
+              "label": "Take job"
+            }
+          ]
+        },
+        {
+          "id": "send-the-dispatch-email",
+          "title": "Send the dispatch email",
+          "kind": "sends",
+          "what": "The dispatch email with tracking link.",
+          "why": "The customer hears once the parcel is booked.",
+          "code": [
+            "worker/src/jobs/send-email.ts"
+          ],
+          "edges": [
+            {
+              "id": "worker--email",
+              "source": "worker",
+              "target": "email",
+              "label": "Sends order emails through"
+            }
+          ],
+          "messages": [
+            {
+              "from": "worker",
+              "to": "email",
+              "label": "Send email"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pay-with-card-form",
+      "title": "Pay with the card form",
+      "revision": 1,
+      "modelRevision": "sha256:0a3c28f5e56b5f6b82208e0e37fc842b479cb5a2f516d16aab73759b86b85ef3",
+      "author": "agent",
+      "writtenAt": "2026-08-12T10:00:00Z",
+      "steps": [
+        {
+          "id": "send-the-card-details",
+          "title": "Send the card details",
+          "kind": "sends",
+          "what": "The order and the card number from the checkout form.",
+          "why": "Pageturner took cards itself before decision 0001.",
+          "code": [
+            "storefront/src/checkout/CardForm.tsx"
+          ],
+          "edges": [
+            {
+              "id": "web--gateway",
+              "source": "web",
+              "target": "gateway",
+              "label": "Sends card details to"
+            }
+          ],
+          "messages": [
+            {
+              "from": "web",
+              "to": "gateway",
+              "label": "Card details"
+            }
+          ]
+        },
+        {
+          "id": "charge-the-card",
+          "title": "Charge the card",
+          "kind": "sends",
+          "what": "A charge for the basket total.",
+          "why": "The charge happened inside the order request.",
+          "code": [
+            "api/src/payments/charge.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--gateway",
+              "source": "api",
+              "target": "gateway",
+              "label": "Charges cards through"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "gateway",
+              "label": "Charge card"
+            }
+          ]
+        },
+        {
+          "id": "keep-a-card-token",
+          "title": "Keep a card token",
+          "kind": "does",
+          "what": "Saves a card token beside the order.",
+          "why": "The token was kept for refunds.",
+          "code": [
+            "api/src/orders/save.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--tokens",
+              "source": "api",
+              "target": "tokens",
+              "label": "Stores card tokens in"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "tokens",
+              "label": "Save token"
+            }
+          ]
+        },
+        {
+          "id": "send-the-receipt",
+          "title": "Send the receipt",
+          "kind": "sends",
+          "what": "The receipt email, inside the same request.",
+          "why": "Before the job queue, emails went out directly.",
+          "code": [
+            "api/src/email/receipt.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--email",
+              "source": "api",
+              "target": "email",
+              "label": "Sends receipts through"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "email",
+              "label": "Send receipt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

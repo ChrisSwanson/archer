@@ -1,0 +1,41 @@
+erDiagram
+    direction LR
+    CUSTOMER["Customer"] {
+        int id PK
+        string email UK
+        string name
+    }
+    ORDER["Order"] {
+        int id PK
+        int customer_id FK
+        string status "a state of the order lifecycle"
+        timestamp placed_at
+    }
+    ORDER-LINE["Order Line"] {
+        int order_id PK, FK
+        int book_id PK, FK
+        int quantity
+        int price_pence "the price when ordered"
+    }
+    BOOK["Book"] {
+        int id PK
+        string isbn UK
+        string title
+        int stock "copies on the shelf"
+    }
+    PAYMENT["Payment"] {
+        int id PK
+        int order_id FK
+        string session_ref UK "the payment provider's session"
+        string outcome "pending, succeeded or failed"
+    }
+    SHIPMENT["Shipment"] {
+        int id PK
+        int order_id FK, UK
+        string tracking_ref
+    }
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ ORDER-LINE : contains
+    ORDER-LINE }o--|| BOOK : "is for"
+    ORDER ||--o{ PAYMENT : "is paid by"
+    ORDER ||--o| SHIPMENT : "is sent as"

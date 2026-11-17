@@ -1,0 +1,59 @@
+%% description: Separate body commands, vessel type and a permitted 406 response; other unavailable-additions behaviour is unspecified.
+flowchart TB
+    %% archer-key command: Coffee command
+    %% archer-key caution: Specification caveat
+    %% archer-key refusal: Coffee refused
+    %% archer-key dotted: Unresolved specification detail
+    %% archer-key dashed: Permitted response
+    request[BREW or POST]:::command
+    media[Content-Type Conflict]:::caution
+    body[Start or Stop]:::command
+    vessel_check{Vessel?}
+    error418[418 I'm a Teapot]:::refusal
+    additions{Additions Available?}
+    unavailable[Cannot Supply Additions]
+    error406[406 Not Acceptable]:::refusal
+    unspecified[Other Behaviour Unspecified]:::caution
+    start[Start Brewing]:::command
+    stop[Stop Brewing]:::command
+    request media_conflict@-.->|Two media types| media
+    request read_body@-->|Section 4 body| body
+    body stop_command@-->|stop| stop
+    body start_command@-->|start| vessel_check
+    vessel_check teapot_refusal@-->|Teapot| error418
+    vessel_check pot_additions@-->|Coffee pot| additions
+    additions unavailable_additions@-->|No| unavailable
+    unavailable additions_refusal@-->|MAY return| error406
+    unavailable other_behaviour@-.->|Otherwise unspecified| unspecified
+    additions brew_start@-->|Yes| start
+    classDef dashed stroke-dasharray: 6 4
+    class additions_refusal dashed
+    classDef command fill:#176b56,stroke:#176b56
+    classDef caution fill:#884f24,stroke:#884f24
+    classDef refusal fill:#a52a36,stroke:#a52a36
+
+%%    Copyright (C) The Internet Society (1998).  All Rights Reserved.
+%%
+%%    This document and translations of it may be copied and furnished to
+%%    others, and derivative works that comment on or otherwise explain it
+%%    or assist in its implementation may be prepared, copied, published
+%%    and distributed, in whole or in part, without restriction of any
+%%    kind, provided that the above copyright notice and this paragraph are
+%%    included on all such copies and derivative works.  However, this
+%%    document itself may not be modified in any way, such as by removing
+%%    the copyright notice or references to the Internet Society or other
+%%    Internet organizations, except as needed for the purpose of
+%%    developing Internet standards in which case the procedures for
+%%    copyrights defined in the Internet Standards process must be
+%%    followed, or as required to translate it into languages other than
+%%    English.
+%%
+%%    The limited permissions granted above are perpetual and will not be
+%%    revoked by the Internet Society or its successors or assigns.
+%%
+%%    This document and the information contained herein is provided on an
+%%    "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+%%    TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+%%    BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+%%    HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+%%    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.

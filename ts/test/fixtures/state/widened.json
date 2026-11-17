@@ -1,0 +1,37 @@
+{
+  "type": "state-machine",
+  "direction": "lr",
+  "states": [
+    { "id": "Idle", "label": "Waiting for work", "note": { "position": "right-of", "text": "polls every 5 s" } },
+    { "id": "Checking", "label": "Checking the \"queue\"" },
+    { "id": "Route", "label": "Route", "kind": "choice" },
+    { "id": "Split", "label": "Split", "kind": "fork" },
+    { "id": "Merge", "label": "Merge", "kind": "join" },
+    { "id": "Working", "label": "Working" },
+    { "id": "Fetch", "label": "Fetch", "parentId": "Working" },
+    { "id": "Run", "label": "Run", "parentId": "Working" },
+    { "id": "Working_start", "label": "start", "kind": "initial", "parentId": "Working" },
+    { "id": "Working_end", "label": "end", "kind": "final", "parentId": "Working" },
+    { "id": "Report", "label": "Report" },
+    { "id": "Notify", "label": "Notify" },
+    { "id": "root_start", "label": "start", "kind": "initial" },
+    { "id": "root_end", "label": "end", "kind": "final" }
+  ],
+  "transitions": [
+    { "id": "Working_start--Fetch", "source": "Working_start", "target": "Fetch" },
+    { "id": "Fetch--Run", "source": "Fetch", "target": "Run", "label": "fetched" },
+    { "id": "Run--Working_end", "source": "Run", "target": "Working_end" },
+    { "id": "root_start--Idle", "source": "root_start", "target": "Idle" },
+    { "id": "Idle--Checking", "source": "Idle", "target": "Checking", "label": "poll" },
+    { "id": "Checking--Route", "source": "Checking", "target": "Route" },
+    { "id": "Route--Idle", "source": "Route", "target": "Idle", "label": "empty" },
+    { "id": "Route--Working", "source": "Route", "target": "Working", "label": "job found" },
+    { "id": "Working--Split", "source": "Working", "target": "Split" },
+    { "id": "Split--Report", "source": "Split", "target": "Report" },
+    { "id": "Split--Notify", "source": "Split", "target": "Notify" },
+    { "id": "Report--Merge", "source": "Report", "target": "Merge" },
+    { "id": "Notify--Merge", "source": "Notify", "target": "Merge" },
+    { "id": "Merge--Idle", "source": "Merge", "target": "Idle", "label": "done: next" },
+    { "id": "Idle--root_end", "source": "Idle", "target": "root_end", "label": "shutdown" }
+  ]
+}

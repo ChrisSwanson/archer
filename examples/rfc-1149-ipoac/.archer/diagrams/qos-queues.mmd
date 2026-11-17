@@ -1,0 +1,59 @@
+%% description: Trace wing marking into a class queue and through the departure gate; the proper time has no specified scheduling formula.
+flowchart TB
+    %% archer-key classification: Service classification
+    %% archer-key queueing: Queue operation
+    %% archer-key optional: Optional mechanism
+    %% archer-key dotted: Optional mechanism
+    barcode[Wing Bar Code]:::classification
+    scan[Bar-Code Reader]:::classification
+    level{Service Level?}:::classification
+    concorde[Concorde Queue]:::queueing
+    first[First Queue]:::queueing
+    business[Business Queue]:::queueing
+    coach[Coach Queue]:::queueing
+    gate[Gated Queue]:::queueing
+    departure[Departure]:::queueing
+    red[RED Paint]:::optional
+    scales[Scales for WFQ]:::optional
+    barcode read_marking@-->|Scan on entry| scan
+    scan classify@-->|Read class| level
+    level assign_concorde@-->|Concorde| concorde
+    level assign_first@-->|First| first
+    level assign_business@-->|Business| business
+    level assign_coach@-->|Coach| coach
+    concorde release_concorde@-->|Enqueue| gate
+    first release_first@-->|Enqueue| gate
+    business release_business@-->|Enqueue| gate
+    coach release_coach@-->|Enqueue| gate
+    gate depart@-->|Proper time| departure
+    gate deletion_option@-.->|Mark while enqueued| red
+    gate wfq_option@-.->|Weigh carriers| scales
+    classDef classification fill:#65428c,stroke:#65428c
+    classDef queueing fill:#176b56,stroke:#176b56
+    classDef optional fill:#884f24,stroke:#884f24
+
+%%    Copyright (C) The Internet Society (1999).  All Rights Reserved.
+%%
+%%    This document and translations of it may be copied and furnished to
+%%    others, and derivative works that comment on or otherwise explain it
+%%    or assist in its implementation may be prepared, copied, published
+%%    and distributed, in whole or in part, without restriction of any
+%%    kind, provided that the above copyright notice and this paragraph are
+%%    included on all such copies and derivative works.  However, this
+%%    document itself may not be modified in any way, such as by removing
+%%    the copyright notice or references to the Internet Society or other
+%%    Internet organizations, except as needed for the purpose of
+%%    developing Internet standards in which case the procedures for
+%%    copyrights defined in the Internet Standards process must be
+%%    followed, or as required to translate it into languages other than
+%%    English.
+%%
+%%    The limited permissions granted above are perpetual and will not be
+%%    revoked by the Internet Society or its successors or assigns.
+%%
+%%    This document and the information contained herein is provided on an
+%%    "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+%%    TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+%%    BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+%%    HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+%%    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.

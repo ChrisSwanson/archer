@@ -1,0 +1,15 @@
+{
+  "about": "Comment bodies for the G7 probe: each is stored through the service API (the page's POST api/comments, and the agent's create_comment), then shown in the review panel.",
+  "bodies": [
+    "<img src=x onerror=\"window.__xss='cm-img';alert('cm-img')\">",
+    "<script>window.__xss='cm-script'</script>",
+    "[md link](javascript:window.__xss='cm-md')",
+    "<javascript:window.__xss='cm-auto'>",
+    "javascript:window.__xss='cm-bare'",
+    "x\" onmouseover=\"window.__xss='cm-quote'",
+    "<svg/onload=window.__xss='cm-svg'",
+    "&lt;img src=x onerror=alert('cm-ent')&gt; &#60;script&#62;",
+    "<a id=\"__archerTelemetry\" href=\"https://xss-canary.invalid/cm\">clobber</a>",
+    "![px](https://xss-canary.invalid/cm-pixel.png)"
+  ]
+}

@@ -1,0 +1,125 @@
+.archer-diagrams-view { display: flex; flex-direction: column; gap: 16px; }
+
+/* Type chips: All and each kind present, with counts. */
+.archer-diagrams-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.archer-diagrams-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: var(--line-chrome) solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-small);
+  cursor: pointer;
+}
+.archer-diagrams-chip:hover { color: var(--text); border-color: var(--border-hover); }
+.archer-diagrams-chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-fill); color: var(--accent-on-fill); }
+.archer-diagrams-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-diagrams-chip-count { color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.archer-diagrams-chip[aria-pressed="true"] .archer-diagrams-chip-count { color: inherit; opacity: 0.8; }
+
+/* A uniform grid: one column at phone width, as many 250px tracks as fit beyond it. */
+.archer-diagrams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.archer-diagrams-grid > li { display: flex; min-width: 0; }
+
+.archer-diagram-card {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: var(--line-chrome) solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  cursor: pointer;
+}
+.archer-diagram-card:hover { border-color: var(--border-hover); }
+.archer-diagram-card:hover .archer-diagram-card-title { text-decoration: underline; text-underline-offset: 3px; }
+/* The focus ring is the card's, drawn while its one button has keyboard focus. */
+.archer-diagram-card:has(.archer-diagram-card-title:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-diagram-card .archer-diagram-card-title:focus-visible { outline: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .archer-diagram-card { transition: border-color 120ms ease; }
+}
+
+.archer-diagram-card-preview {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: var(--line-chrome) solid var(--border);
+  background: var(--plate);
+}
+.archer-diagram-card-preview { position: relative; }
+/* Pinned to the frame: a percentage height on a grid item resolves against an auto row. */
+.archer-diagram-card-preview > * { position: absolute; inset: 0; width: auto; height: auto; }
+/* The whole drawing in the fixed 16:9 frame, never cropped. */
+.archer-diagram-card-preview img { box-sizing: border-box; width: 100%; height: 100%; padding: 10px; object-fit: contain; }
+.archer-diagram-card-placeholder { display: grid; place-items: center; color: var(--text-faint); }
+.archer-diagram-card-placeholder .archer-files-glyph,
+.archer-diagram-card-placeholder svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+
+.archer-diagram-card-body { display: flex; flex: 1; flex-direction: column; gap: 6px; padding: 12px 14px 14px; }
+.archer-diagram-card-heading { margin: 0; font-size: var(--type-body); font-weight: 600; line-height: 1.35; }
+
+/* One title size, two lines at most, two lines reserved so every card's rows line up. */
+.archer-diagram-card-title {
+  display: -webkit-box;
+  min-height: calc(2em * 1.35);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* The description reads as a preview of the file, not as more title. */
+.archer-diagram-card-description {
+  display: -webkit-box;
+  min-height: calc(2em * 1.45);
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-style: italic;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.archer-diagram-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: auto 0 0;
+  padding-top: 6px;
+  color: var(--text-faint);
+  font-size: var(--type-floor);
+  font-variant-numeric: tabular-nums;
+}
+.archer-diagram-card-meta .archer-project-view-folder { flex: 1 1 auto; font-size: var(--type-floor); }
+.archer-diagram-card-meta .archer-project-view-threads { margin-left: auto; }
+.archer-diagram-card-edited { flex: none; white-space: nowrap; }
+
+/* An embedded diagram's address under its title, and its note in the metadata row. */
+.archer-diagram-card-address { margin: 0; color: var(--text-faint); font-family: var(--font-mono); --type-tracking: 0; font-size: var(--type-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archer-diagram-card-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; }
+.archer-diagram-card-note:hover { color: var(--text); }
+.archer-diagram-card-note:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-mark); }

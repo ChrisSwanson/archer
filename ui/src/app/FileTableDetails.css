@@ -1,0 +1,33 @@
+/* Folder rows use a title overlay on phones; expandable rows keep title and body separate. */
+.archer-files-activity-indicator {
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.archer-files-activity-indicator[data-active="true"] {
+  background: var(--danger-strong);
+}
+
+.archer-files-title-line {
+  min-width: 0;
+}
+
+.archer-files-title-line .archer-files-open {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.archer-files-title-text {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+

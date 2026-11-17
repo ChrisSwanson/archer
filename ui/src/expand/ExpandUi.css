@@ -1,0 +1,63 @@
+/* Expand's menu (beside the pointer; a sheet on a phone) and "Added to This View" in the side panel. */
+.archer-expand-menu {
+  /* Over the chat bubble (40) and the dock sheet (45–46): the menu is the one thing open. */
+  position: fixed; z-index: 50; box-sizing: border-box; width: min(340px, calc(100vw - 16px));
+  max-height: min(70vh, 560px); overflow-y: auto; padding: 6px; border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card); background: var(--surface); color: var(--text); box-shadow: var(--shadow-panel);
+  font-size: var(--type-small);
+}
+.archer-expand-menu[data-sheet] {
+  left: 0; right: 0; bottom: 0; top: auto; width: 100%; max-height: 60vh; border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+}
+.archer-expand-group { display: grid; gap: 2px; margin-top: 6px; padding-top: 6px; border-top: var(--line-chrome) solid var(--border); }
+.archer-expand-heading { padding: 2px 10px; color: var(--text-faint); font-size: var(--type-small); font-weight: 500; }
+.archer-expand-item {
+  display: grid; gap: 2px; flex: 1; min-width: 0; padding: 7px 10px; border: 0; border-radius: var(--radius-control);
+  background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; outline: none;
+}
+.archer-expand-item:hover, .archer-expand-item:focus { background: var(--surface-2); }
+.archer-expand-item:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.archer-expand-item[aria-disabled="true"] { cursor: default; color: var(--text-dim); }
+.archer-expand-item[aria-disabled="true"]:hover { background: transparent; }
+.archer-expand-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: var(--type-body); font-weight: 500; overflow-wrap: anywhere; }
+.archer-expand-detail { color: var(--text-dim); line-height: 1.4; overflow-wrap: anywhere; }
+.archer-expand-tag {
+  padding: 0 6px; border: var(--line-chrome) dashed var(--border-strong); border-radius: var(--radius-mark); color: var(--text-dim);
+  font-size: var(--type-small); font-weight: 400;
+}
+.archer-expand-open {
+  flex: none; align-self: center; padding: 4px 8px; border: var(--line-chrome) solid transparent; border-radius: var(--radius-control);
+  background: transparent; color: var(--text-dim); font: inherit; cursor: pointer; outline: none;
+}
+.archer-expand-open:hover, .archer-expand-open:focus { border-color: var(--border-strong); color: var(--text); }
+.archer-expand-open:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.archer-expand-status, .archer-expand-more { margin: 6px 0 0; padding: 4px 10px; color: var(--text-dim); line-height: 1.4; }
+.archer-expand-failed { color: var(--danger-text); }
+
+.archer-expand-added { display: grid; gap: 6px; padding: 0 0 12px; border-top: var(--line-chrome) solid var(--border); }
+.archer-expand-added > :not(h2) { margin-inline: 14px; }
+.archer-expand-added-use { margin-block: 0; color: var(--text-dim); font-size: var(--type-small); }
+.archer-expand-added-list { display: grid; gap: 6px; margin-block: 0; padding: 0; list-style: none; }
+.archer-expand-added-item { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; font-size: var(--type-small); }
+.archer-expand-added-item .archer-expand-detail { grid-column: 1; }
+.archer-expand-added-actions { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 2px; }
+
+
+.archer-expand-description { display: grid; gap: 2px; }
+.archer-expand-details { min-width: 0; font-size: var(--type-small); }
+.archer-expand-details-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-right: 8px; }
+.archer-expand-details-head h2 { min-width: 0; }
+.archer-expand-details-head[data-docked] {
+  position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.archer-expand-choice { display: grid; gap: 6px; padding: 12px 14px; border-top: var(--line-chrome) solid var(--border); }
+.archer-expand-choice h3, .archer-expand-choice p { margin: 0; }
+.archer-expand-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.archer-expand-actions .archer-expand-open { min-width: 44px; min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+/* Details' actions are the panel's buttons (as Source's and Review's): filled when they act, flat and faint when refused. */
+.archer-expand-actions .archer-expand-open:not(:disabled) { border-color: var(--border-strong); background: var(--surface-2); color: var(--text); }
+.archer-expand-actions .archer-expand-open:hover:not(:disabled) { border-color: var(--border-hover); }
+.archer-expand-open:disabled,
+.archer-expand-open:disabled:hover { border-color: transparent; background: transparent; color: var(--text-faint); cursor: default; }
+@media (pointer: coarse) { .archer-expand-item, .archer-expand-open { min-width: 44px; min-height: 44px; } }

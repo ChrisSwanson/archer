@@ -1,0 +1,17 @@
+flowchart TD
+  %% Every construct ADR 0009 adds to the flowchart profile.
+  client([Client]):::person
+  gateway{{API gateway}}
+  auth[[Authenticate request]]
+  orders[(Orders DB)]:::database
+  cache[(Session cache)]
+  subgraph backend[Backend]
+    auth
+    orders
+    cache
+  end
+  client calls@-->|HTTPS| gateway
+  gateway checks@==>|every request| auth
+  auth reads@-.->|on cache miss| orders
+  auth peeks@-.-> cache
+  gateway bulk@==> orders

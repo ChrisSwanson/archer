@@ -1,0 +1,42 @@
+{
+  "name": "archer",
+  "version": "0.15.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Archer in TypeScript: agent-authored Mermaid diagrams as a shared visual layer between a person and their agents",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "archer": "dist/archer.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:stress": "STRESS=1 vitest run test/stress",
+    "bundle": "tsx scripts/bundle.ts",
+    "draw": "tsx src/bin/archer.ts draw",
+    "test:browser": "playwright test -c test/service/browser",
+    "plugin": "tsx scripts/bundle.ts plugin/dist",
+    "package": "tsx scripts/package.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "@resvg/resvg-wasm": "2.6.2",
+    "dompurify": "3.4.17",
+    "elkjs": "0.11.1",
+    "markdown-it": "15.0.3",
+    "mermaid": "12.2.0",
+    "parse5": "7.3.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "14.2.0",
+    "@types/node": "24.19.1",
+    "esbuild": "0.28.2",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
+  }
+}

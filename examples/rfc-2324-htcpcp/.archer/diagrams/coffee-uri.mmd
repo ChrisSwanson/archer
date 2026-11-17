@@ -1,0 +1,40 @@
+%% description: Read the coffee URI as nested naming parts, including optional host, pot and additions; no request execution order is implied.
+erDiagram
+    direction LR
+    COFFEE_URI["Coffee URI"]
+    SCHEME["Coffee Scheme"]
+    HOST["Host"]
+    POT_DESIGNATOR["Pot Designator"] {
+        string form "pot- followed by integer"
+    }
+    ADDITIONS_LIST["Additions List"]
+    COFFEE_URI ||--|| SCHEME : requires
+    COFFEE_URI ||--o| HOST : "optionally names"
+    COFFEE_URI ||--o| POT_DESIGNATOR : "optionally selects"
+    COFFEE_URI ||--o| ADDITIONS_LIST : "optionally requests"
+
+%%    Copyright (C) The Internet Society (1998).  All Rights Reserved.
+%%
+%%    This document and translations of it may be copied and furnished to
+%%    others, and derivative works that comment on or otherwise explain it
+%%    or assist in its implementation may be prepared, copied, published
+%%    and distributed, in whole or in part, without restriction of any
+%%    kind, provided that the above copyright notice and this paragraph are
+%%    included on all such copies and derivative works.  However, this
+%%    document itself may not be modified in any way, such as by removing
+%%    the copyright notice or references to the Internet Society or other
+%%    Internet organizations, except as needed for the purpose of
+%%    developing Internet standards in which case the procedures for
+%%    copyrights defined in the Internet Standards process must be
+%%    followed, or as required to translate it into languages other than
+%%    English.
+%%
+%%    The limited permissions granted above are perpetual and will not be
+%%    revoked by the Internet Society or its successors or assigns.
+%%
+%%    This document and the information contained herein is provided on an
+%%    "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+%%    TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+%%    BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+%%    HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+%%    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.

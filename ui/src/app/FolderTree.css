@@ -1,0 +1,189 @@
+/* The Folders tab (FolderTree.tsx): indentation only, no guide lines; the
+   Title column aligned across depths; numerals tabular. */
+
+/* Positioned, so visually hidden text inside it is clipped with the rest, not laid out against the page. */
+.archer-folder-tree-frame {
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Its frame's width, never narrower than its columns' minimums (14rem + 10rem + 6rem + 6.5rem + 6rem + 6rem,
+   five 16px gaps, 24px padding: FolderTree.tsx WIDTH). */
+.archer-folder-tree {
+  width: 100%;
+  min-width: calc(48.5rem + 104px);
+  font-size: var(--type-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-folder-tree-head,
+.archer-folder-tree-row {
+  display: grid;
+  grid-template-columns: var(--archer-tree-columns);
+  gap: 16px;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.archer-folder-tree-head {
+  padding-block: 6px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  margin-bottom: 4px;
+  color: var(--text-faint);
+  font-size: var(--type-small);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.archer-folder-tree-heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding-inline-start: 10px;
+}
+.archer-folder-tree-heading[data-column="name"] { padding-inline-start: 0; }
+.archer-folder-tree-heading[data-column="threads"] { justify-content: flex-end; }
+.archer-folder-tree-heading .archer-files-sort { text-transform: inherit; }
+/* A heading is one line: the columns are in rem (FolderTree.tsx WIDTH), so they grow with the reader's text size
+   and each label fits. Only when the text alone is enlarged past its column (the 200% fallback that enlarges
+   every element but not the root, round 1 D12) does a label break inside its own column, rather than run over
+   the next one ("KINDTHREADS") or past the frame ("CREATED"). */
+.archer-folder-tree-heading .archer-files-sort { min-width: 0; max-width: calc(100% + 12px); text-align: start; overflow-wrap: anywhere; }
+.archer-folder-tree-heading[data-column="threads"] .archer-files-sort { text-align: end; }
+.archer-folder-tree-heading .archer-files-sort-mark { flex: none; }
+.archer-folder-tree-heading:hover .archer-files-column-drag { opacity: 1; }
+
+.archer-folder-tree-row {
+  min-height: 32px;
+  border-radius: var(--radius-control);
+}
+.archer-folder-tree-row:hover { background: var(--surface-2); }
+.archer-folder-tree-file-row { cursor: pointer; }
+
+.archer-folder-tree-row > [role="gridcell"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+/* While a column drags, its cells slide to preview where it lands. */
+[data-column-drag] .archer-folder-tree [data-column] { transition: transform 160ms cubic-bezier(0.2, 0, 0, 1); }
+[data-column-drag] .archer-folder-tree [data-column-dragging] { position: relative; z-index: 2; background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+@media (prefers-reduced-motion: reduce) { [data-column-drag] .archer-folder-tree [data-column] { transition: none; } }
+
+.archer-folder-tree-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.archer-folder-tree-disclose,
+.archer-folder-tree-open {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 0 6px 0 0;
+  border: 0;
+  border-radius: var(--radius-mark);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-body);
+  text-align: start;
+  cursor: pointer;
+}
+/* The arrow only opens and closes: a square target of its own, apart from the name. */
+.archer-folder-tree-disclose { flex: none; justify-content: center; width: 28px; padding: 0; }
+.archer-folder-tree-disclose:hover { color: var(--text); background: var(--surface-2); }
+/* The name goes to the folder's page. */
+.archer-folder-tree-folder-link {
+  min-width: 0; min-height: 28px; display: inline-flex; align-items: center; padding: 0 2px; border: 0; background: transparent;
+  color: var(--text); font: inherit; font-size: var(--type-body); font-weight: 500; text-decoration: none; cursor: pointer;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: var(--radius-mark);
+}
+.archer-folder-tree-row[data-project-root] .archer-folder-tree-folder-link { font-weight: 600; }
+.archer-folder-tree-folder-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.archer-folder-tree-folder-link[aria-current="page"] { text-decoration: underline; text-underline-offset: 3px; }
+/* A file's name cell, indented by its depth (the row's --archer-tree-indent) past the folders' arrow column. */
+.archer-folder-tree-row > .archer-folder-tree-file { min-height: 28px; padding-inline-start: calc(var(--archer-tree-indent, 0px) + 20px); color: var(--text); font-size: var(--type-body); }
+.archer-folder-tree-file .archer-files-glyph { flex: none; width: var(--icon-indicator); height: var(--icon-indicator); fill: none; stroke: currentColor; color: var(--text-faint); }
+.archer-folder-tree-open { display: block; padding: 0; color: var(--text-faint); font-size: var(--type-small); }
+.archer-folder-tree-row:hover .archer-folder-tree-open,
+.archer-folder-tree-open:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.archer-folder-tree-open:focus-visible,
+.archer-folder-tree-disclose:focus-visible,
+.archer-folder-tree-folder-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.archer-folder-tree-chevron {
+  flex: none;
+  transition: transform 140ms ease;
+}
+.archer-folder-tree-chevron[data-open="true"] { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .archer-folder-tree-chevron { transition: none; } }
+
+.archer-folder-tree-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archer-folder-tree-count { color: var(--text-faint); font-size: var(--type-small); }
+
+
+.archer-folder-tree-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.archer-folder-tree-title-text {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.archer-folder-tree-title .archer-search-matches { flex-basis: 100%; }
+
+.archer-folder-tree-number { text-align: end; }
+.archer-folder-tree-threads[data-open="true"] { color: var(--text); font-weight: 600; }
+.archer-folder-tree-description { color: var(--text-faint); }
+
+/* Cells start where their header's label does, past the header's drag handle. */
+.archer-folder-tree-row > [role="gridcell"]:not([data-column="name"]) { padding-inline-start: 10px; }
+
+/* A phone has room for the tree, not its columns: each file reads as its name with its whole
+   title beneath; sorting stays in Filters. */
+@media (max-width: 640px) {
+  .archer-folder-tree { min-width: 0; }
+  .archer-folder-tree-head { display: none; }
+  .archer-folder-tree-head,
+  .archer-folder-tree-row { grid-template-columns: minmax(0, 1fr); row-gap: 2px; padding: 4px 8px; }
+  .archer-folder-tree-row > [role="gridcell"]:not([data-column="name"], [data-column="title"]),
+  .archer-folder-tree-row[data-folder]:not([data-project-root]) > [role="gridcell"][data-column="title"] { display: none; }
+  .archer-folder-tree-row > [role="gridcell"][data-column="title"] { padding-inline-start: calc(var(--archer-tree-indent, 0px) + 42px); }
+  .archer-folder-tree-title-text { white-space: normal; overflow-wrap: anywhere; }
+  .archer-folder-tree-open { min-height: 44px; display: flex; align-items: center; }
+  .archer-folder-tree-disclose { min-height: 44px; }
+  .archer-folder-tree-folder-link { min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+}
+/* A linked git worktree beside its repository's name (project-directory.ts worktreeDetail). */
+.archer-project-worktree { color: var(--text-dim); font-weight: 400; }
+
+/* A date and its source wrap as two units rather than run past the column: under the text-spacing
+   overrides (WCAG 1.4.12) "· Git" was cut off at the frame (round 1, #16). */
+.archer-folder-tree-row > .archer-files-date { display: flex; flex-wrap: wrap; column-gap: 0.25em; white-space: normal; }
+.archer-folder-tree-row > .archer-files-date .archer-files-source { white-space: nowrap; }
+
+/* A touch target is 44 px both ways (DESIGN.md, G7 [H]; round 1 #14): the arrow is square, a short name
+   is as wide as it is tall, and a file's name moves over by what the arrow grew. */
+@media (pointer: coarse) {
+  .archer-folder-tree-disclose { width: 44px; min-height: 44px; }
+  .archer-folder-tree-folder-link,
+  .archer-folder-tree-open { min-width: 44px; min-height: 44px; }
+  .archer-folder-tree-row > .archer-folder-tree-file { padding-inline-start: calc(var(--archer-tree-indent, 0px) + 36px); }
+}
+@media (pointer: coarse) and (max-width: 640px) {
+  .archer-folder-tree-row > [role="gridcell"][data-column="title"] { padding-inline-start: calc(var(--archer-tree-indent, 0px) + 58px); }
+}

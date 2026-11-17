@@ -1,0 +1,8 @@
+%% This file has Windows (CRLF) line endings.
+flowchart LR
+    a[Alpha]
+    b[Beta]
+    c{Gamma?}
+    a ab@--> b
+    b bc@-->|check| c
+    c ca@-.->|retry| a

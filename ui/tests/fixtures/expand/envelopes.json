@@ -1,0 +1,213 @@
+{
+ "context": {
+  "schemaVersion": 2,
+  "view": {
+   "id": "context",
+   "kind": "c4",
+   "title": "Context"
+  },
+  "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "model": {
+   "type": "c4-model",
+   "level": "context",
+   "elements": [
+    {
+     "id": "user",
+     "kind": "person",
+     "label": "Shopper"
+    },
+    {
+     "id": "shop",
+     "kind": "system",
+     "label": "Shop"
+    },
+    {
+     "id": "pay",
+     "kind": "system",
+     "label": "Payments",
+     "external": true
+    }
+   ],
+   "boundaries": [],
+   "relationships": [
+    {
+     "id": "user--shop",
+     "source": "user",
+     "target": "shop",
+     "label": "buys from"
+    },
+    {
+     "id": "shop--pay",
+     "source": "shop",
+     "target": "pay",
+     "label": "charges"
+    }
+   ]
+  }
+ },
+ "containers": {
+  "schemaVersion": 2,
+  "view": {
+   "id": "containers",
+   "kind": "c4",
+   "title": "Containers"
+  },
+  "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "model": {
+   "type": "c4-model",
+   "level": "container",
+   "elements": [
+    {
+     "id": "user",
+     "kind": "person",
+     "label": "Shopper"
+    },
+    {
+     "id": "web",
+     "kind": "container",
+     "label": "Web",
+     "technology": "React",
+     "boundaryId": "shop"
+    },
+    {
+     "id": "api",
+     "kind": "container",
+     "label": "API",
+     "technology": "Node",
+     "boundaryId": "shop"
+    },
+    {
+     "id": "db",
+     "kind": "container",
+     "label": "Orders DB",
+     "shape": "database",
+     "technology": "Postgres",
+     "boundaryId": "shop"
+    },
+    {
+     "id": "mail",
+     "kind": "system",
+     "label": "Mail",
+     "external": true
+    }
+   ],
+   "boundaries": [
+    {
+     "id": "shop",
+     "kind": "system",
+     "label": "Shop"
+    }
+   ],
+   "relationships": [
+    {
+     "id": "user--web",
+     "source": "user",
+     "target": "web",
+     "label": "uses"
+    },
+    {
+     "id": "web--api",
+     "source": "web",
+     "target": "api",
+     "label": "calls"
+    },
+    {
+     "id": "api--db",
+     "source": "api",
+     "target": "db",
+     "label": "reads"
+    },
+    {
+     "id": "api--mail",
+     "source": "api",
+     "target": "mail",
+     "label": "sends"
+    }
+   ]
+  }
+ },
+ "notes/deploy.md#deploy": {
+  "schemaVersion": 2,
+  "view": {
+   "id": "notes/deploy.md#deploy",
+   "kind": "freeform",
+   "title": "Deploy (proposed)"
+  },
+  "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "model": {
+   "type": "freeform-graph",
+   "direction": "lr",
+   "nodes": [
+    {
+     "id": "api",
+     "label": "API",
+     "shape": "rectangle",
+     "classes": [
+      "container"
+     ]
+    },
+    {
+     "id": "queue",
+     "label": "Jobs",
+     "shape": "rectangle",
+     "classes": [
+      "container"
+     ]
+    },
+    {
+     "id": "worker",
+     "label": "Worker",
+     "shape": "rectangle",
+     "classes": [
+      "container"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "id": "e1",
+     "source": "api",
+     "target": "queue"
+    },
+    {
+     "id": "e2",
+     "source": "queue",
+     "target": "worker"
+    }
+   ],
+   "groups": []
+  }
+ },
+ "checkout": {
+  "schemaVersion": 2,
+  "view": {
+   "id": "checkout",
+   "kind": "sequence",
+   "title": "Checkout"
+  },
+  "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "model": {
+   "type": "sequence-trace",
+   "participants": [
+    {
+     "id": "user",
+     "label": "Shopper"
+    },
+    {
+     "id": "shop",
+     "label": "Shop"
+    }
+   ],
+   "events": [
+    {
+     "type": "message",
+     "id": "msg-0",
+     "from": "user",
+     "to": "shop",
+     "kind": "sync",
+     "label": "pays"
+    }
+   ]
+  }
+ }
+}

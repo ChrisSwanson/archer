@@ -1,0 +1,26 @@
+%% description: Ideating a feature: the agent draws, Archer presents, the person comments, the agent revises.
+sequenceDiagram
+    actor developer as Developer
+    participant coding_agent as Coding Agent
+    participant archer as Archer
+    participant web_page as Archer Page
+    developer->>coding_agent: Describe the new feature
+    coding_agent->>archer: validate_diagram on a new note
+    archer-->>coding_agent: Problems at their lines, or none
+    coding_agent->>archer: present_diagram
+    archer->>web_page: Show the diagram
+    archer-->>coding_agent: Page URL
+    coding_agent-->>developer: The URL and one sentence
+    loop until the picture looks right
+        developer->>web_page: Select parts, write comments
+        developer->>web_page: Send to agent
+        web_page->>archer: Sent comments
+        archer-)coding_agent: archer wait ends with them
+        coding_agent->>archer: get_comments
+        archer-->>coding_agent: Threads with their anchors
+        coding_agent->>archer: write_diagram with expectedRevision
+        archer->>web_page: Redraw and name the change
+        coding_agent->>archer: reply_comment, resolve_comment
+        archer->>web_page: The agent's answer
+    end
+    Note over developer,coding_agent: Agreed on the picture before any code

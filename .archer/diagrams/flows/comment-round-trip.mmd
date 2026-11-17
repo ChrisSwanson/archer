@@ -1,0 +1,42 @@
+sequenceDiagram
+    %% comments/contract.ts is the contract; store.ts writes, agent.ts answers
+    actor person as Person
+    participant page as Archer page
+    participant service as Background service
+    participant file as x.comments.json beside the diagram or note
+    participant app as MCP server (application layer)
+    actor agent as Coding agent
+    person->>page: select elements or a note passage, press C, write
+    page->>service: POST api/comments with target and anchor
+    service->>file: bakery lock, read-modify-write, thread status draft
+    service-)page: SSE comments
+    alt queued submission (default)
+        Note over person,page: edit drafts freely, then send the queued batch
+        person->>page: Send queued comments (N)
+        page->>service: POST api/comments/submit
+        service->>file: queued batch becomes sent
+    else immediate shared service setting
+        service->>file: publish only the person-changed thread
+        service-)page: SSE comments with final sent thread
+    end
+    person->>agent: I sent comments
+    agent->>app: get_comments
+    app->>file: sent threads become read, under the same lock
+    app-->>agent: read threads with their revisions
+    agent->>agent: change the diagram or note if asked
+    agent->>app: reply_comment threadId, body, expectedRevision
+    alt the person edited the thread since the read
+        app-->>agent: thread_changed with the thread as it is now
+    else revision unchanged
+        app->>file: append the agent's comment, status answered
+        app-->>agent: the thread
+    end
+    file-)service: fs.watch event, reload reconciles comments
+    service-)page: SSE comments for that target
+    page->>service: GET api/comments?target=view:id
+    page-->>person: the agent's reply in the thread
+    agent->>app: resolve_comment threadId, expectedRevision
+    app->>file: status resolved, kept until dismissed
+    person->>page: dismiss
+    page->>service: POST api/comments/threadId/dismiss
+    service->>file: thread removed, the file deleted when empty

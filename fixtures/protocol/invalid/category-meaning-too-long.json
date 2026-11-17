@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "view": { "id": "category-meaning", "kind": "freeform", "title": "Invalid" },
+  "revision": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "model": {
+    "type": "freeform-graph",
+    "nodes": [{ "id": "a", "label": "A", "classes": ["gpu"] }],
+    "edges": [],
+    "groups": [],
+    "categories": [{ "name": "gpu", "meaning": "A model server on a GPU in the rack downstairs" }]
+  }
+}

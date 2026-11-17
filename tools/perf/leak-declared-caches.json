@@ -1,0 +1,11 @@
+{
+  "$comment": "Declared bounded caches for gate G6 (docs/quality/rubrics/performance.md \u00a73 G6). A class that grows with the leak journey's loops, retained into Archer code only through one of these names (a property, variable or node name on its retainer path), is not confirmed retention. Each entry needs a reason a reviewer can check: where the cache lives and what bounds it. Adding one is a manifest-style decision: both reviewers agree and the maintainer approves (\u00a76).",
+  "caches": [
+    {
+      "name": "resourceStoreEntries",
+      "where": "ui/src/app/resources.ts createResourceStore: the page's one store of shared reads (the module-level `resources`)",
+      "reason": "Answers the page re-reads by URL: the catalog per fetcher, comment activity and authoring status per project, note-diagram and diagram-source answers, file-route listings. LRU-bounded to 64 entries and 8 MiB of answer text (RESOURCE_LIMITS); never evicted: a read in flight, an entry someone listens to (the catalog), the entry just answered. Cleared on pagehide. Its sibling listener Map holds one entry per subscribed key and empties as subscribers leave.",
+      "approved": "owner 2026-11-11 (0.15.0 read layer)"
+    }
+  ]
+}

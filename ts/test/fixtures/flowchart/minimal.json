@@ -1,0 +1,69 @@
+{
+  "type": "freeform-graph",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "api",
+      "label": "API Service",
+      "shape": "rectangle",
+      "groupId": "backend"
+    },
+    {
+      "id": "user",
+      "label": "User",
+      "shape": "rectangle",
+      "classes": [
+        "person"
+      ]
+    },
+    {
+      "id": "web",
+      "label": "Web App",
+      "shape": "stadium"
+    }
+  ],
+  "edges": [
+    {
+      "id": "browses",
+      "source": "user",
+      "target": "web",
+      "label": "uses"
+    },
+    {
+      "id": "calls",
+      "source": "web",
+      "target": "api",
+      "label": "HTTP"
+    }
+  ],
+  "groups": [
+    {
+      "id": "backend",
+      "label": "Backend"
+    }
+  ],
+  "sourceOrder": {
+    "elements": [
+      {
+        "id": "user",
+        "kind": "node"
+      },
+      {
+        "id": "web",
+        "kind": "node"
+      },
+      {
+        "id": "api",
+        "kind": "node"
+      },
+      {
+        "id": "backend",
+        "kind": "group"
+      }
+    ],
+    "edges": [
+      "browses",
+      "calls"
+    ]
+  }
+}

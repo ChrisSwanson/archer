@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "viewId": "ctx",
+  "emphases": [
+    {
+      "id": "slots",
+      "viewId": "ctx",
+      "title": "Every slot",
+      "groups": [
+        {
+          "id": "first",
+          "style": "highlight",
+          "palette": "teal",
+          "state": "existing",
+          "label": "First",
+          "nodes": [
+            "web"
+          ],
+          "edges": []
+        },
+        {
+          "id": "second",
+          "style": "highlight",
+          "palette": "violet",
+          "state": "existing",
+          "label": "Second",
+          "nodes": [
+            "api"
+          ],
+          "edges": []
+        },
+        {
+          "id": "third",
+          "style": "highlight",
+          "palette": "coral",
+          "state": "existing",
+          "label": "Third",
+          "nodes": [],
+          "edges": [
+            "calls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "speeds",
+      "viewId": "ctx",
+      "groups": [
+        {
+          "id": "slow",
+          "style": "flow",
+          "palette": "teal",
+          "state": "existing",
+          "speed": "slow",
+          "label": "Slow",
+          "nodes": [],
+          "edges": [
+            "calls"
+          ]
+        },
+        {
+          "id": "normal",
+          "style": "flow",
+          "palette": "violet",
+          "state": "existing",
+          "speed": "normal",
+          "label": "Normal",
+          "nodes": [
+            "web"
+          ],
+          "edges": []
+        },
+        {
+          "id": "fast",
+          "style": "flow",
+          "palette": "coral",
+          "state": "existing",
+          "speed": "fast",
+          "label": "Fast",
+          "nodes": [
+            "api"
+          ],
+          "edges": []
+        }
+      ]
+    },
+    {
+      "id": "unpaced",
+      "viewId": "ctx",
+      "groups": [
+        {
+          "id": "unpaced",
+          "style": "flow",
+          "palette": "teal",
+          "state": "existing",
+          "speed": "normal",
+          "label": "Unpaced",
+          "nodes": [],
+          "edges": [
+            "calls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "texts",
+      "viewId": "ctx",
+      "title": "Now and proposed",
+      "groups": [
+        {
+          "id": "now",
+          "style": "highlight",
+          "palette": "teal",
+          "state": "existing",
+          "label": "What is there now",
+          "description": "Both optional strings present.",
+          "nodes": [
+            "web"
+          ],
+          "edges": []
+        },
+        {
+          "id": "proposed",
+          "style": "highlight",
+          "palette": "violet",
+          "state": "existing",
+          "label": "Refund queue (proposed)",
+          "nodes": [
+            "api"
+          ],
+          "edges": []
+        }
+      ]
+    }
+  ]
+}

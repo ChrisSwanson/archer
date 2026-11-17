@@ -1,0 +1,16 @@
+%% description: Where Archer's processes run, and how a browser on another device reaches them.
+architecture-beta
+    title Where Archer Runs
+    %% archer-key dashed: Crosses the network
+    %% archer-line dashed: web_page--archer_service
+    group agent_host(server)[Agent's Computer]
+    service coding_agent(server)[Coding Agent] in agent_host
+    service cli(server)[Archer CLI] in agent_host
+    service archer_service(server)[Background Service] in agent_host
+    service repository(disk)[Project Files] in agent_host
+    service web_page(internet)[Archer Page on Another Device]
+    coding_agent:R -[runs]-> L:cli
+    cli:R -[presents]-> L:archer_service
+    cli:B -[writes]-> T:repository
+    archer_service:B -[watches]-> T:repository
+    web_page:L -[HTTPS, paired]-> R:archer_service

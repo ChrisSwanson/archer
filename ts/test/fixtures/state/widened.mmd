@@ -1,0 +1,32 @@
+stateDiagram-v2
+    %% Every construct the state profile reads.
+    direction LR
+    state "Waiting for work" as Idle
+    Checking : Checking the #quot;queue#quot;
+    state Route <<choice>>
+    state Split <<fork>>
+    state Merge <<join>>
+    state Working {
+        state Fetch
+        state Run
+        [*] --> Fetch
+        Fetch --> Run : fetched
+        Run --> [*]
+    }
+    state Report
+    state Notify
+    [*] --> Idle
+    Idle --> Checking : poll
+    Checking --> Route
+    Route --> Idle : empty
+    Route --> Working : job found
+    Working --> Split
+    Split --> Report
+    Split --> Notify
+    Report --> Merge
+    Notify --> Merge
+    Merge --> Idle : done: next
+    Idle --> [*] : shutdown
+    note right of Idle : polls every 5 s
+    classDef busy font-weight:bold
+    class Working busy

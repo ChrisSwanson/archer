@@ -1,0 +1,28 @@
+architecture-beta
+    title One user, one service, many projects
+    group machine(server)[Developer machine]
+    group sessions(server)[Agent sessions] in machine
+    group daemon(server)[archer serve, detached] in machine
+    group disk(disk)[Files] in machine
+    service hostA(server)[Agent host A] in sessions
+    service hostB(server)[Agent host B] in sessions
+    service mcpA(server)[archer mcp for project A] in sessions
+    service mcpB(server)[archer mcp for project B] in sessions
+    service sock(server)[Management socket] in daemon
+    service http(internet)[HTTP data plane] in daemon
+    service watch(server)[Project watchers] in daemon
+    service repoA(disk)[Project A checkout] in disk
+    service repoB(disk)[Project B checkout] in disk
+    service account(database)[Account state dir] in disk
+    service browser(internet)[Browser tab per project]
+    hostA:R -[stdio]-> L:mcpA
+    hostB:R -[stdio]-> L:mcpB
+    mcpA:R -[NDJSON]-> L:sock
+    mcpB:B -[NDJSON]-> T:sock
+    mcpA:B -[writes]-> T:repoA
+    watch:B -[fs.watch]-> T:repoA
+    watch:R -[fs.watch]-> L:repoB
+    sock:B -[attach]-> T:watch
+    sock:R -[token, port, recovery]-> L:account
+    http:R -[page and SSE]-> L:browser
+    watch:T -[events]-> B:http

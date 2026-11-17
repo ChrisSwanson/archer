@@ -1,0 +1,87 @@
+.react-flow__controls .archer-pan-select-button,
+.archer-canvas-controls .archer-pan-select-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+}
+.react-flow__controls .archer-pan-select-button:hover,
+.archer-canvas-controls .archer-pan-select-button:hover { background: var(--surface-2); }
+.react-flow__controls .archer-pan-select-button[aria-pressed="true"],
+.archer-canvas-controls .archer-pan-select-button[aria-pressed="true"] {
+  color: var(--accent-on-fill);
+  background: var(--accent-fill);
+}
+.archer-pan-select-button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.archer-pan-hand .react-flow__pane,
+.archer-pan-hand .react-flow__node,
+.archer-pan-hand .react-flow__edge,
+.archer-seq-canvas.archer-pan-hand,
+.archer-seq-canvas.archer-pan-hand [role="button"] { cursor: grab; }
+.archer-pan-hand.archer-pan-dragging .react-flow__pane,
+.archer-pan-hand.archer-pan-dragging .react-flow__node,
+.archer-pan-hand.archer-pan-dragging .react-flow__edge,
+.archer-seq-canvas.archer-pan-hand.archer-seq-canvas--panning,
+.archer-seq-canvas.archer-pan-hand.archer-seq-canvas--panning [role="button"] { cursor: grabbing; }
+
+/* Keep the authored modes and the existing zoom/fit actions one coherent cluster:
+   every icon in it is drawn at the scale's size (`--icon`, styles.css) and, at
+   rest, in one colour. Its glyphs are drawn on the scale's padded 24-unit box
+   (`ControlGlyphs.tsx`), so one size gives one apparent size. */
+:is(.react-flow__controls, .archer-canvas-controls) button svg {
+  width: var(--icon);
+  height: var(--icon);
+  max-width: var(--icon);
+  max-height: var(--icon);
+}
+/* Every glyph in the cluster is an outline, and a markup fill="none" loses to
+   React Flow's `fill: currentColor` on its buttons: drawn filled, the nested
+   view read as a solid square, Source as a smudge and Fit as four wedges. (A
+   part that is meant solid, such as help's dot, says so on itself.) */
+:is(.react-flow__controls, .archer-canvas-controls) button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.react-flow__controls .archer-pan-select-button:not([aria-pressed="true"]),
+.archer-canvas-controls .archer-pan-select-button:not([aria-pressed="true"]) { color: var(--text-dim); }
+.react-flow__controls .archer-pan-select-button:not([aria-pressed="true"]):hover,
+.archer-canvas-controls .archer-pan-select-button:not([aria-pressed="true"]):hover { color: var(--text); }
+/* Keep the authored modes and the existing zoom/fit actions one coherent cluster. */
+.react-flow__controls .react-flow__controls-button,
+.react-flow__controls .archer-pan-select-button,
+.archer-canvas-controls button,
+.archer-canvas-controls .archer-pan-select-button {
+  box-sizing: border-box;
+  width: 44px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (pointer: coarse) {
+  .react-flow__controls .react-flow__controls-button,
+  .react-flow__controls .archer-pan-select-button,
+  .archer-canvas-controls button,
+  .archer-canvas-controls .archer-pan-select-button {
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+/* The taller mode cluster reaches the emphasis legend above the notation key.
+   Keep its phone inset beyond the 15px gutter, 44px controls, the cluster's
+   6px of inset and its 2px border. */
+@media (max-width: 560px) {
+  .archer-emph-surface:has(.archer-pan-select-button) > .archer-emph-legend {
+    left: calc(15px + 44px + 6px + 2px + 12px);
+    min-width: 0;
+  }
+}

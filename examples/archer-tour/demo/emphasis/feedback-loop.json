@@ -1,0 +1,23 @@
+{
+  "id": "feedback-round",
+  "viewId": "feedback-loop",
+  "title": "One Feedback Round",
+  "groups": [
+    {
+      "id": "send-feedback",
+      "style": "flow",
+      "label": "Sent feedback",
+      "description": "Sent comments reach the agent with the parts they refer to.",
+      "nodes": [],
+      "edges": ["msg-8", "msg-9", "msg-10", "msg-11", "msg-12"]
+    },
+    {
+      "id": "revise-and-answer",
+      "style": "flow",
+      "label": "Revision and answer",
+      "description": "The agent changes the picture and answers the comment threads.",
+      "nodes": [],
+      "edges": ["msg-13", "msg-14", "msg-15", "msg-16"]
+    }
+  ]
+}

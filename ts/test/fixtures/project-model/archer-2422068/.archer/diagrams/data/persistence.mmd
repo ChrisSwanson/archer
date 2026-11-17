@@ -1,0 +1,75 @@
+erDiagram
+    %% What Archer stores and where. Project files are the source of truth;
+    %% account state is private recovery, never compiled models.
+    MANIFEST["archer.toml (project root)"] {
+        int version "must be 1"
+        string folder "default .archer"
+        string name "optional"
+    }
+    VIEW["[[views]] entry"] {
+        string id PK "stable id"
+        string kind "c4-context, sequence, state, ..."
+        string title
+        string source "relative to archer.toml, inside the folder"
+        string covers "up to 64 globs, for staleness"
+    }
+    DIAGRAM["diagram .mmd"] {
+        string path PK "relative to the Archer folder"
+        string revision "sha256 of the bytes"
+    }
+    NOTE["note .md"] {
+        string path PK
+        string type "front matter"
+        string status "front matter"
+        string author "agent marks the agent's own note"
+        string diagrams "front matter list of linked diagrams"
+    }
+    EMBEDDED["mermaid fence in a note"] {
+        string address PK "note path # name"
+        string sourceRevision "sha256 of the body"
+        int ordinal
+    }
+    COMMENTS["x.comments.json beside its target"] {
+        int version "2"
+        string target "view:id or note:path"
+    }
+    THREAD {
+        string id PK "t- and 12 hex"
+        string anchor "view, node, edge, group, selection or passage"
+        string status "draft, sent, read, answered, resolved"
+        int revision "advances on each person change"
+    }
+    COMMENT {
+        string id PK "c- and 12 hex"
+        string author "person or agent"
+        string body "at most 4000 characters"
+    }
+    IDENTITY["state dir service.json"] {
+        string token "64 hex, in every page URL"
+        int port "reused on restart"
+    }
+    INDEX["runtime/index.json"] {
+        string root PK "canonical project root"
+        boolean attached
+    }
+    RECOVERY["runtime/sha256(root).json"] {
+        string presentation
+        string selection
+        string emphases
+        string captions
+        string lastChange
+    }
+    BLOB["runtime/sha256(root).sources/hex"] {
+        string revision PK "content digest, checked on read"
+    }
+    MANIFEST ||--o{ VIEW : registers
+    VIEW |o--|| DIAGRAM : "points at"
+    NOTE |o--o{ DIAGRAM : "links to"
+    NOTE ||--o{ EMBEDDED : contains
+    DIAGRAM ||--o| COMMENTS : "has beside it"
+    NOTE ||--o| COMMENTS : "is commented in"
+    EMBEDDED ||--o| COMMENTS : "has beside its note"
+    COMMENTS ||--|{ THREAD : holds
+    THREAD ||--|{ COMMENT : contains
+    INDEX ||--o| RECOVERY : "one per project"
+    RECOVERY ||--o{ BLOB : "last good sources"

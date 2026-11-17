@@ -1,0 +1,30 @@
+%% Labels, keys, comments, every cardinality and both line styles.
+erDiagram
+    direction LR
+    CUSTOMER["Customer (person or company)"] {
+        string id PK "uuid v4"
+        string email UK "lower-cased, unique"
+        string name "full legal name, can be very long indeed"
+    }
+    ORDER {
+        int id PK
+        string customer_id FK
+        datetime placed_at
+    }
+    LINE-ITEM["Order line"] {
+        int order_id PK, FK
+        int product_id PK, FK
+        int quantity
+    }
+    PRODUCT {
+        string sku PK
+        decimal price
+    }
+    WAREHOUSE
+    ADDRESS["Address & delivery notes"]
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : "is made of"
+    LINE-ITEM }o..|| PRODUCT : refers
+    PRODUCT }|..|{ WAREHOUSE : "stocked in"
+    CUSTOMER |o--o| ADDRESS : ""
+    style CUSTOMER fill:#fff

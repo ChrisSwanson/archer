@@ -1,0 +1,124 @@
+# Builds the package for a version tag and publishes it as a GitHub Release with archer-X.Y.Z.tgz, archer.tgz,
+# SHA256SUMS and the version's CHANGELOG section as notes (docs/install.md downloads from there).
+#
+# A tag is the release: an annotated vX.Y.Z on a commit of main whose ts/package.json says X.Y.Z
+# (scripts/release-verify-tag.sh refuses anything else). A manual run with `tag` releases an
+# existing tag again; re-running is safe: the release is reused and its assets replaced.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to build and publish (vX.Y.Z, annotated, on main)'
+        required: true
+        type: string
+
+# Read-only by default. Only the publish job, which runs no project code and installs nothing, can
+# write: the build (npm ci with install scripts, the whole toolchain) never holds a write token.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build and check the package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: refs/tags/${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          fetch-depth: 0
+          persist-credentials: false
+      # No dependency cache: a release builds from the lockfile alone.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+
+      # Cheap refusals first: a wrong tag or a missing changelog section costs seconds, not a build.
+      - name: Check the tag and the notes
+        id: tag
+        run: |
+          set -euo pipefail
+          version="$(scripts/release-verify-tag.sh --fetch origin "$TAG")"
+          mkdir -p dist
+          scripts/release-notes.sh "$version" CHANGELOG.md > dist/release-notes.md
+          echo "releasing $TAG as Archer $version ($(wc -l < dist/release-notes.md) lines of notes)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci --no-audit --fund=false
+
+      - name: Build the package
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          npm --workspace ts run package
+          test -f "dist/archer-$VERSION.tgz" || { echo "error: no dist/archer-$VERSION.tgz" >&2; exit 1; }
+
+      - name: Smoke-check and checksum
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          scripts/release-smoke.sh "dist/archer-$VERSION.tgz" "$VERSION"
+          cp "dist/archer-$VERSION.tgz" dist/archer.tgz
+          (cd dist && sha256sum "archer-$VERSION.tgz" archer.tgz > SHA256SUMS && sha256sum -c SHA256SUMS && cat SHA256SUMS)
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release
+          path: |
+            dist/archer-${{ steps.tag.outputs.version }}.tgz
+            dist/archer.tgz
+            dist/SHA256SUMS
+            dist/release-notes.md
+          if-no-files-found: error
+          retention-days: 7
+
+  # gh uploads the assets to a draft and publishes it after the last one, so a failed run leaves
+  # nothing half-downloadable. A release that exists already (a re-run) gets its assets replaced.
+  # This job checks out nothing and installs nothing: it holds the write token and runs only gh.
+  publish:
+    name: publish the release
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      VERSION: ${{ needs.build.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Verify the checksum
+        run: (cd dist && sha256sum -c SHA256SUMS)
+      - name: Publish the release
+        run: |
+          set -euo pipefail
+          notes=dist/release-notes.md
+          assets=("dist/archer-$VERSION.tgz" dist/archer.tgz dist/SHA256SUMS)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${assets[@]}" --clobber
+            gh release edit "$TAG" --title "Archer $VERSION" --notes-file "$notes" --draft=false
+          else
+            gh release create "$TAG" "${assets[@]}" --verify-tag --title "Archer $VERSION" --notes-file "$notes"
+          fi
+          gh release view "$TAG" --json url,assets --jq '.url, (.assets[] | "\(.name) \(.size)")'

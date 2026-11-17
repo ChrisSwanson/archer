@@ -1,0 +1,17 @@
+flowchart BT
+  %% Subgraphs: nesting, a quoted label with punctuation, the ID as the label,
+  %% a node declared inside a group, a declared node placed by its bare ID, and
+  %% a subgraph that shares its ID with a node. `click[Click]` is a node:
+  %% `click` is a keyword only when whitespace follows it.
+  api[API]
+  db[(Orders)]
+  subgraph backend["Backend services (core)"]
+    subgraph data
+      db
+    end
+    api
+    worker[Worker]
+  end
+  subgraph api[Shares its ID with a node]
+    click[Click]
+  end

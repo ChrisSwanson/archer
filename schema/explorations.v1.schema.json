@@ -1,0 +1,1085 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Explorations v1",
+  "description": "The payloads of the browser routes behind the `explorations` capability in api/connection (ADR 0036 A8). Served since slice 7: GET api/expand-menu (ExpandMenu), one element's Expand entries and the pieces they add. Since slice 8: GET api/exploration (Exploration: a link's list, or the presented one), POST api/reader-exploration (ReaderExplorationReport), the opted-in presentation stamp (ExplorationStamp) and get_presentation_context's ExplorationReport (P35–P37). The envelope schema and every existing payload stay frozen. Contract notes: docs/wayfinder/diagram-normalisation/browser-contract-draft.md.",
+  "$comment": "Caps (A13) are named in $defs/Limits with ticket 13's measured values (docs/wayfinder/diagram-normalisation/slice6-prototype.md); maxExpansions and maxExpandParamChars are provisional until ticket 11b. Each response echoes the caps it applied. Every capped list carries `total` before the cap and `truncated`. The service's types are ts/src/expand/menu.ts; the shared constants and the provisional expand codec are shared/explorations.mts.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ExpandMenu"
+    },
+    {
+      "$ref": "#/$defs/Exploration"
+    },
+    {
+      "$ref": "#/$defs/ReaderExplorationReport"
+    },
+    {
+      "$ref": "#/$defs/ExplorationStamp"
+    },
+    {
+      "$ref": "#/$defs/ErrorBody"
+    },
+    {
+      "$ref": "#/$defs/ExplorationReport"
+    }
+  ],
+  "$defs": {
+    "ViewId": {
+      "description": "A view id (ADR 0012), as the envelope schema defines it: a stable ID or <note path>#<name>.",
+      "$ref": "diagram-envelope.schema.json#/$defs/ViewMetadata/properties/id"
+    },
+    "LocalId": {
+      "description": "An id inside one view: an element id (project-wide, ADR 0036 §2), or an edge, message or group id (local to its view, A10).",
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "Revision": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "Family": {
+      "description": "The model family of a view (project-model/merge.ts FAMILIES, plus the two that add nothing to the model).",
+      "enum": ["c4", "architecture", "flowchart", "er", "sequence", "state", "journey"]
+    },
+    "ElementKind": {
+      "enum": ["person", "system", "container", "component", "code"]
+    },
+    "Direction": {
+      "description": "How a wire reads (A4). On an AttachWire: as written in its source. On a NeighbourEntry: from the element's side, forward = element → neighbour, reverse = neighbour → element.",
+      "enum": ["forward", "reverse", "two-way", "undirected"]
+    },
+    "Count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "Generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "Limits": {
+      "description": "The caps the service applied (A13; ticket 13), enforced the same way by service and page.",
+      "type": "object",
+      "properties": {
+        "maxAddedSources": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [5],
+          "description": "Distinct sources on one canvas; a source counts once however many of its elements are expanded (O7)."
+        },
+        "maxAddedBoxes": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [60],
+          "description": "Boxes added by frames; the base view's own boxes do not count (O4)."
+        },
+        "maxAddedWires": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [120],
+          "description": "Wires added by frames, attach wires included: two per added box."
+        },
+        "maxMenuCandidates": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [12],
+          "description": "Entries per section of one menu (diagrams; neighbours), after removing what is on the canvas."
+        },
+        "maxRelationshipsPerElement": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [24],
+          "description": "Model relationships read for one element's neighbours."
+        },
+        "maxPieceBoxes": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [40],
+          "description": "Boxes in one piece. A piece over it is cut and marked truncated; the frame's link opens the full diagram."
+        },
+        "maxResponseBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [65536],
+          "description": "The JSON body before compression. Past it, pieces are omitted (omitted: bytes) from the last entry backwards, neighbours first."
+        },
+        "maxExpansions": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [24],
+          "description": "PROVISIONAL (ticket 11b): (element, source) entries in one expand list."
+        },
+        "maxExpandParamChars": {
+          "type": "integer",
+          "minimum": 1,
+          "examples": [4096],
+          "description": "PROVISIONAL (ticket 11b): length of the encoded expand query parameter."
+        }
+      },
+      "required": [
+        "maxAddedSources",
+        "maxAddedBoxes",
+        "maxAddedWires",
+        "maxMenuCandidates",
+        "maxRelationshipsPerElement",
+        "maxPieceBoxes",
+        "maxResponseBytes",
+        "maxExpansions",
+        "maxExpandParamChars"
+      ],
+      "additionalProperties": false
+    },
+    "PartKey": {
+      "description": "Identity of a box or wire on a grown canvas (A10): (source view, revision, kind, local id). Inside a Piece or Frame the view and revision are the piece's own and are not repeated per part; this full form is used where a part is named outside its piece (attach wires, the reader's report).",
+      "type": "object",
+      "properties": {
+        "view": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "kind": {
+          "enum": ["node", "edge", "group"],
+          "description": "The comment-reference vocabulary (comments/contract.ts)."
+        },
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        }
+      },
+      "required": ["view", "revision", "kind", "id"],
+      "additionalProperties": false
+    },
+    "Expansion": {
+      "description": "One (element, source) entry, as present_diagram's expand takes it (§14) and the ?expand= link replays it, in order. P41: with `neighbour`, only that neighbour of element and its link in source (a \"neighbour not drawn here\" entry); without it, everything source draws around element.",
+      "type": "object",
+      "properties": {
+        "element": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "neighbour": {
+          "$ref": "#/$defs/LocalId"
+        }
+      },
+      "required": ["element", "source"],
+      "additionalProperties": false
+    },
+    "Reading": {
+      "description": "One reading of a conflicting element (A3): a kind and/or a parent, with the views that give it. One reading is the usual case.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ElementKind"
+        },
+        "parent": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "views": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ViewId"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["views"],
+      "additionalProperties": false
+    },
+    "ElementSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "readings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Reading"
+          },
+          "minItems": 1
+        },
+        "conflicting": {
+          "type": "boolean",
+          "description": "More than one kind or parent reading (§4). The menu then lists one diagram entry per reading."
+        }
+      },
+      "required": ["id", "name", "readings", "conflicting"],
+      "additionalProperties": false
+    },
+    "CommentPin": {
+      "description": "Fan-out (ticket 14): the open threads anchored to a part of a piece or frame, as counts only. A thread is read through the existing GET api/comments?target=view:<source> when the person opens the pin. Present only where the source view's feedback settings show comments (A9).",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": ["node", "edge", "group"]
+        },
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "open": {
+          "$ref": "#/$defs/Count"
+        },
+        "latestPostAt": {
+          "type": "string",
+          "description": "An RFC 3339 date-time, as comment-activity spells it."
+        }
+      },
+      "required": ["kind", "id", "open"],
+      "additionalProperties": false
+    },
+    "AttachWire": {
+      "description": "A wire from a piece's box to a box already on the canvas (the expanded element, or an element already drawn: O6, drawn once). Keeps its source's own id and ends as written (A10).",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/LocalId",
+          "description": "The wire's id in its source."
+        },
+        "from": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "to": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "technology": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "line": {
+          "$ref": "diagram-envelope.schema.json#/$defs/EdgeLine"
+        }
+      },
+      "required": ["key", "from", "to", "direction"],
+      "additionalProperties": false
+    },
+    "Piece": {
+      "description": "The part of a source that touches the element (§12): the element's inside when the source opens it, else its direct neighbours there. `model` is a cut of the source's last-good model in its own notation (O3), valid against the frozen envelope schema's DiagramModel, drawn full: every kept box has no frame (ticket 10, answer 9). It holds no box already on the canvas (O6) and no wire that leaves the piece (those are `attach`).",
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "family": {
+          "enum": ["c4", "architecture", "flowchart", "er"],
+          "description": "Graph families only (O3)."
+        },
+        "touches": {
+          "$ref": "#/$defs/LocalId",
+          "description": "The element the piece was cut for; its box is on the canvas."
+        },
+        "opens": {
+          "type": "boolean",
+          "description": "True when the source opens the element (the piece is its inside)."
+        },
+        "model": {
+          "$ref": "diagram-envelope.schema.json#/$defs/DiagramModel"
+        },
+        "attach": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AttachWire"
+          }
+        },
+        "boxes": {
+          "$ref": "#/$defs/Count"
+        },
+        "wires": {
+          "$ref": "#/$defs/Count",
+          "description": "Wires inside plus attach wires."
+        },
+        "total": {
+          "type": "object",
+          "properties": {
+            "boxes": {
+              "$ref": "#/$defs/Count"
+            },
+            "wires": {
+              "$ref": "#/$defs/Count"
+            }
+          },
+          "required": ["boxes", "wires"],
+          "additionalProperties": false
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "Cut at maxPieceBoxes; the frame's link opens the full diagram."
+        },
+        "kind": {
+          "$ref": "diagram-envelope.schema.json#/$defs/DiagramKind",
+          "description": "The source's view kind, so the page can wrap the cut as an envelope to draw it."
+        }
+      },
+      "required": [
+        "source",
+        "revision",
+        "family",
+        "touches",
+        "opens",
+        "kind",
+        "model",
+        "attach",
+        "boxes",
+        "wires",
+        "total",
+        "truncated"
+      ],
+      "additionalProperties": false
+    },
+    "Omitted": {
+      "description": "Why an entry carries no piece. `own`: the source is not a graph family (O3), offered as \"open it on its own\". `limit`: adding it would pass maxAddedSources or maxAddedBoxes (§13), offered as \"open it on its own\". `bytes`: dropped to stay under maxResponseBytes; a hover on it reads GET api/exploration for that one entry (the only case a hover costs a request).",
+      "enum": ["own", "limit", "bytes"]
+    },
+    "DiagramEntry": {
+      "description": "A diagram that opens or draws the element (§11): opensIn first, then drawnIn, then the sources that open on their own (omitted: own), each by view id.",
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "family": {
+          "$ref": "#/$defs/Family"
+        },
+        "sourceRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "relation": {
+          "enum": ["opens", "draws"]
+        },
+        "reading": {
+          "$ref": "#/$defs/Count",
+          "description": "Index into element.readings: one entry per (source, reading) on a conflict."
+        },
+        "proposed": {
+          "const": true,
+          "description": "From a proposed view, through the occurrence index (A5); labelled \"proposed\"."
+        },
+        "adds": {
+          "type": "object",
+          "description": "The count the menu shows: what this entry would add, after the cap.",
+          "properties": {
+            "boxes": {
+              "$ref": "#/$defs/Count"
+            },
+            "wires": {
+              "$ref": "#/$defs/Count"
+            }
+          },
+          "required": ["boxes", "wires"],
+          "additionalProperties": false
+        },
+        "onCanvas": {
+          "type": "boolean",
+          "description": "The source already has a frame here; choosing the entry grows that frame (O7)."
+        },
+        "piece": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Piece"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "omitted": {
+          "$ref": "#/$defs/Omitted"
+        }
+      },
+      "required": ["source", "title", "family", "sourceRevision", "relation", "reading", "adds", "onCanvas", "piece"],
+      "additionalProperties": false
+    },
+    "NeighbourEntry": {
+      "description": "A model relationship the canvas does not draw (§11), added inside a frame named for `via`, the diagram that draws that link (the first by name precedence, §3).",
+      "type": "object",
+      "properties": {
+        "element": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ElementKind"
+          }
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "via": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "viaTitle": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "viaRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "alsoDrawnIn": {
+          "$ref": "#/$defs/Count",
+          "description": "Other views that draw the same pair."
+        },
+        "proposed": {
+          "const": true
+        },
+        "piece": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Piece"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "omitted": {
+          "$ref": "#/$defs/Omitted"
+        },
+        "adds": {
+          "type": "object",
+          "description": "The count the menu shows: what this entry would add, after the cap.",
+          "properties": {
+            "boxes": {
+              "$ref": "#/$defs/Count"
+            },
+            "wires": {
+              "$ref": "#/$defs/Count"
+            }
+          },
+          "required": ["boxes", "wires"],
+          "additionalProperties": false
+        },
+        "onCanvas": {
+          "type": "boolean",
+          "description": "`via` already has a frame here; adding grows it (O7)."
+        }
+      },
+      "required": [
+        "element",
+        "name",
+        "kinds",
+        "direction",
+        "via",
+        "viaTitle",
+        "viaRevision",
+        "alsoDrawnIn",
+        "adds",
+        "onCanvas",
+        "piece"
+      ],
+      "additionalProperties": false
+    },
+    "ExpandMenu": {
+      "description": "GET api/expand-menu?viewId=<base>&element=<id>&expand=<canvas>. One element's Expand entries, each with the piece it would add, so a hover preview and an add cost no request. \"Inside\" is not here: the page resolves it from the base envelope's own nesting (ADR 0029), so it works on plain groups too. An id that is not a model element (a plain subgraph, an unkinded node) answers 200 with element null and empty lists, never an error, so a right-click on it is not a failed request (G3).",
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "viewId": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision",
+          "description": "The base view's last-good revision the menu was cut against."
+        },
+        "modelGeneration": {
+          "$ref": "#/$defs/Generation",
+          "description": "ProjectState's model generation (moves on every rebuild, A1)."
+        },
+        "element": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ElementSummary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "canvas": {
+          "type": "array",
+          "description": "The expansions the request named that hold on this canvas, in order; entries already on the canvas are not offered again.",
+          "items": {
+            "$ref": "#/$defs/Expansion"
+          }
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "remaining": {
+          "type": "object",
+          "description": "Headroom left on this canvas.",
+          "properties": {
+            "sources": {
+              "$ref": "#/$defs/Count"
+            },
+            "boxes": {
+              "$ref": "#/$defs/Count"
+            },
+            "wires": {
+              "$ref": "#/$defs/Count"
+            }
+          },
+          "required": ["sources", "boxes", "wires"],
+          "additionalProperties": false
+        },
+        "diagrams": {
+          "$ref": "#/$defs/DiagramList"
+        },
+        "neighbours": {
+          "$ref": "#/$defs/NeighbourList"
+        },
+        "bytesTruncated": {
+          "type": "boolean",
+          "description": "Some pieces were omitted (omitted: bytes) to stay under maxResponseBytes."
+        },
+        "dropped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DroppedExpansion"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "viewId",
+        "revision",
+        "modelGeneration",
+        "element",
+        "canvas",
+        "dropped",
+        "limits",
+        "remaining",
+        "diagrams",
+        "neighbours",
+        "bytesTruncated"
+      ],
+      "additionalProperties": false
+    },
+    "DropReason": {
+      "description": "Why a requested expansion is not on the canvas. A link or the page's own exploration is resolved best-effort and says what it dropped.",
+      "enum": [
+        "duplicate",
+        "element_not_on_canvas",
+        "source_unknown",
+        "source_unrelated",
+        "source_is_base",
+        "source_not_frame",
+        "source_uncompiled",
+        "source_is_copy",
+        "nothing_to_add",
+        "limit_passed"
+      ]
+    },
+    "ResolvedExpansion": {
+      "type": "object",
+      "properties": {
+        "element": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "neighbour": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "status": {
+          "enum": ["added", "dropped"]
+        },
+        "frame": {
+          "$ref": "#/$defs/Count",
+          "description": "Index into frames when added."
+        },
+        "reason": {
+          "$ref": "#/$defs/DropReason"
+        },
+        "piece": {
+          "$ref": "#/$defs/Piece",
+          "description": "P35: the piece this entry added when it was replayed, as the menu carries it, so the page builds the canvas from the same pieces as an add."
+        }
+      },
+      "required": ["element", "source", "status"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "added"
+              }
+            }
+          },
+          "then": {
+            "required": ["frame", "piece"],
+            "properties": {
+              "frame": true,
+              "piece": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "dropped"
+              }
+            }
+          },
+          "then": {
+            "required": ["reason"],
+            "properties": {
+              "reason": true,
+              "frame": false,
+              "piece": false
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "Frame": {
+      "description": "One source on the canvas (O7: one frame per source, grown by each element expanded from it). Placed beside the elements it touches (§13); layout is the page's. P35: its parts are the pieces of its added entries (`expansions.items[].piece`), not a second union model.",
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "sourceRevision": {
+          "$ref": "#/$defs/Revision",
+          "description": "A8: each source's revision, outside every envelope."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "family": {
+          "enum": ["c4", "architecture", "flowchart", "er"]
+        },
+        "proposed": {
+          "const": true
+        },
+        "touches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalId"
+          },
+          "minItems": 1,
+          "description": "The canvas elements this frame was expanded from, in order."
+        },
+        "boxes": {
+          "$ref": "#/$defs/Count"
+        },
+        "wires": {
+          "$ref": "#/$defs/Count"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "pins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommentPin"
+          }
+        }
+      },
+      "required": ["source", "sourceRevision", "title", "family", "touches", "boxes", "wires", "truncated", "pins"],
+      "additionalProperties": false
+    },
+    "Exploration": {
+      "description": "GET api/exploration?viewId=<base>&expand=<encoded> (a link or the page's own), or GET api/exploration?viewId=<base>&presentationId=<id> (the agent's presentation). Every frame in one read, whatever the number of sources (ticket 14, cold load).",
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "viewId": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "origin": {
+          "enum": ["presentation", "link"],
+          "description": "`link` covers a page's own exploration too: both are a list the page sent."
+        },
+        "presentationId": {
+          "type": "string",
+          "pattern": "^present-[a-f0-9]{12}$"
+        },
+        "generation": {
+          "$ref": "#/$defs/Generation",
+          "description": "A8. For a presentation: moves on every present and on every frame refresh after a source recompiles or leaves (A11). Absent for a link."
+        },
+        "modelGeneration": {
+          "$ref": "#/$defs/Generation"
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "expansions": {
+          "$ref": "#/$defs/ExpansionList",
+          "description": "Every requested entry in replay order, added or dropped with its reason."
+        },
+        "frames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Frame"
+          },
+          "description": "At most limits.maxAddedSources."
+        },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "sources": {
+              "$ref": "#/$defs/Count"
+            },
+            "boxes": {
+              "$ref": "#/$defs/Count"
+            },
+            "wires": {
+              "$ref": "#/$defs/Count"
+            }
+          },
+          "required": ["sources", "boxes", "wires"],
+          "additionalProperties": false
+        },
+        "notices": {
+          "type": "array",
+          "maxItems": 8,
+          "description": "One line per change the page should say (\"Runtime was removed, so its frame is gone\").",
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "pinsTruncated": {
+          "const": true,
+          "description": "P43: some open comment pins were left out so the answer stays within limits.maxResponseBytes. Entries and frames never are: the replay keeps those within the budget, and an entry that does not fit is dropped as limit_passed."
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "viewId",
+        "revision",
+        "origin",
+        "modelGeneration",
+        "limits",
+        "expansions",
+        "frames",
+        "counts"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "origin": {
+                "const": "presentation"
+              }
+            }
+          },
+          "then": {
+            "required": ["presentationId", "generation"],
+            "properties": {
+              "presentationId": true,
+              "generation": true
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "ExplorationStamp": {
+      "description": "What an opted-in bootstrap (api/bootstrap?explorations=1) and presentation event (api/events?explorations=1) add as `presentation.exploration` when the presentation has expansions; never sent to a page that did not opt in (A8). The page reads the frames with one GET api/exploration?viewId=<base>&presentationId=<id>.",
+      "type": "object",
+      "properties": {
+        "generation": {
+          "$ref": "#/$defs/Generation"
+        },
+        "sources": {
+          "$ref": "#/$defs/Count"
+        },
+        "parts": {
+          "$ref": "#/$defs/Count",
+          "description": "Boxes added, for the MCP-App line \"N parts added: open in Archer\" (A11)."
+        }
+      },
+      "required": ["generation", "sources", "parts"],
+      "additionalProperties": false
+    },
+    "ReaderExplorationReport": {
+      "description": "POST api/reader-exploration, only if O1 stands (a page's own expansions are reported to the agent like a reader's selection, the last page to speak). Same origin and body cap as POST api/walkthrough-position; 204 or 422. Transient reader state, like a selection: not an operation (ADR 0016), and never changes what another page shows. Frame selections ride here as (source, kind, id), since SelectionContext carries base-view parts only (A10). Rejected (422) unless `revision` is the base's current one.",
+      "type": "object",
+      "properties": {
+        "viewId": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "expand": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expansion"
+          },
+          "description": "At most limits.maxExpansions; empty clears it.",
+          "maxItems": 24
+        },
+        "selection": {
+          "type": "array",
+          "maxItems": 64,
+          "description": "P36: frame parts the reader selected, as (source, kind, id); the service resolves them against the source's model (A10).",
+          "items": {
+            "$ref": "#/$defs/FrameSelection"
+          }
+        }
+      },
+      "required": ["viewId", "revision", "expand"],
+      "additionalProperties": false
+    },
+    "ErrorBody": {
+      "description": "ADR 0002's error shape, as http.ts error() writes it. An unauthorized or revoked caller gets the bare 404 every route gives, never this body (ADR 0015, A9).",
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "enum": [
+                "invalid_request",
+                "diagram_not_found",
+                "presentation_not_found",
+                "expand_param_too_long",
+                "invalid_expand",
+                "element_not_on_canvas",
+                "internal"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "details": {
+              "type": "object"
+            }
+          },
+          "required": ["code", "message"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["schemaVersion", "error"],
+      "additionalProperties": false
+    },
+    "DiagramList": {
+      "type": "object",
+      "description": "Capped at maxMenuCandidates (shared with neighbours). `total` is the count before the cap; `truncated` is total > items.length (A13).",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiagramEntry"
+          }
+        },
+        "total": {
+          "$ref": "#/$defs/Count"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": ["items", "total", "truncated"],
+      "additionalProperties": false
+    },
+    "NeighbourList": {
+      "type": "object",
+      "description": "Capped at maxRelationshipsPerElement and maxMenuCandidates. Same total/truncated rule.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NeighbourEntry"
+          }
+        },
+        "total": {
+          "$ref": "#/$defs/Count"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": ["items", "total", "truncated"],
+      "additionalProperties": false
+    },
+    "ExpansionList": {
+      "type": "object",
+      "description": "Capped at maxExpansions. Same total/truncated rule.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResolvedExpansion"
+          }
+        },
+        "total": {
+          "$ref": "#/$defs/Count"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": ["items", "total", "truncated"],
+      "additionalProperties": false
+    },
+    "DroppedExpansion": {
+      "type": "object",
+      "properties": {
+        "element": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "neighbour": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "reason": {
+          "$ref": "#/$defs/DropReason"
+        }
+      },
+      "required": ["element", "source", "reason"],
+      "additionalProperties": false
+    },
+    "FrameSelection": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "kind": {
+          "enum": ["node", "edge"]
+        },
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        }
+      },
+      "required": ["source", "kind", "id"],
+      "additionalProperties": false
+    },
+    "ExplorationReport": {
+      "description": "get_presentation_context's `exploration` (management socket getContext; ADR 0036 §14, O1, A10): the later of the agent's presented exploration and the reader's own report. Not a browser payload.",
+      "type": "object",
+      "properties": {
+        "origin": {
+          "enum": ["presentation", "reader"]
+        },
+        "viewId": {
+          "$ref": "#/$defs/ViewId"
+        },
+        "generation": {
+          "$ref": "#/$defs/Generation"
+        },
+        "expand": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expansion"
+          },
+          "maxItems": 24
+        },
+        "frames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/ViewId"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "touches": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/LocalId"
+                }
+              },
+              "boxes": {
+                "$ref": "#/$defs/Count"
+              },
+              "proposed": {
+                "const": true
+              }
+            },
+            "required": ["source", "title", "touches", "boxes"],
+            "additionalProperties": false
+          }
+        },
+        "selection": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/ViewId"
+              },
+              "kind": {
+                "enum": ["node", "edge"]
+              },
+              "id": {
+                "$ref": "#/$defs/LocalId"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": ["source", "kind", "id"],
+            "additionalProperties": false
+          }
+        },
+        "dropped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DroppedExpansion"
+          }
+        },
+        "notices": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      },
+      "required": ["origin", "viewId", "expand", "frames", "selection"],
+      "additionalProperties": false
+    }
+  }
+}

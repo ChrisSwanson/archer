@@ -1,0 +1,15 @@
+{
+  "viewId": "datagram-flight",
+  "id": "physical-trip",
+  "title": "Carry the paper datagram",
+  "groups": [
+    {
+      "id": "carry",
+      "label": "Physical carriage",
+      "description": "Carriage is a conceptual trip, not a delivery guarantee.",
+      "style": "flow",
+      "nodes": ["carrier", "receiver"],
+      "edges": ["msg-2"]
+    }
+  ]
+}

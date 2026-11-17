@@ -1,0 +1,171 @@
+.archer-web-shell.primary-shell{box-sizing:border-box;padding-left:64px;background:var(--bg)}
+.primary-navigation{position:fixed;left:0;top:0;bottom:0;width:64px;transition:width 180ms cubic-bezier(.16,1,.3,1);z-index:40;color:var(--text);font-size:var(--type-body);pointer-events:none}
+.primary-navigation[data-expanded=true]{width:min(340px,calc(100vw - 12px))}
+.primary-rail{height:100%;width:100%;box-sizing:border-box;background:var(--surface);border-right:var(--line-chrome) solid var(--border);display:flex;flex-direction:column;padding:18px 10px;overflow:hidden;pointer-events:none}
+.primary-navigation[data-expanded=true],.primary-navigation[data-expanded=true] .primary-rail{pointer-events:auto}
+.primary-navigation-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:24px;pointer-events:auto}
+/* Keep the collapsed rail as the only route that can reveal Projects. */
+.primary-navigation::before{content:"";position:absolute;inset:0 auto 0 0;width:64px;z-index:-1;pointer-events:auto}
+.primary-navigation-section{pointer-events:auto}
+.primary-navigation[data-expanded=false] .primary-navigation-head,.primary-navigation[data-expanded=false] .primary-navigation-section{pointer-events:none}
+.primary-rail button{pointer-events:auto;min-height:44px;border:0;border-radius:var(--radius-control);background:transparent;color:var(--text-dim);font:inherit;text-align:left;cursor:pointer}
+.primary-brand,.primary-help{display:flex;align-items:center;gap:14px;width:44px;flex:none;padding:10px 12px}
+.primary-brand span,.primary-help-label{white-space:nowrap;opacity:0;visibility:hidden;transition:opacity 120ms ease-out}
+.primary-navigation[data-expanded=true] .primary-brand span,.primary-navigation[data-expanded=true] .primary-help-label{visibility:visible;opacity:1}
+.primary-rail svg{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.primary-rail .primary-brand{font-weight:700;color:var(--text)}
+.primary-navigation[data-expanded=true] .primary-brand{flex:1;min-width:0;width:auto}
+.primary-sections{display:flex;flex-direction:column;gap:8px;overflow-x:hidden;overflow-y:auto;min-height:0;flex:1}
+.primary-navigation-section{flex:none;min-width:0}
+/* Settings and Shortcuts are top-level rows like Archer and Projects: the glyph in the same 20px box at the same
+   12px inset, the label after the same 14px gap, so all four line up, rail open or closed (round 1 pass 5
+   O2; round1-f16 e2e). The "?" sits centred in that box, set on the type scale (round 1 #21). Open, a row is as
+   wide as the rail, so its hover fill holds its label. */
+.primary-rail .primary-help{margin-top:16px}
+.primary-help span{pointer-events:none}
+.primary-help-glyph{display:inline-grid;place-items:center;width:var(--icon);height:var(--icon);flex:none;font-size:var(--type-title);line-height:1}
+.primary-help-label{font-size:var(--type-body)}
+.primary-navigation[data-expanded=true] :is(.primary-help,.archer-settings-launcher){width:auto;align-self:stretch}
+.primary-navigation[data-expanded=false] .primary-brand,.primary-navigation[data-expanded=false] .primary-help,.primary-navigation[data-expanded=false] .archer-settings-launcher{justify-content:center;gap:0}
+.primary-navigation[data-expanded=false] .primary-brand span,.primary-navigation[data-expanded=false] .primary-help-label,.primary-navigation[data-expanded=false] .archer-settings-launcher span{display:none}
+.primary-document-bar {display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0.875rem 1.375rem;background:var(--surface);border-bottom:var(--line-chrome) solid var(--border);min-width:0;}
+.primary-document-identity {min-width:0;}
+.primary-document-identity .primary-document-title {font-size:var(--type-title);font-weight:600;line-height:1.4;margin:0.25rem 0 0;overflow-wrap:anywhere;}
+/* A title with a state tag beside it ("Editing"): one row, the tag centred on the title's line. */
+.primary-document-heading {display:flex;align-items:center;gap:10px;min-width:0;margin-top:0.25rem;}
+.primary-document-heading>.primary-document-title {margin:0;min-width:0;}
+.primary-document-heading>:not(.primary-document-title) {flex:none;}
+.primary-breadcrumb {display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--text-dim);font-size:var(--type-small);}
+.primary-breadcrumb button {padding:2px 0;background:none;color:inherit;border:0;font:inherit;cursor:pointer;}
+.primary-breadcrumb button:hover {color:var(--accent-quiet);}
+/* The "…" that opens the whole path is a phone's (Breadcrumb.tsx); wider, every segment shows. */
+.primary-breadcrumb-more-wrap {display:none;}
+/* The breadcrumb and, for a diagram embedded in a note, how fresh its note is (ADR 0012): one quiet line. */
+.primary-document-trail {display:flex;flex-wrap:wrap;align-items:baseline;column-gap:16px;row-gap:2px;min-width:0;}
+.primary-document-trail .archer-freshness {margin-left:0;font-size:var(--type-small);color:var(--text-dim);}
+.primary-document-local-tools {margin-left:auto;}
+/* Held out of the layout while its tools are still deciding (New waits for the project's editing state): it arrives as
+   a new box beside the title, never as a 9 px stub that grows leftwards and moves (PF-6). */
+.primary-document-local-tools:has(> :only-child:empty) {display:none;}
+/* min-height: the row is as tall as the header's tools (40 px at a 16 px root: New's line in the local tools) from the
+   first frame, so they come without moving the page (PF-6). In rem, so a larger root text size grows it with the tools
+   and the rest of the bar (O240). */
+.primary-document-actions {min-width:0;max-width:100%;min-height:2.5rem;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+/* The bell's place while the project's capabilities load (WebShell "pending"). */
+.primary-action-reserve {width:var(--icon-button);height:var(--icon-button);flex:none;}
+/* Icon-only soft-tint buttons in the bar: transparent until hovered. */
+.primary-document-actions>.archer-theme-toggle {position:static;width:var(--icon-button);height:var(--icon-button);background:transparent;box-shadow:none;}
+.primary-document-actions button {min-height:2.25rem;}
+.primary-shell .archer-main {min-height:0;}
+@media(max-width:720px){
+ .primary-shell .archer-comparison-panel,.primary-shell .archer-artifact-wrapper{z-index:41}
+ .archer-web-shell.primary-shell{padding-left:52px}
+ .primary-navigation{width:52px}
+ .primary-rail{padding:12px 4px}
+ .primary-navigation[data-expanded=true]{width:min(340px,calc(100vw - 12px))}
+ .primary-document-bar{padding:0.75rem;gap:8px;flex-wrap:wrap}
+ .primary-document-identity{flex:1;min-width:120px}
+ .primary-document-actions{width:auto;gap:6px;flex-wrap:nowrap}
+ .primary-document-actions>.archer-theme-toggle,.primary-document-actions>.archer-review-toggle{flex:none;min-width:44px;min-height:44px}
+ .primary-document-actions button{min-height:44px}
+}
+
+/* One compact notification entry in document actions; tools keep their labels. */
+.primary-document-actions .archer-notification-toggle{position:relative;width:var(--icon-button);height:var(--icon-button);min-width:var(--icon-button);min-height:var(--icon-button);flex:none;justify-content:center;padding:0;background:transparent;color:var(--text-dim)}
+.primary-document-actions .archer-notification-toggle:hover,.primary-document-actions .archer-notification-toggle[aria-expanded=true]{background:var(--surface-2);color:var(--text)}
+.primary-document-actions .archer-notification-toggle svg{width:var(--icon);height:var(--icon);flex:none}
+/* The badge overhangs the button's outer corner by 2px up and 4px right; the button has no border, so these are measured from its edge. */
+.primary-document-actions .archer-notification-toggle .archer-review-toggle-count{position:absolute;top:-2px;right:-4px;box-sizing:border-box;min-width:18px;height:18px;padding:0 4px;background:var(--accent);color:var(--accent-ink);font-size:var(--type-floor);font-weight:600;line-height:18px;font-variant-numeric:tabular-nums;pointer-events:none}
+@media(max-width:720px){.primary-document-actions .archer-notification-toggle,.primary-action-reserve{width:44px;height:44px;min-width:44px;min-height:44px}}
+/* A touch target is never under the floor (styles.css, `--icon-touch`), at any width. */
+@media(pointer:coarse){.primary-document-actions :is(.archer-notification-toggle,.archer-theme-toggle){width:var(--icon-touch);height:var(--icon-touch);min-width:var(--icon-touch);min-height:var(--icon-touch)}}
+
+
+
+/* The project hierarchy is permanent. The narrow rail clips it; widening the
+   rail reveals the whole section without a second Projects interaction. */
+.primary-projects-heading{box-sizing:border-box;display:flex;align-items:center;gap:14px;height:44px;margin:0;padding:10px 12px;color:var(--text-dim);font-size:var(--type-small);font-weight:600;line-height:24px;text-transform:uppercase;white-space:nowrap}
+.primary-projects-heading span{opacity:0;visibility:hidden;transition:opacity 120ms ease-out}
+.primary-navigation[data-expanded=false] .primary-projects-heading{gap:0}
+.primary-navigation[data-expanded=false] .primary-projects-heading span{display:none}
+.primary-flyout{position:static;pointer-events:none;width:calc(min(340px,calc(100vw - 12px)) - 20px);flex:none;box-sizing:border-box;padding:0 0 12px;opacity:0;visibility:hidden;transition:opacity 120ms ease-out}
+.primary-navigation[data-expanded=true] .primary-projects-heading span,.primary-navigation[data-expanded=true] .primary-flyout{opacity:1;visibility:visible}
+.primary-navigation[data-expanded=true] .primary-flyout{pointer-events:auto}
+.primary-directory-status{color:var(--text-dim);font-size:var(--type-small);line-height:1.6;margin:4px 8px 0}
+.primary-directory-retry{display:inline;padding:0;min-height:0!important;color:var(--accent-quiet)!important;text-decoration:underline;text-underline-offset:2px}
+.primary-empty{color:var(--text-dim);font-size:var(--type-small);line-height:1.6;margin:2px 8px 0}
+
+/* Projects: the projects by name, then the reader's recent files and projects
+   (projects-and-search.md). Names only: one line each, no paths, no tree. */
+.primary-places{display:grid;gap:14px;padding:0 4px}
+.primary-place-group ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.primary-place-heading{margin:0 0 4px;padding:0 8px;color:var(--text-dim);font-size:var(--type-small);font-weight:500}
+.primary-rail .primary-place{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:6px 8px;color:var(--text);min-width:0}
+.primary-place-group:first-child .primary-place{padding-left:22px}
+.primary-place-group:first-child .primary-overview{padding-left:22px}
+.primary-place-group:last-child{padding-left:14px}
+.primary-place-group:last-child .primary-place{padding-left:22px}
+.primary-rail .primary-place:hover{background:var(--surface-2);color:var(--accent-quiet)}
+/* Where the reader is: the ink-blue name and a mark, not another tinted bar. */
+.primary-rail .primary-place[aria-current=page]{color:var(--accent-quiet)}
+.primary-place[aria-current=page] .primary-place-name{font-weight:600}
+.primary-rail .primary-place[aria-current=page] .primary-place-glyph{color:var(--accent-quiet)}
+.primary-place-name{min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.primary-rail svg.primary-place-glyph{width:16px;height:16px;flex:none;color:var(--text-dim)}
+/* The active project: a dot in the row's reserved left gutter, so names stay aligned. */
+.primary-rail .primary-place[data-active-project]{position:relative}
+.primary-active-project{position:absolute;left:8px;top:50%;width:7px;height:7px;border-radius:50%;background:var(--accent);transform:translateY(-50%)}
+.primary-inactive-projects{margin-top:6px;padding-top:6px;border-top:var(--line-chrome) solid var(--border)}
+.primary-inactive-projects>summary{display:flex;align-items:center;gap:8px;min-height:36px;padding:0 8px;color:var(--text-dim);font-size:var(--type-small);cursor:pointer;list-style-position:inside}
+.primary-inactive-projects>summary span:last-child{margin-left:auto;font-variant-numeric:tabular-nums}
+.primary-inactive-projects ul{margin-top:2px!important}
+@media(max-width:720px){.primary-inactive-projects>summary{min-height:44px}}
+
+/* The document bar's menu button: only at phone width, where the sidebar is a drawer. */
+.primary-drawer-button{display:none}
+@media(max-width:720px){
+ .archer-web-shell.primary-shell{padding-left:0}
+ .primary-navigation,.primary-navigation[data-expanded=true]{width:min(320px,calc(100vw - 48px));transform:translateX(-100%);visibility:hidden;transition:transform 200ms cubic-bezier(.16,1,.3,1),visibility 0s linear 200ms;z-index:60}
+ .primary-navigation[data-drawer=true]{transform:none;visibility:visible;pointer-events:auto;transition:transform 200ms cubic-bezier(.16,1,.3,1);box-shadow:var(--shadow-panel)}
+ .primary-navigation[data-drawer=true] .primary-rail{pointer-events:auto;padding:16px 10px}
+ .primary-flyout{width:100%}
+ .primary-rail .primary-place{min-height:44px}
+ .primary-drawer-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin:-6px 0 -6px -6px;padding:0;border:0;border-radius:var(--radius-control);background:transparent;color:var(--text-dim);cursor:pointer}
+ .primary-drawer-button:hover{background:var(--surface-2);color:var(--text)}
+ .primary-scrim{position:fixed;inset:0;left:min(320px,calc(100vw - 48px));background:var(--scrim);pointer-events:auto}
+}
+@media(prefers-reduced-motion:reduce){.primary-navigation,.primary-navigation[data-drawer=true],.primary-brand span,.primary-help-label,.primary-projects-heading span,.primary-flyout{transition:none}}
+
+/* A phone's header (G1): the trail and the workspace actions on one row, the title and the page's
+   own tools on the next. The trail's last crumb names what the title already says, so it goes. */
+@media (max-width: 599px) {
+ .primary-document-bar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"drawer trail actions" "title title local";align-items:center;column-gap:6px;row-gap:0;padding:4px 8px 8px}
+ .primary-document-bar>.primary-drawer-button{grid-area:drawer}
+ .primary-document-identity{display:contents}
+ /* The way up keeps the row; a note's commit time ("Committed 41m ago") takes a line under it rather than
+    squeezing the crumb to a stub or lying over it (round 1 pass 2, F5 c). */
+ .primary-document-trail{grid-area:trail;min-width:0;flex-wrap:wrap;row-gap:0;overflow:hidden}
+ .primary-document-trail>.archer-freshness{flex:1 0 100%;min-width:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .primary-document-identity .primary-document-title{grid-area:title;min-width:0;margin:0 0 0 4px;line-height:1.3}
+ .primary-document-identity .primary-document-heading{grid-area:title;margin:0}
+ .primary-document-identity .archer-source-readonly{grid-area:local;justify-self:end}
+ .primary-document-local-tools{grid-area:local;justify-self:end;margin-left:0}
+ .primary-document-actions{grid-area:actions;gap:6px}
+ .primary-breadcrumb{flex:1 1 0;flex-wrap:nowrap;min-width:0;overflow:hidden;gap:6px}
+ .primary-breadcrumb>*{flex:none;white-space:nowrap}
+ /* One level up after a "…", rather than every level squeezed to a stub (round 1, #12). A long name
+    gives up its later words to an ellipsis, never its first. */
+ .primary-breadcrumb>button{flex:0 1 auto;min-width:min-content;min-height:24px;overflow:hidden;text-overflow:ellipsis}
+ .primary-breadcrumb:not([data-whole])>[data-far]{display:none}
+ .primary-breadcrumb-more-wrap{display:inline-flex;flex:none;align-items:center;gap:6px;margin-right:-10px;color:var(--text-dim);font-size:var(--type-small)}
+ .primary-breadcrumb-more{display:inline-grid;place-items:center;min-width:24px;min-height:24px;padding:0 2px;background:none;color:inherit;border:0;font:inherit;cursor:pointer}
+ .primary-breadcrumb-more:hover{color:var(--accent-quiet)}
+ /* The whole path, asked for: it wraps onto as many lines as it needs. */
+ .primary-document-trail:has(.primary-breadcrumb[data-whole]){align-items:flex-start;overflow:visible}
+ .primary-breadcrumb[data-whole]{flex-wrap:wrap;overflow:visible;row-gap:0}
+ .primary-breadcrumb[data-whole]>button{flex:none}
+ .primary-breadcrumb>[aria-current=page],.primary-breadcrumb>span[aria-hidden]:has(+[aria-current=page]){display:none}
+}
+.primary-place-name .archer-project-worktree{color:var(--text-dim);font-weight:400}
+/* A touch target is 44 px both ways (G7 [H], round 1 #14); after the phone rules, which it outranks. */
+@media(pointer:coarse){.primary-breadcrumb>button,.primary-breadcrumb-more{min-width:44px;min-height:44px}}

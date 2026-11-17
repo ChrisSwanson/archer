@@ -1,0 +1,33 @@
+sequenceDiagram
+    %% write_diagram on a .mmd view: application/index.ts, project-state.ts, host-bridge.ts
+    actor agent as Coding agent
+    participant app as MCP server (application layer)
+    participant folder as Archer folder
+    participant service as Background service
+    participant page as Archer page
+    actor person as Person
+    agent->>app: read_diagram viewId
+    app->>folder: read source and compile
+    app-->>agent: source, sourceRevision, model
+    agent->>app: write_diagram viewId, source, expectedRevision, summary
+    app->>folder: re-read, compare sourceRevision
+    alt the file moved on since the read
+        app-->>agent: revision_conflict, nothing written
+    else revision matches
+        app-)service: attach, recordWrite viewId and summary (only if a service is running)
+        app->>folder: writeConfined: temp file, fsync, rename
+        app->>app: compile the new source
+        app-->>agent: status compiled or failed, with diagnostics
+    end
+    folder-)service: fs.watch event
+    service->>service: after 60 ms quiet, reload and recompile the changed view
+    Note over service: within 5 s of recordWrite the change is the agent's
+    service-)page: SSE change and compile, plus presentation with the new envelope if the agent presented it
+    opt the reader picked this tab themselves
+        page->>service: GET api/diagrams/id when the streamed revision differs (an older service: every second)
+    end
+    page->>page: project, lay out with ELK in a worker, redraw keeping the viewport
+    page-->>person: change notice naming the agent and its summary
+    opt the new source does not compile
+        page-->>person: compile notice, last good drawing kept
+    end

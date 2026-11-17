@@ -1,0 +1,5953 @@
+/*
+ * The chrome's type ramp: every size the page's own text is set in.
+ *
+ * In `rem`, so a reader who has raised their browser's text size gets bigger
+ * chrome (at a 200% root the bar, tabs, panel and sheet all double). Four
+ * steps a clear ratio apart (about 1.2 each) -- the sizes before this were
+ * 11.5, 12, 12.5, 13, 13.5 and 14px, which read as one size set carelessly --
+ * and a floor under them for the smallest functional text: badges, counts,
+ * key caps. Nothing the reader needs to read is set smaller than the floor.
+ *
+ * Canvas lettering is NOT on this ramp: node, edge and caption labels are
+ * measured by the layout in pixels and keep their own sizes
+ * (`tests/type-ramp.test.ts` lists them).
+ */
+:root {
+  --type-floor: 0.6875rem; /* 11px: badges, counts, key caps */
+  --type-small: 0.75rem; /* 12px: kinds, metadata, secondary controls */
+  --type-body: 0.875rem; /* 14px: tabs, panel text, buttons that are read */
+  --type-title: 1.0625rem; /* 17px: sheet and notice headings */
+  --type-display: 1.375rem; /* 22px: the one headline a page with nothing drawn shows */
+  /* The note pages' long-form reading scale (round 1): someone's writing, read at length, not chrome. */
+  --type-reading: 0.9375rem; /* 15px: a note's prose */
+  --type-reading-heading: 1.40625rem; /* 22.5px: a note's section headings */
+  --type-reading-title: 1.625rem; /* 26px: a note page's title */
+  /* Canvas lettering between the ramp's steps (round 1 pass 3). In px, not rem: the layout measures
+     this text in px (each is a layout constant, held equal by tests/type-ramp.test.ts), so it does not follow
+     the reader's text size the way chrome does. */
+  --type-canvas-frame: 14px; /* a nested frame's kind and name (FRAME_CAPTION_FONT_PX) */
+  --type-canvas-participant: 13px; /* a sequence participant (PARTICIPANT_FONT) */
+  --type-canvas-journey: 13.5px; /* a journey section's and task's label (JOURNEY_LABEL_FONT_PX) */
+  --type-canvas-node-title: 18px; /* a flowchart node's title, its first line (NODE_TITLE_FONT_PX) */
+  --type-canvas-node-description: 15px; /* the lines after a node's title (NODE_DESCRIPTION_FONT_PX) */
+  --type-canvas-node-label: 14px; /* a figure's label: a state, an entity, a C4 element (NODE_LABEL_FONT_PX) */
+  --type-canvas-edge-label: 13px; /* a connection's label (EDGE_LABEL_FONT_PX) */
+  --type-canvas-edge-detail: 11px; /* a relationship's technology line (EDGE_TECHNOLOGY_FONT_PX) */
+  --type-canvas-kind: 11px; /* a node's kind caption (NODE_KIND_FONT_PX) */
+  --type-canvas-nest-caption: 12px; /* a closed container's "N inside" (NEST_CAPTION_FONT_PX) */
+  --type-canvas-journey-title: 15px; /* a journey's title on its board */
+  --type-canvas-journey-detail: 12px; /* a journey task's actors, score and a section's count */
+  /* Over the canvas, held to the framing's clearance in px (`diagrams/chrome-clearance.ts`): the emphasis legend and
+     the off-screen cue, and the legend's smallest heads. */
+  --type-canvas-overlay: 12px;
+  --type-canvas-overlay-small: 11px;
+  /* The two families, each named once. Fira Sans is embedded (`theme/current-font.css`); the rest of the sans stack
+     is what a host policy that refuses the font falls back to. Code, paths and ids take the platform's monospace. */
+  --font-sans: "Fira Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Sans text is set loose, on the page and the canvas alike: the layout measures every label with it
+     (TYPE_TRACKING_EM). A monospace rule sets it to 0 for its subtree, so code keeps its grid. */
+  --type-tracking: 0.04em;
+  /* Layout, not palette, so shared by both schemes. Where the document bar
+     ends (App.tsx keeps it current as the bar wraps) and the width of the
+     review sidebar, which overlays the main column without narrowing it. */
+  --primary-bar-bottom: 64px;
+  --primary-review-width: min(330px, calc(100vw - 64px));
+  /* Stable file tables override this for their selected columns. */
+  --note-emphasis-clearance: 340px;
+  --legend-pad: 12px;
+  --legend-row-gap: 7px;
+  /* The icon scale: one glyph size, one stroke and one button for every
+     icon-only control (rail, page bar, canvas clusters, editing cluster, side
+     panel, dialogs' Close), so they draw at one apparent size wherever they
+     sit. Glyphs are drawn on a padded 24-unit box (strokes inside about
+     4–20), so `--icon` gives each the same 12–15px of drawing; one drawn edge
+     to edge is redrawn, not given its own size. The stroke does not scale
+     with the viewBox (`vector-effect`, below). */
+  --icon: 20px;            /* an icon-only control */
+  --icon-inline: 16px;     /* an icon beside its word: Edit, Source, New, menu rows */
+  --icon-indicator: 14px;  /* a small indicator: disclosures, sort marks, the key's +/− */
+  --icon-stroke: 1.5px;
+  --icon-button: 36px;     /* a control, bar or panel button */
+  --icon-touch: 44px;      /* the floor for a touch target (`pointer: coarse`) */
+  --icon-gap: 2px;         /* between buttons inside one toolbar */
+  --icon-label-gap: 6px;   /* between an icon and its word */
+  --icon-group-inset: 3px; /* a floating cluster's inset, so its tiles sit concentric in its corners */
+  /* Corners by role (redesign slice 8). Chrome: a mark (a chip, a swatch, a key cap), a control (a button, a field,
+     a menu row), a card (a popover, a panel, a list card), a dialog (a dialog, a sheet, a bubble), a pill, and a
+     cluster, concentric with the control tiles inside it. The diagram: a card rounds less than the panel round it.
+     A notation's own outline (a C4 component, a rounded node, a cylinder) is geometry the layout and export share. */
+  --radius-mark: 4px;
+  --radius-control: 6px;
+  --radius-card: 8px;
+  --radius-dialog: 12px;
+  --radius-pill: 999px;
+  --radius-cluster: calc(var(--radius-control) + var(--icon-group-inset));
+  --radius-node: 12px;
+  --radius-panel: 16px;
+  /* Structural lines by role (redesign slice 8). Chrome: the hairline of a divider, a field or a card, its strong
+     line (a status frame, a tab's mark, a key cap), and a small mark's line (a chevron, a number badge). The diagram:
+     a card 1.5px and a C4 system's card 2px (owner, 2026-11-15: 2px and 3px read heavy, "cartoony"), the outer
+     boundary 2px, a panel inside it 1.5px, a selection 2.5px, an emphasis 3px. */
+  --line-chrome: 1px;
+  --line-chrome-strong: 2px;
+  --line-mark: 1.5px;
+  --line-node: 1.5px;
+  --line-node-strong: 2px;
+  --line-boundary: 2px;
+  --line-panel: 1.5px;
+  --line-selected: 2.5px;
+  --line-emphasis: 3px;
+}
+
+/*
+ * Archer palette.
+ *
+ * Two complete token sets, selected by `data-theme` on the root element (see
+ * `src/theme/theme.ts`). Everything downstream reads tokens only, so a theme
+ * swap is one attribute -- and a colour written straight into a component is
+ * invisible to it, which `tests/canvas-theme.test.tsx` enforces.
+ *
+ * Dark began as the palette Archer shipped; light was designed and
+ * contrast-measured in `docs/prototypes/emphasis` (see its README). Every
+ * light token clears its floor: 3:1 for node borders and edges (WCAG 1.4.11),
+ * 4.5:1 for the 10-11px faint text. The comments record what was measured --
+ * check the numbers, do not trust the comment.
+ *
+ * ONE DESIGN (phase 3b, the second design review). Structure is neutral: hue
+ * carries the person (the accent's blue) and the agent (amber, and its
+ * emphasis palette), and nothing else. The structural greys -- canvas,
+ * panels, outlines, wires, text -- were a mint-tinted grey, a third hue that
+ * meant nothing, then a neutral slate. From the retired Line map design: edge
+ * weight follows the notation (with the edge rules), a plain ground with no
+ * dot grid, and shorter, quieter panel shadows.
+ *
+ * COOL SLATE (owner, 2026-11-12, from the reference drawings; it replaced
+ * 2026-10-08's warm Drafting greys). Structure is white and a Tailwind-like
+ * cool slate in light, a cool near-black slate in dark (DESIGN.md, Colors);
+ * `tests/one-design.test.tsx` holds the line between a cast and a hue. The
+ * reader's accent is an ink blue. Every contrast below was re-measured for
+ * these values (`tests/canvas-theme.test.tsx`, `tests/comment-roles.test.ts`).
+ *
+ * Three things do NOT survive flipping the variables, and all three were wrong
+ * in the prototype's first draft:
+ *   - a scrim must always DARKEN, so it is its own token in both themes;
+ *   - the canvas is never pure white, because it is the largest area on screen
+ *     and would become a light source -- the lightest step is spent on the
+ *     nodes;
+ *   - glow is emission, so halos are retuned per theme rather than reused.
+ */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0f141b;
+  --surface: #0b0f15;
+  --surface-2: #18202a;
+  --old-bg: #1b2330;   /* the old version of a walkthrough: the stage, a shade apart */
+  --panel: rgb(11 15 21 / 93%);
+
+  --border: #273141;
+  --border-strong: #384456;
+  --border-hover: #6b7a90;
+
+  --node-bg: #1b2430;
+  --node-border: #8a9ab0; /* 5.9:1 on the canvas: an inked line, not a hairline */
+  --node-border-hover: #cbd5e1;
+  --node-text: #f1f5f9;
+  /* The quiet neutral: an authored grey with a light outline, receding (DESIGN.md, Diagram palette). */
+  --node-quiet-bg: #30343b; /* a neutral grey a step off the plain card (#1b2430), as light's is: ΔE 6.1 */
+  --node-quiet-border: #666d78; /* dimmer than the plain outline (6.5:1), 3.5:1 on the canvas and 3:1 or more on every panel; its words 5.6:1 on the fill */
+  --node-quiet-text: #a3aebd;
+  /* Connections (DESIGN.md, Diagram palette): an inked cool slate, 9.6:1 on the canvas; the arrowhead is
+     filled in the same colour. */
+  --edge: #b4c0cd;
+  --edge-hover: #dbe2ea;
+  --plate: #141b24;
+  --plate-text: #eef2f6;
+  --node-bg-faded: color-mix(in srgb, var(--node-bg) 25%, transparent);
+  --node-border-faded: color-mix(in srgb, var(--node-border) 25%, transparent);
+  --plate-faded: color-mix(in srgb, var(--plate) 25%, transparent);
+  /* Words outside the focus or a shown highlight: solid, and the quietest grey that keeps 4.5:1 on a faded box,
+     a faded caption plate, inside a group and on every family panel -- 4.64:1 at worst (C-07;
+     `tests/round1-f2.test.tsx`). A clear step back (owner, 2026-11-12), not --text-dim's slight one. */
+  --text-faded: #808b9b;
+
+  --text: #e6ebf1;
+  --text-dim: #a3aebd;
+  --text-faint: #8d99aa;
+
+  /* The READER's voice: selection, the active tab and chip, focus on chrome,
+     text selection. Blue, because the four emphasis hues below are the
+     AGENT's and the accent used to be the same mint as `--g1`, which left a
+     selected node and a teal-emphasised one told apart by motion alone.
+
+     A light ink blue rather than a mid blue, and that is the violet's doing.
+     Colour difference (CIEDE2000) from each emphasis hue, as seen with full
+     colour vision / deuteranopia / protanopia:
+       teal 39.9 / 33.1 / 38.5    amber  50.2 / 53.7 / 52.0
+       coral 38.1 / 44.9 / 38.4   violet 18.3 / 11.0 / 13.5
+     A dichromat has no blue-violet hue axis at all, so against `--g3` only
+     lightness is left: a mid blue such as #4c9aff matches the violet's
+     lightness and measures 5.7 / 1.3 -- the same colour. Drafting's #9db4ff
+     against the old violet #b58cf5 measured 5.7 / 8.4, under the floor of 10
+     (the palette's own tightest pair), so the VIOLET moved a step darker
+     (#a57ae8, still 5.5:1 on the canvas) rather than the accent the owner
+     chose. Shape still does the real work there: selection fills the body,
+     emphasis is a detached ring.
+
+     Contrast: 7.8:1 on the node body, 8.8:1 on the canvas, 9.2:1 on the tab bar,
+     6.8:1 as the border of its own fill. */
+  --accent: #9db4ff;
+  --accent-fill: #1f2b52;      /* selected node body */
+  --accent-on-fill: #ffffff;   /* 13.8:1 on the fill */
+  --accent-ink: #101a3a;       /* text on a solid accent chip, 8.5:1 */
+  --accent-quiet: #a9b9e8;     /* eyebrows, secondary accent text, 9.5:1 */
+
+  /* Categorical emphasis palette. Each hue clears 3:1 against the canvas
+     (5.5:1 at the lowest, violet) and stays separable under
+     deuteranopia/protanopia. */
+  --g1: #63e6b2;
+  --g2: #f2b544;
+  --g3: #a57ae8;
+  --g4: #ff8a7a;
+  /* A flow's line steps back for its moving arrows, but stays a 3:1 line in every hue (1.4.11; Cl-05b). */
+  --flow-line-opacity: 0.7;
+  /* A walkthrough's earlier steps (ADR 0034 §4): --g1 stepped back toward the box border, so the
+     current step still leads. Dark 6.5:1 on the canvas, 5.7:1 on a box; light (below) 3.8:1 and 4.6:1. */
+  --walked: #7fa58d;
+
+  /* The hue ONE emphasised element draws itself in. Set per element by its
+     palette class (`.archer-emph-palette-*`), which is the only route an
+     agent's enum has to a colour -- it picks a class, the theme picks the
+     value. Defined here so every consumer resolves in both themes; the value
+     is only the fallback for an element carrying no palette class at all. */
+  --emph-hue: var(--g1);
+  --discussion-hue: var(--text);
+
+  --danger-border: #5c3a34;
+  --danger-bg: #1a1210;
+  --danger-text: #ffb4a2;
+  --danger-strong: #ff8a7a;
+
+  /* A modal scrim must always DARKEN what is behind it. Deriving it from --bg
+     works by accident in dark and inverts in light, where it becomes a white
+     veil that bleaches the backdrop away instead of dimming it. */
+  --scrim: rgb(5 8 12 / 76%);
+  --shadow-panel: 0 4px 14px rgb(0 0 0 / 24%);
+  --shadow-modal: 0 24px 70px rgb(0 0 0 / 40%);
+
+  /* Glow is emission: over a dark canvas a wide soft blur reads as light.
+     Retuned in light rather than reused -- see the light block. */
+  --node-ring-hover: 0 0 0 2px rgb(203 213 225 / 18%);
+  --node-shadow-selected: 0 0 0 3px rgb(157 180 255 / 24%), 0 4px 14px rgb(0 0 0 / 30%);
+
+  /* Where the keyboard is standing. Deliberately NOT the accent: the focused
+     node and the selected node are different nodes as often as not, so a focus
+     ring in the selection's colour would make the two unreadable together.
+     It is the theme's own text colour (`--text`), which has no hue at all --
+     so it cannot be mistaken for the accent or for any agent hue, and position
+     differs from selection in hue AND in shape. 13.2:1 on the node body,
+     11.6:1 on a selected one, 14.9:1 as an edge's halo on the canvas. */
+  --kbd-focus: #e6ebf1;
+
+  /* Group containers are chrome framing their contents, so they sit between
+     the canvas and a node rather than competing with either. */
+  /* Opaque panels (DESIGN.md, Diagram palette): depth is enclosure, never stacked transparency. A
+     subgraph inside a neutral subgraph takes the other step (`--group-bg-alt`). Border 4.9:1 on the
+     canvas, 4.1:1 on the alternate step; caption 6.6:1 on the panel. */
+  --group-bg: #121821;
+  --group-bg-alt: #19212c;
+  --group-border: #94a3b8;
+  --group-border-alt: #76869b;
+  --group-text: #e2e8f0;
+  --group-caption: #c3ccd8;
+  /* A structural panel's caption, inside the outer boundary: a quieter slate, 7.1:1 on its step (`--group-bg-alt`). */
+  --group-caption-alt: #a3aebd;
+  /* An edge label\'s words (treatment A): the softer slate; a label on a family panel sets the family\'s ink inline. */
+  --edge-label-ink: var(--text-dim);
+  --group-bg-faded: color-mix(in srgb, var(--group-bg) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--group-border) 25%, transparent);
+
+  /* The six diagram families (DESIGN.md, Diagram palette): what a thing IS -- a person, a system, a
+     container, a database, or an authored category nearest one -- never a state; structure is neutral. Fill, border,
+     caption ink (group labels and Key samples; node words stay --node-text) and group panel. In dark the
+     colour lives in the lines: boxes keep the neutral fill, borders and captions are bright (6.5:1 or more
+     on the canvas, a panel and a box), and a panel carries only a faint tint. Literal values: the export
+     resolves them as they are. */
+  --family-violet-fill: #241f3a;
+  --family-violet-border: #a78bfa;
+  --family-violet-ink: #d8cefd;
+  --family-violet-text: #d8cefd;
+  --family-violet-panel: #16182a;
+  --family-violet-card: #1b2430;
+  --family-teal-fill: #122b2c;
+  --family-teal-border: #2fbfae;
+  --family-teal-ink: #a0e7dd;
+  --family-teal-text: #a0e7dd;
+  --family-teal-panel: #111e23;
+  --family-teal-card: #1b2430;
+  --family-green-fill: #142b1e;
+  --family-green-border: #4cc27a;
+  --family-green-ink: #aeeac1;
+  --family-green-text: #aeeac1;
+  --family-green-panel: #121c1c;
+  --family-green-card: #1b2430;
+  --family-plum-fill: #2e1828;
+  --family-plum-border: #ec79b5;
+  --family-plum-ink: #f8c4df;
+  --family-plum-text: #f8c4df;
+  --family-plum-panel: #1c1722;
+  --family-plum-card: #1b2430;
+  --family-rust-fill: #2e1d12;
+  --family-rust-border: #f0803c;
+  --family-rust-ink: #fdc9a2;
+  --family-rust-text: #fdc9a2;
+  --family-rust-panel: #1d1a19;
+  --family-rust-card: #1b2430;
+  --family-red-fill: #8a2020;
+  --family-red-border: #f87171;
+  --family-red-ink: #fca5a5;
+  --family-red-text: #ffffff;
+  --family-red-panel: #1b181b;
+  --family-red-card: #1b2430;
+
+  /* The arrowhead is a filled marker, so it carries no stroke weight to read
+     by and sits a step brighter than the line it terminates. */
+  --edge-arrow: #b4c0cd;
+  --edge-arrow-ink: var(--edge-arrow); /* an emphasised edge sets its hue here */
+
+  /* An error banner is an interruption, not a surface: it is the one place a
+     saturated fill is wanted, so it does not use the quiet --danger-bg. */
+  --banner-danger-bg: #7f1d1d;
+  --banner-danger-text: #ffffff;
+
+  /* Sequence diagrams. Participants, lifelines and messages reuse the graph
+     tokens so the two canvases stay one visual language; only the fragment and
+     activation containers, which have no graph equivalent, are their own.
+
+     NEUTRAL, not tinted. A tinted fill inside an accent-coloured border is
+     exactly what a selected node looks like, so a fragment drawn that way
+     reads as a selection nobody made -- and before the accent moved these were
+     green, a second accent living only on this canvas. A fragment is
+     structure, like a group container. Its kind chip alone wears the accent.
+     Frame: 3.9:1 on the canvas, 3.5:1 on its own fill, 3.0:1 round an
+     activation bar. Label: 6.4:1 on the fill over the canvas. */
+  --fragment-bg: rgb(230 235 241 / 5%);
+  --fragment-border: #737b88;
+  --fragment-text: #a5abb5;
+  --activation-bg: #2a303b;
+  /* A lifeline ties each message to its participant: a graphic, so 3:1 on the
+     canvas (3.5:1 here). The value `--border-hover` had, now its own. */
+  --lifeline: #64738a;
+
+  /* THE TWO VOICES (decided 2026-10-04). Structure is neutral; hue
+     means exactly two things.
+     YOU, the reader: selection, your drafts, your comment pins and your
+     words in a thread. The accent's own ink blue, aliased so the two cannot
+     part: the reader's voice was already the accent.
+     THE AGENT: its emphasis, its caption, its replies and its mark on a pin.
+     Amber -- across the blue/yellow axis that deuteranopia and protanopia
+     both keep, so the two voices stay apart for a dichromat by hue as well as
+     by lightness (`--g3`'s violet does not: see `--accent`).
+     Measured (tests/comment-roles.test.ts): agent 10.1:1 on the panel, 9.7:1
+     on the canvas, 8.4:1 on its own wash; its ink 9.6:1 on it. */
+  --you: var(--accent);
+  --you-ink: var(--accent-ink);
+  --you-fill: var(--accent-fill);
+  --agent: #f2b544;
+  --agent-ink: #241700;
+  --agent-fill: #2b2414;
+  --agent-text: #f2b544;
+}
+
+/*
+ * The OS-following default, resolved without JavaScript.
+ *
+ * `initTheme()` stamps `data-theme` before the first render, but a deferred
+ * module still runs after the document is parsed. Scoping this to a root that
+ * has not been stamped yet means the default path is already correct at first
+ * paint and never flashes; the attribute then takes over and this stops
+ * applying. Kept byte-identical to the explicit light block below, which
+ * `tests/canvas-theme.test.tsx` checks so the two cannot drift.
+ */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --surface-2: #f1f5f9;
+    --old-bg: #e2e8f0;   /* the old version of a walkthrough: the stage, a shade apart */
+    --panel: rgb(248 250 252 / 95%);
+
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --border-hover: #7d8ba0;
+
+    --node-bg: #f1f5f9;
+    --node-border: #64748b;
+    --node-border-hover: #334155;
+    --node-text: #0f172a;
+    /* The quiet neutral: an authored grey with a light outline, receding (DESIGN.md, Diagram palette). */
+    --node-quiet-bg: #e5e7eb;
+    --node-quiet-border: #7f8896;
+    --node-quiet-text: #4b5563;
+    --edge: #334155; /* 7.4:1 on the canvas */
+    --edge-hover: #1e293b;
+    --plate: #f8fafc;
+    --plate-text: #1e293b;
+    --node-bg-faded: color-mix(in srgb, var(--node-bg) 25%, transparent);
+    --node-border-faded: color-mix(in srgb, var(--node-border) 25%, transparent);
+    --plate-faded: color-mix(in srgb, var(--plate) 25%, transparent);
+    /* Words a walkthrough or a highlight has stepped back: legible (4.95:1 at worst), plainly not on the path. */
+    --text-faded: #5d6b7e;
+
+    --text: #0f172a;
+    --text-dim: #475569;
+    --text-faint: #5d6b7e;
+
+    --accent: #2645a3;
+    --accent-fill: #e1e6f6;
+    --accent-on-fill: #13235a;
+    --accent-ink: #ffffff;
+    --accent-quiet: #2c4fb8;
+
+    --g1: #0d8259;
+    --g2: #8a5f05;
+    --g3: #7e4fda;
+    --g4: #ba3826;
+    --flow-line-opacity: 0.85;
+    --walked: #5a7d69;
+
+    --emph-hue: var(--g1);
+    --discussion-hue: var(--text);
+
+    --danger-border: #e3b6ac;
+    --danger-bg: #fdf2ef;
+    --danger-text: #8a3620;
+    --danger-strong: #b3452a;
+
+    --scrim: rgb(15 23 42 / 45%);
+    --shadow-panel: 0 2px 10px rgb(15 23 42 / 8%);
+    --shadow-modal: 0 20px 56px rgb(15 23 42 / 20%);
+
+    --node-ring-hover: 0 0 0 2px rgb(51 65 85 / 14%);
+    --node-shadow-selected: 0 0 0 2px rgb(38 69 163 / 26%), 0 2px 8px rgb(15 23 42 / 14%);
+
+    --kbd-focus: #0f172a;
+
+    --group-bg: #ffffff;
+    --group-bg-alt: #f8fafc;
+    --group-border: #475569; /* 4.7:1 on the canvas, 5.3:1 or more on either panel step: the cue for containment */
+    --group-border-alt: #64748b;
+    --group-text: #1e293b;
+    --group-caption: #334155;
+    --group-caption-alt: #475569; /* 7.2:1 on the alternate step: quieter than the outer caption's 9.9:1 */
+    --edge-label-ink: var(--text-dim);
+    --group-bg-faded: color-mix(in srgb, var(--group-bg) 25%, transparent);
+    --group-border-faded: color-mix(in srgb, var(--group-border) 25%, transparent);
+
+    --family-violet-fill: #f3effe;
+    --family-violet-border: #6d28d9;
+    --family-violet-ink: #4c1d95;
+    --family-violet-text: #4c1d95;
+    --family-violet-panel: #f5f3ff;
+    --family-violet-card: #ffffff;
+    --family-teal-fill: #ddf7f1;
+    --family-teal-border: #0f766e;
+    --family-teal-ink: #134e4a;
+    --family-teal-text: #134e4a;
+    --family-teal-panel: #f0fdfa;
+    --family-teal-card: #ffffff;
+    --family-green-fill: #dcfce7;
+    --family-green-border: #15803d;
+    --family-green-ink: #14532d;
+    --family-green-text: #14532d;
+    --family-green-panel: #f0fdf4;
+    --family-green-card: #ffffff;
+    --family-plum-fill: #fdeef6;
+    --family-plum-border: #a3216a;
+    --family-plum-ink: #831843;
+    --family-plum-text: #831843;
+    --family-plum-panel: #fdf2f8;
+    --family-plum-card: #ffffff;
+    --family-rust-fill: #fff0dc;
+    --family-rust-border: #c2410c;
+    --family-rust-ink: #7c2d12;
+    --family-rust-text: #7c2d12;
+    --family-rust-panel: #fff7ed;
+    --family-rust-card: #ffffff;
+    --family-red-fill: #7f1d1d;
+    --family-red-border: #450a0a;
+    --family-red-ink: #7f1d1d;
+    --family-red-text: #ffffff;
+    --family-red-panel: #fef2f2;
+    --family-red-card: #ffffff;
+
+    --edge-arrow: #334155;
+    --edge-arrow-ink: var(--edge-arrow); /* an emphasised edge sets its hue here */
+
+    --banner-danger-bg: #b3452a;
+    --banner-danger-text: #ffffff;
+
+    --fragment-bg: rgb(20 26 38 / 4%);
+    --fragment-border: #7d8592;
+    --fragment-text: #4f5866;
+    --activation-bg: #f1f5f9;
+    --lifeline: #7d8ba0;
+
+    --you: var(--accent);
+    --you-ink: var(--accent-ink);
+    --you-fill: var(--accent-fill);
+    --agent: #8a5f05;
+    --agent-ink: #ffffff;
+    --agent-fill: #fbf1dc;
+    --agent-text: #7a5304;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* The canvas is the largest surface on screen, so it sets the perceived
+     brightness of the whole view. Pure white made it a light source; --surface
+     is held just off white and the lightest step (a warm near-white) is spent
+     on the nodes instead, the one place it buys separation. */
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --surface-2: #f1f5f9;
+  --old-bg: #e2e8f0;   /* the old version of a walkthrough: the stage, a shade apart */
+  --panel: rgb(248 250 252 / 95%);
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-hover: #7d8ba0;
+
+  --node-bg: #f1f5f9;
+  --node-border: #64748b;      /* 4.7:1 on the canvas: an inked line, not a hairline */
+  --node-border-hover: #334155;
+  --node-text: #0f172a;
+  /* The quiet neutral: an authored grey with a light outline, receding (DESIGN.md, Diagram palette). */
+  --node-quiet-bg: #e5e7eb;
+  --node-quiet-border: #7f8896;
+  --node-quiet-text: #4b5563;
+  --edge: #334155; /* 7.4:1 on the canvas */
+  --edge-hover: #1e293b;
+  --plate: #f8fafc;
+  --plate-text: #1e293b;
+  --node-bg-faded: color-mix(in srgb, var(--node-bg) 25%, transparent);
+  --node-border-faded: color-mix(in srgb, var(--node-border) 25%, transparent);
+  --plate-faded: color-mix(in srgb, var(--plate) 25%, transparent);
+  /* Words outside the focus or a shown highlight: solid, and the quietest grey that keeps 4.5:1 on a faded box,
+     a faded caption plate, inside a group and on every family panel -- 4.95:1 at worst (C-07;
+     `tests/round1-f2.test.tsx`). A clear step back (owner, 2026-11-12), not --text-dim's slight one. */
+  --text-faded: #5d6b7e;
+
+  --text: #0f172a;
+  --text-dim: #475569;
+  --text-faint: #5d6b7e;       /* 5.3:1 on the surface and the panel, 4.9:1
+                                  on a soft-tint button, 4.7:1 on the canvas */
+
+  /* The reader's voice, as in dark -- see there for why it is blue and why
+     the violet decides which blue. The ink blue chosen, #2c4fb8,
+     sat at the old violet's own lightness: 11.9 / 0.6 / 3.3 against #6335bd,
+     one colour to a dichromat. Rather than move either far, both moved a
+     step apart: the accent a shade deeper (#2645a3, still ink blue) and the
+     violet a shade lighter (#7e4fda). CIEDE2000 from each emphasis hue, full
+     colour vision / deuteranopia / protanopia:
+       teal 44.6 / 39.1 / 43.6    amber  53.0 / 57.3 / 53.7
+       coral 42.9 / 56.3 / 47.0   violet 16.0 / 13.0 / 11.0
+
+     Contrast: 8.5:1 on the node body, 7.0:1 on the canvas, 8.0:1 on the tab bar,
+     6.8:1 as the border of its own fill. */
+  --accent: #2645a3;
+  --accent-fill: #e1e6f6;
+  --accent-on-fill: #13235a;   /* 11.9:1 on the fill */
+  --accent-ink: #ffffff;       /* 8.5:1 on the accent */
+  --accent-quiet: #2c4fb8;     /* 6.7:1 on the bar, 5.9:1 on the canvas */
+
+  /* Darkened so each still clears 3:1 against the canvas (teal is the
+     lowest at 4.0:1; violet 4.3:1 -- see `--accent` for why it is lighter). */
+  --g1: #0d8259;
+  --g2: #8a5f05;
+  --g3: #7e4fda;
+  --g4: #ba3826;
+  --flow-line-opacity: 0.85;
+  --walked: #5a7d69;
+
+  --emph-hue: var(--g1);
+  --discussion-hue: var(--text);
+
+  --danger-border: #e3b6ac;
+  --danger-bg: #fdf2ef;
+  --danger-text: #8a3620;
+  --danger-strong: #b3452a;
+
+  /* Dark-tinted, and lighter-handed than dark mode's. Darkening a light page
+     compresses contrast slowly -- dark-on-white stays legible well past the
+     alpha that would black out a dark page -- so this lands lower than 76% and
+     still reads as "behind glass" rather than erased. */
+  --scrim: rgb(15 23 42 / 45%);
+  --shadow-panel: 0 2px 10px rgb(15 23 42 / 8%);
+  --shadow-modal: 0 20px 56px rgb(15 23 42 / 20%);
+
+  /* Tighter and only slightly stronger than dark's. Over white the spread is
+     what reads as heavy, not the opacity, so most of the correction is in the
+     radius -- pushing the alpha instead just turns the ring into a blob. */
+  --node-ring-hover: 0 0 0 2px rgb(51 65 85 / 14%);
+  --node-shadow-selected: 0 0 0 2px rgb(38 69 163 / 26%), 0 2px 8px rgb(15 23 42 / 14%);
+
+  /* This theme's `--text`: 16.7:1 on the node body, 13.5:1 on a selected
+     one, 13.9:1 as an edge's halo on the canvas. */
+  --kbd-focus: #0f172a;
+
+  --group-bg: #ffffff;
+  --group-bg-alt: #f8fafc;
+  --group-border: #475569; /* 4.7:1 on the canvas, 5.3:1 or more on either panel step: the cue for containment */
+  --group-border-alt: #64748b;
+  --group-text: #1e293b;
+  --group-caption: #334155;
+  --group-caption-alt: #475569; /* 7.2:1 on the alternate step: quieter than the outer caption's 9.9:1 */
+  --edge-label-ink: var(--text-dim);
+  --group-bg-faded: color-mix(in srgb, var(--group-bg) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--group-border) 25%, transparent);
+
+  --family-violet-fill: #f3effe;
+  --family-violet-border: #6d28d9;
+  --family-violet-ink: #4c1d95;
+  --family-violet-text: #4c1d95;
+  --family-violet-panel: #f5f3ff;
+  --family-violet-card: #ffffff;
+  --family-teal-fill: #ddf7f1;
+  --family-teal-border: #0f766e;
+  --family-teal-ink: #134e4a;
+  --family-teal-text: #134e4a;
+  --family-teal-panel: #f0fdfa;
+  --family-teal-card: #ffffff;
+  --family-green-fill: #dcfce7;
+  --family-green-border: #15803d;
+  --family-green-ink: #14532d;
+  --family-green-text: #14532d;
+  --family-green-panel: #f0fdf4;
+  --family-green-card: #ffffff;
+  --family-plum-fill: #fdeef6;
+  --family-plum-border: #a3216a;
+  --family-plum-ink: #831843;
+  --family-plum-text: #831843;
+  --family-plum-panel: #fdf2f8;
+  --family-plum-card: #ffffff;
+  --family-rust-fill: #fff0dc;
+  --family-rust-border: #c2410c;
+  --family-rust-ink: #7c2d12;
+  --family-rust-text: #7c2d12;
+  --family-rust-panel: #fff7ed;
+  --family-rust-card: #ffffff;
+  --family-red-fill: #7f1d1d;
+  --family-red-border: #450a0a;
+  --family-red-ink: #7f1d1d;
+  --family-red-text: #ffffff;
+  --family-red-panel: #fef2f2;
+  --family-red-card: #ffffff;
+
+  --edge-arrow: #334155;
+  --edge-arrow-ink: var(--edge-arrow); /* an emphasised edge sets its hue here */
+
+  --banner-danger-bg: #b3452a;
+  --banner-danger-text: #ffffff;
+
+  /* Neutral, as in dark. Frame: 3.5:1 on the canvas, 3.2:1 on its own fill,
+     4.0:1 round an activation bar. Label: 5.3:1 on the fill over the canvas.
+     The bar is lifted off the canvas the way a participant box is. */
+  --fragment-bg: rgb(20 26 38 / 4%);
+  --fragment-border: #7d8592;
+  --fragment-text: #4f5866;
+  --activation-bg: #f1f5f9;
+  /* 3.1:1 on the canvas: `--border-hover` (#8c867b) was 2.98 (round 1, G5). */
+  --lifeline: #7d8ba0;
+
+  /* The two voices, as in dark. Agent 5.2:1 on the panel, 4.7:1 on the
+     canvas; its text 6.1:1 on its own wash; white 5.7:1 on it. */
+  --you: var(--accent);
+  --you-ink: var(--accent-ink);
+  --you-fill: var(--accent-fill);
+  --agent: #8a5f05;
+  --agent-ink: #ffffff;
+  --agent-fill: #fbf1dc;
+  --agent-text: #7a5304;
+}
+
+:root {
+  color: var(--text);
+  background: var(--bg);
+  font-family: var(--font-sans);
+}
+
+/* Every element sets its own tracking, in its own em: `letter-spacing` inherits as a length, so set once on the
+   root it would be 0.04 of the root's size on 11px and 15px text alike. Nothing else sets `letter-spacing`
+   (`tests/tracking-one-token.test.ts`); a monospace run sets `--type-tracking: 0` instead. */
+:where(*) {
+  letter-spacing: var(--type-tracking);
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+}
+
+/* A control the page did not size takes the page's type, not the browser's 13.33px (round 1, Cl-15). `:where` keeps
+   this at no specificity, so every control's own `font` rule still wins. */
+:where(button, input, select, textarea) {
+  font: inherit;
+}
+
+/* The surfaces the browser draws for us still belong to the palette: a text
+   selection in the platform's blue, or a default focus ring, is the page
+   admitting that nobody looked at it. */
+::selection {
+  background: var(--accent-fill);
+  color: var(--accent-on-fill);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * Base (unselected) canvas theme.
+ *
+ * React Flow's `colorMode` follows the applied theme, so removing these rules
+ * does not produce an unstyled diagram -- it produces React Flow's own theme
+ * (node #1e1e1e, edge stroke #3e3e3e in dark). That is off-palette, and the
+ * edge stroke sits at roughly 1.8:1 against the canvas, below the 3:1 floor
+ * for a non-text graphic. The :hover and .selected rules below are written as
+ * deltas on top of these values, so they only read correctly with this base in
+ * place.
+ *
+ * Ownership: `.archer-node` / `.archer-edge` are applied by our own adapter
+ * (`src/diagrams/xflow-adapter.ts`), NOT by React Flow. These rules used to
+ * hang off `.react-flow__node-default`, which React Flow derives from
+ * `node.type` -- so giving a node any other type silently dropped both its
+ * hover and its selected treatment. `.selectable` and `.selected` are still
+ * React Flow's, deliberately: React Flow owns interaction state (marquee
+ * selection never passes through our adapter) and we only own appearance.
+ *
+ * Class namespaces, so independent channels cannot capture each other:
+ *   `archer-node` / `archer-edge`  -- identity, always present
+ *   `archer-focus-*`               -- presentation focus (see focus-style.ts)
+ *   `archer-emph-*`                -- reserved for agent emphasis
+ * A member of one namespace must never be read as a member of another.
+ */
+.archer-node {
+  box-sizing: border-box;
+  background: var(--node-bg);
+  /* Inked, not a hairline: 1.5px and a 12px corner (DESIGN.md, Diagram palette), at the opening zoom and Fit; a card
+     rounds less than the 16px panel it sits in. */
+  border: var(--line-node) solid var(--node-border);
+  border-radius: var(--radius-node);
+  color: var(--node-text);
+  /* The label is centred both ways. `font-size` and `line-height` are the
+     numbers `layout/graph-metrics.ts` sizes every node box from, so changing
+     either here without changing it there overflows the box. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: var(--type-canvas-node-label);
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+/* Above the diamond's own painted square, which is a sibling. */
+.archer-node-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* One row per line the layout wrapped the label into. `nowrap` because the
+   box was sized for exactly these rows: a row the browser re-wrapped would be
+   a row nobody reserved height for. */
+.archer-node-label-row {
+  display: block;
+  white-space: nowrap;
+}
+
+/* A flowchart node's title and description (DESIGN.md, Typography and Diagram palette: Node text): the
+   title bold and a step larger, the description regular on a comfortable line, a small gap between. Sizes,
+   lines and gap are `NODE_TITLE_*` and `NODE_DESCRIPTION_*` in `layout/graph-metrics.ts`, which sized the
+   box. The description is in the node's own full ink (owner, 2026-11-12: never the chrome's dim grey), so a
+   family's words colour it as they colour the title; selection's words keep selection's ink. */
+.archer-node-title-row {
+  font-size: var(--type-canvas-node-title);
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.archer-node-description-row {
+  color: inherit;
+  font-size: var(--type-canvas-node-description);
+  font-weight: 400;
+  line-height: 23px;
+}
+
+.archer-node-title-row + .archer-node-description-row {
+  margin-top: 4px;
+}
+
+/* A flowchart person's glyph, beside its title's first row in the title's ink (PERSON_GLYPH_PX and its gap). */
+.archer-node-person-glyph {
+  display: inline-flex;
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+
+/* `.react-flow__edge-path` is the class our own `ElkEdge` puts on the routed
+   polyline; React Flow's internals also look for it, so it stays. Scoping it
+   under `.archer-edge` keeps the stroke ours rather than every path React Flow
+   might ever draw. */
+.archer-edge .react-flow__edge-path {
+  stroke: var(--edge);
+  /* Inked: 2px (DESIGN.md, Diagram palette). Owner, 2026-11-15: lighter than the 2.5px of 2026-11-11 ("still a bit
+     thin"), which with 2px borders read heavy and "cartoony". */
+  stroke-width: 2;
+}
+
+/*
+ * How the line is drawn: `-->` solid, `-.->` dotted, `==>` thick.
+ *
+ * Shape only -- a dash pattern and a weight -- so it reads in greyscale and
+ * needs no token. Both are properties hover, selection and emphasis ALSO set
+ * on this same stroke, so neither is written as a plain value they would
+ * replace:
+ *
+ *   - thick is restated for EVERY rule that sets the stroke's width: each
+ *     has a twin directly after it, the same selector plus the line class,
+ *     2px heavier. A thick edge is therefore heavier than a solid one in the
+ *     same state, in every state -- one rule on the base stroke would be
+ *     flattened by the first hover.
+ *   - dotted, dashed and dash-dot are dash patterns no state removes, and
+ *     emphasis never adds one (ADR 0030): a pattern is the author's, and its
+ *     meaning is in the Key.
+ *
+ * The pattern is set on the path, never on the edge's group, and the
+ * arrowhead is a marker with a stroke of its own: it stays solid.
+ * `tests/edge-lines.test.tsx` enumerates the vocabulary and the states.
+ */
+.archer-edge.archer-line-thick .react-flow__edge-path {
+  stroke-width: 4;
+}
+
+.archer-edge.archer-line-dotted .react-flow__edge-path {
+  stroke-dasharray: 2 4;
+}
+
+.archer-edge.archer-line-dashed .react-flow__edge-path {
+  stroke-dasharray: 6 4;
+}
+
+.archer-edge.archer-line-dashdot .react-flow__edge-path {
+  stroke-dasharray: 8 3 2 3;
+}
+
+/*
+ * EDGE WEIGHT FOLLOWS THE NOTATION (phase 3b, from the retired Line map
+ * design). The canvas says what it draws (`data-notation` on the graph
+ * surface, `DiagramCanvas`), and the resting line takes the notation's weight:
+ *
+ *   - RAILS, 2px, for what flows: data flow, C4 and architecture (the rule
+ *     above, the default).
+ *   - HAIRLINES, 1.25px, where the line is a relation and the boxes carry the
+ *     reading: ER relationships, whose crow's feet are the message (and
+ *     sequence messages, on the other canvas: `.archer-seq-message-stroke`).
+ *   - Between the two for a state machine's transitions, 1.5px.
+ *
+ * Only the resting weight: hover, selection and emphasis set their own widths
+ * and outrank these, so every notation looks the same when pointed at.
+ */
+[data-notation="state"] .archer-edge .react-flow__edge-path {
+  stroke-width: 1.5;
+}
+
+[data-notation="state"] .archer-edge.archer-line-thick .react-flow__edge-path {
+  stroke-width: 3.5;
+}
+
+[data-notation="er"] .archer-edge .react-flow__edge-path {
+  stroke-width: 1.25;
+}
+
+[data-notation="er"] .archer-edge.archer-line-thick .react-flow__edge-path {
+  stroke-width: 3;
+}
+
+/*
+ * The caption plate. `font-size`, `line-height` and the padding are the
+ * numbers `layout/graph-metrics.ts` reserves each caption's box with -- ELK
+ * routes every other wire around that box, so drawing the plate any bigger
+ * puts it back on top of its neighbours.
+ */
+/* Treatment A (owner's choice, redesign slice 6): no plate. Regular italic in the softer slate; the line stops round
+   the words, the gap painted inline in the colour of what is behind the label (`diagrams/label-ground.ts`), so it
+   reads as a break in the line, never a box. On a family panel the words take the family's ink
+   (`--edge-label-ink`, set inline). Regular is the weight `edgeLabelBox` measures it in. */
+.archer-edge-label {
+  padding: 2px 4px;
+  color: var(--edge-label-ink);
+  font-size: var(--type-canvas-edge-label);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* A part of a label's gap, where a panel's edge runs through it (`GroundPieces`), behind the words. */
+.archer-edge-label-ground {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.archer-edge-label-row {
+  display: block;
+}
+
+/* A C4 relationship's technology and description, under its label on the same plate, in the C4 card's
+   secondary lines (`.archer-c4-type`, `.archer-c4-description`), so edges and boxes read as one system.
+   Sizes are `layout/graph-metrics.ts`'s (EDGE_TECHNOLOGY_*), which the layout reserves the plate with. */
+/* Opaque: the label's ink is already the dim one (`.archer-edge-label`); faded once more it fell under 4.5:1
+   on the light plate (axe, 2026-11-11). */
+.archer-edge-label-technology {
+  display: block;
+  font-size: var(--type-canvas-edge-detail);
+  line-height: 15px;
+  font-weight: 400;
+}
+
+.archer-edge-label-description {
+  display: block;
+  font-weight: 400;
+}
+
+.archer-edge .react-flow__edge-text {
+  fill: var(--plate-text);
+  font-size: var(--type-canvas-edge-detail);
+  font-weight: 600;
+}
+
+.archer-edge .react-flow__edge-textbg {
+  fill: var(--plate);
+  fill-opacity: 0.96;
+}
+
+.archer-node.selectable:hover:not(.selected) {
+  box-shadow: var(--node-ring-hover);
+}
+
+/* Hover recolours the border only where emphasis does not own it (ADR 0030). */
+.archer-node.selectable:hover:not(.selected):not(.archer-emph) {
+  border-color: var(--node-border-hover) !important;
+}
+
+.archer-node.selected {
+  background: var(--accent-fill) !important;
+  border: var(--line-selected) solid var(--accent) !important;
+  box-shadow: var(--node-shadow-selected) !important;
+  color: var(--accent-on-fill) !important;
+}
+
+/*
+ * Keyboard focus -- a third state, drawn so it can be read alongside the other
+ * two.
+ *
+ * Focus is an INSET ring; selection fills the body and glows outside it; agent
+ * emphasis is a detached outline further out again. Three different shapes at
+ * three different radii, so a node can be focused, selected and emphasised at
+ * once and still say all three. Shape carries it, not colour, which is what
+ * keeps it legible in greyscale.
+ *
+ * `!important` and a place after `.archer-node.selected` because that rule is
+ * itself `!important`: without both, focusing a selected node would silently
+ * drop the ring, which is exactly the pairing that most needs to be told
+ * apart. The selected case re-states the selection glow rather than replacing
+ * it, since one element has only one `box-shadow`.
+ *
+ * The class is applied only while focus is genuinely inside the canvas (see
+ * `EmphasisSurface`), so this never paints a ring the keyboard has left.
+ */
+.archer-node.archer-kbd-focus {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus) !important;
+}
+
+.archer-node.archer-kbd-focus.selected {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus), var(--node-shadow-selected) !important;
+}
+
+/* React Flow's own default outline would sit on top of the ring above and is
+   the one thing here that is not ours to theme. */
+.archer-node:focus,
+.archer-node:focus-visible {
+  outline: none;
+}
+
+.archer-node.selected .react-flow__handle {
+  background: var(--accent);
+  border-color: var(--accent-fill);
+}
+
+/*
+ * Node shapes.
+ *
+ * For every shape but two, the shape IS this element's `border-radius` --
+ * which is why the box, the fill and all three rings stay on `.archer-node`
+ * itself. `box-shadow` (hover, selection, the keyboard ring, the emphasis
+ * breath) and `outline` (the emphasis ring) both follow the radius, so each
+ * state rule above and below applies to a stadium or a circle with no rule of
+ * its own. `layout/graph-metrics.ts` carries wires on to the same outlines.
+ *
+ * The two are the diamond and the hexagon, which no radius can make. Each is
+ * painted by an element INSIDE the node and restates every state against it;
+ * see their blocks below.
+ *
+ * The class names the OUTLINE (`outlineOf`), not the declared shape: a plain
+ * rectangle with the `database` class arrives here as `archer-shape-cylinder`,
+ * the same class `shape: cylinder` gets, so there is one cylinder and no rule
+ * keyed on the class to stack a second one on top.
+ */
+.archer-node.archer-shape-rectangle {
+  border-radius: var(--radius-node);
+}
+
+.archer-node.archer-shape-rounded {
+  border-radius: 16px;
+}
+
+.archer-node.archer-shape-stadium {
+  border-radius: 999px;
+}
+
+.archer-node.archer-shape-circle {
+  border-radius: 50%;
+}
+
+/* A cylinder: the top and bottom edges become half-ellipses 7px deep
+   (`CYLINDER_CAP_PX`), and `::before` closes the top one into a lid.
+   `padding-top` is the room under the lid the layout reserved. */
+.archer-node.archer-shape-cylinder {
+  padding-top: 14px;
+  border-radius: 50% / 7px;
+}
+
+.archer-node.archer-shape-cylinder::before {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  left: -1px;
+  box-sizing: border-box;
+  height: 14px;
+  border: var(--line-chrome) solid;
+  border-color: inherit;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+/* A subroutine: a square-cornered box with a bar standing inside each end,
+   8px in (`SUBROUTINE_BAR_PX`; 7px here plus the node's own 1px border). The
+   bars inherit the border's colour, so hover, selection and emphasis recolour
+   them with the box and no state needs a rule for them. */
+.archer-node.archer-shape-subroutine {
+  border-radius: 0;
+}
+
+.archer-node.archer-shape-subroutine::before {
+  position: absolute;
+  top: 0;
+  right: 7px;
+  bottom: 0;
+  left: 7px;
+  border-style: solid;
+  border-width: 0 var(--line-chrome);
+  border-color: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+/*
+ * The diamond is the one outline no radius can make, so it is a square turned
+ * 45 degrees INSIDE the node (`GraphNode` renders it), and the node element
+ * itself paints nothing. Turned rather than clipped: `clip-path` would cut the
+ * rings off with the corners, where a rotated box keeps its `box-shadow` and
+ * `outline` and turns them with it.
+ *
+ * The cost is that every state has to be restated against the inner square,
+ * which is the block below -- the same declarations as the rules for every
+ * other shape, one selector deeper. `tests/node-shapes.test.tsx` enumerates
+ * the states so one cannot be added for the box and forgotten here.
+ *
+ * `:not(#archer-none)` matches every element and exists only for the weight an
+ * id carries: the state rules being cancelled are `!important` at up to four
+ * classes, and this has to outrank all of them wherever it sits in the file.
+ */
+.archer-node.archer-shape-diamond:not(#archer-none) {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  animation: none !important;
+}
+
+.archer-node-diamond {
+  position: absolute;
+  /* (1 - 1/sqrt(2)) / 2: the square whose diagonal is the node's width. */
+  inset: 14.645%;
+  box-sizing: border-box;
+  border: var(--line-node) solid var(--node-border);
+  border-radius: 3px;
+  background: var(--node-bg);
+  transform: rotate(45deg);
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.archer-shape-diamond.selectable:hover:not(.selected) .archer-node-diamond {
+  border-color: var(--node-border-hover);
+  box-shadow: var(--node-ring-hover);
+}
+
+.archer-shape-diamond.selectable.archer-emph:hover:not(.selected) .archer-node-diamond {
+  border-color: var(--emph-hue);
+}
+
+.archer-shape-diamond.selected .archer-node-diamond {
+  border: var(--line-node) solid var(--accent);
+  background: var(--accent-fill);
+  box-shadow: var(--node-shadow-selected);
+}
+
+.archer-shape-diamond.selected.archer-emph .archer-node-diamond {
+  border-color: var(--emph-hue);
+}
+
+.archer-shape-diamond.archer-kbd-focus .archer-node-diamond {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus);
+}
+
+.archer-shape-diamond.archer-kbd-focus.selected .archer-node-diamond {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus), var(--node-shadow-selected);
+}
+
+/* Emphasis is the border's colour and nothing else (ADR 0030). */
+.archer-shape-diamond.archer-emph .archer-node-diamond {
+  border: var(--line-node) solid var(--emph-hue);
+}
+
+/*
+ * The hexagon: six corners, so an inline SVG inside the node (`GraphNode`
+ * renders it, from the same corners the layout carries wires to), and -- as
+ * with the diamond -- the node element itself paints nothing. An SVG rather
+ * than a `clip-path`, which would cut the rings off with the corners.
+ *
+ * Three polygons, back to front, because an SVG has no `box-shadow`, `outline`
+ * or inset shadow to borrow:
+ *   -halo   the body's outline again, stroked wide and faint: the hover ring
+ *           and the selection glow;
+ *   -body   the fill and the border, which emphasis colours;
+ *   -inset  2px inside the body: the keyboard ring, and the system kind's
+ *           second frame.
+ * The same three shapes at the same three radii as every other node, so a
+ * hexagon can be focused, selected and emphasised at once and say all three.
+ *
+ * The border is removed outright (not just made transparent) so the SVG's
+ * origin is the node's own corner in every state, selected included.
+ * `tests/node-shapes.test.tsx` enumerates the states for this block exactly as
+ * it does for the diamond's.
+ */
+.archer-node.archer-shape-hexagon:not(#archer-none) {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  animation: none !important;
+}
+
+.archer-node-hexagon {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.archer-node-hexagon-halo,
+.archer-node-hexagon-inset {
+  fill: none;
+  stroke: none;
+  stroke-linejoin: round;
+}
+
+.archer-node-hexagon-body {
+  fill: var(--node-bg);
+  stroke: var(--node-border);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: fill 120ms ease, stroke 120ms ease;
+}
+
+.archer-shape-hexagon.archer-kind-system .archer-node-hexagon-inset {
+  stroke: var(--node-border);
+  stroke-width: 1;
+}
+
+.archer-shape-hexagon.archer-kind-external .archer-node-hexagon-body {
+  stroke-dasharray: 4 3;
+}
+
+.archer-shape-hexagon.archer-category-dashed .archer-node-hexagon-body {
+  stroke-dasharray: 4 3;
+}
+
+.archer-shape-hexagon.archer-emph .archer-node-hexagon-body {
+  stroke: var(--emph-hue);
+  stroke-width: 3;
+}
+
+.archer-shape-hexagon.selectable:hover:not(.selected):not(.archer-emph) .archer-node-hexagon-body {
+  stroke: var(--node-border-hover);
+}
+
+.archer-shape-hexagon.selectable:hover:not(.selected) .archer-node-hexagon-halo {
+  stroke: color-mix(in srgb, var(--node-border-hover) 18%, transparent);
+  stroke-width: 5;
+}
+
+/* `!important` for the reason `.archer-node.selected` is: the user's own
+   pointing wins the fill and the glow, whatever else applies. */
+.archer-shape-hexagon.selected .archer-node-hexagon-body {
+  fill: var(--accent-fill) !important;
+  stroke: var(--accent) !important;
+  stroke-width: 2.5 !important;
+  stroke-dasharray: none !important;
+}
+
+/* ...but an emphasised node keeps the agent's border colour while selected:
+   selection says itself in the fill and the glow (ADR 0030). */
+.archer-shape-hexagon.selected.archer-emph .archer-node-hexagon-body {
+  stroke: var(--emph-hue) !important;
+}
+
+.archer-shape-hexagon.selected .archer-node-hexagon-halo {
+  stroke: color-mix(in srgb, var(--accent) 24%, transparent) !important;
+  stroke-width: 8 !important;
+}
+
+.archer-shape-hexagon.archer-kbd-focus .archer-node-hexagon-inset,
+.archer-shape-hexagon.archer-kbd-focus.selected .archer-node-hexagon-inset {
+  stroke: var(--kbd-focus);
+  stroke-width: 3;
+}
+
+/*
+ * Semantic classes.
+ *
+ * Every kind says what it is in WORDS (the caption) and with a glyph, both in
+ * the node's own text colour -- so a kind is never told apart by hue, and
+ * needs no token of its own. Three kinds also change the box, each in a way
+ * that survives greyscale: a system is double-framed, an external system is
+ * dashed, a database rectangle is a cylinder (by its shape class; see the
+ * note on node shapes above).
+ */
+.archer-node-kind {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  font-size: var(--type-canvas-kind);
+  font-weight: 500;
+  line-height: 16px;
+  text-transform: capitalize;
+  opacity: 0.78;
+}
+
+/* A second frame inside the border: the thing the diagram is about. Drawn as
+   an inset shadow so it follows the shape; hover, selection and the keyboard
+   ring replace it for as long as they apply, which is the order of importance
+   those states should have anyway. */
+.archer-node.archer-kind-system {
+  box-shadow: inset 0 0 0 2px var(--node-bg), inset 0 0 0 3px var(--node-border);
+}
+
+.archer-shape-diamond.archer-kind-system .archer-node-diamond {
+  box-shadow: inset 0 0 0 2px var(--node-bg), inset 0 0 0 3px var(--node-border);
+}
+
+/* Outside the boundary. Selection redraws the border solid, deliberately:
+   a selected node should read as selected first. */
+.archer-node.archer-kind-external {
+  border-style: dashed;
+}
+
+.archer-shape-diamond.archer-kind-external .archer-node-diamond {
+  border-style: dashed;
+}
+
+/*
+ * Diagram families (DESIGN.md, Diagram palette; `diagrams/palette.ts` decides which).
+ *
+ * A family is what a thing IS, so it is written into the same custom properties the neutral node and
+ * panel paint from (`--node-bg`, `--node-border`, `--node-text`, `--group-*`), on the element itself. Every
+ * state rule -- hover, selection, the keyboard ring, the agent's emphasis, focus fading -- then applies
+ * unchanged and draws over it, and selection still fills the body blue: a family never looks like a state.
+ * The words are the family's full ink, title and description alike (owner, 2026-11-12). The faded values are
+ * restated here because the root's are mixed from the root's neutral colours. `:where()` keeps each rule at
+ * two classes, so the fade (`.react-flow__node.archer-dimmed`, later) still wins.
+ */
+.archer-node.archer-family-violet {
+  --node-border: var(--family-violet-border);
+  --node-border-faded: color-mix(in srgb, var(--family-violet-border) 25%, transparent);
+  --node-text: var(--family-violet-text);
+}
+
+.archer-node.archer-family-teal {
+  --node-border: var(--family-teal-border);
+  --node-border-faded: color-mix(in srgb, var(--family-teal-border) 25%, transparent);
+  --node-text: var(--family-teal-text);
+}
+
+.archer-node.archer-family-green {
+  --node-border: var(--family-green-border);
+  --node-border-faded: color-mix(in srgb, var(--family-green-border) 25%, transparent);
+  --node-text: var(--family-green-text);
+}
+
+.archer-node.archer-family-plum {
+  --node-border: var(--family-plum-border);
+  --node-border-faded: color-mix(in srgb, var(--family-plum-border) 25%, transparent);
+  --node-text: var(--family-plum-text);
+}
+
+.archer-node.archer-family-rust {
+  --node-border: var(--family-rust-border);
+  --node-border-faded: color-mix(in srgb, var(--family-rust-border) 25%, transparent);
+  --node-text: var(--family-rust-text);
+}
+
+.archer-node.archer-family-red {
+  --node-border: var(--family-red-border);
+  --node-border-faded: color-mix(in srgb, var(--family-red-border) 25%, transparent);
+  --node-text: var(--family-red-text);
+}
+
+/* A node with a colour of its own is filled in it; one that only sits in a family panel is a light card with
+   the family's border and ink (the reference's GPU panels: tinted panel, light cards). */
+.archer-node.archer-family-violet:where(:not(.archer-family-card)) {
+  --node-bg: var(--family-violet-fill);
+  --node-bg-faded: color-mix(in srgb, var(--family-violet-fill) 25%, transparent);
+}
+
+.archer-node.archer-family-teal:where(:not(.archer-family-card)) {
+  --node-bg: var(--family-teal-fill);
+  --node-bg-faded: color-mix(in srgb, var(--family-teal-fill) 25%, transparent);
+}
+
+.archer-node.archer-family-green:where(:not(.archer-family-card)) {
+  --node-bg: var(--family-green-fill);
+  --node-bg-faded: color-mix(in srgb, var(--family-green-fill) 25%, transparent);
+}
+
+.archer-node.archer-family-plum:where(:not(.archer-family-card)) {
+  --node-bg: var(--family-plum-fill);
+  --node-bg-faded: color-mix(in srgb, var(--family-plum-fill) 25%, transparent);
+}
+
+.archer-node.archer-family-rust:where(:not(.archer-family-card)) {
+  --node-bg: var(--family-rust-fill);
+  --node-bg-faded: color-mix(in srgb, var(--family-rust-fill) 25%, transparent);
+}
+
+.archer-node.archer-family-red:where(:not(.archer-family-card)) {
+  --node-bg: var(--family-red-fill);
+  --node-bg-faded: color-mix(in srgb, var(--family-red-fill) 25%, transparent);
+}
+
+.archer-node.archer-family-violet:where(.archer-family-card) {
+  --node-bg: var(--family-violet-card);
+  --node-bg-faded: color-mix(in srgb, var(--family-violet-card) 25%, transparent);
+  --node-text: var(--family-violet-ink);
+}
+
+.archer-node.archer-family-teal:where(.archer-family-card) {
+  --node-bg: var(--family-teal-card);
+  --node-bg-faded: color-mix(in srgb, var(--family-teal-card) 25%, transparent);
+  --node-text: var(--family-teal-ink);
+}
+
+.archer-node.archer-family-green:where(.archer-family-card) {
+  --node-bg: var(--family-green-card);
+  --node-bg-faded: color-mix(in srgb, var(--family-green-card) 25%, transparent);
+  --node-text: var(--family-green-ink);
+}
+
+.archer-node.archer-family-plum:where(.archer-family-card) {
+  --node-bg: var(--family-plum-card);
+  --node-bg-faded: color-mix(in srgb, var(--family-plum-card) 25%, transparent);
+  --node-text: var(--family-plum-ink);
+}
+
+.archer-node.archer-family-rust:where(.archer-family-card) {
+  --node-bg: var(--family-rust-card);
+  --node-bg-faded: color-mix(in srgb, var(--family-rust-card) 25%, transparent);
+  --node-text: var(--family-rust-ink);
+}
+
+.archer-node.archer-family-red:where(.archer-family-card) {
+  --node-bg: var(--family-red-card);
+  --node-bg-faded: color-mix(in srgb, var(--family-red-card) 25%, transparent);
+  --node-text: var(--family-red-ink);
+}
+
+/* The quiet neutral (`palette.ts`, `categoryQuiet`): an authored grey with a light outline -- "Dropped" in the
+   owner's loop -- a step lighter than the plain neutral and receding, still 4.5:1 and 3:1. */
+.archer-node.archer-neutral-quiet {
+  --node-bg: var(--node-quiet-bg);
+  --node-border: var(--node-quiet-border);
+  --node-text: var(--node-quiet-text);
+  --node-bg-faded: color-mix(in srgb, var(--node-quiet-bg) 25%, transparent);
+  --node-border-faded: color-mix(in srgb, var(--node-quiet-border) 25%, transparent);
+}
+
+/* The solid red takes white words, so the keyboard's inset ring is white on it too -- until selection paints
+   the body its own fill, where the ring is the theme's again. */
+.archer-node.archer-family-red:where(:not(.selected)) {
+  --kbd-focus: var(--family-red-text);
+}
+
+/* An authored category that declares a dash: its outline, as an external's. Selection draws it solid. */
+.archer-node.archer-category-dashed {
+  border-style: dashed;
+}
+
+.archer-shape-diamond.archer-category-dashed .archer-node-diamond {
+  border-style: dashed;
+}
+
+.archer-edge.selectable {
+  cursor: pointer;
+}
+
+.archer-edge.selectable:hover .react-flow__edge-path {
+  stroke: var(--edge-hover) !important;
+  stroke-width: 3 !important;
+}
+
+.archer-edge.archer-line-thick.selectable:hover .react-flow__edge-path {
+  stroke-width: 5 !important;
+}
+
+/* A node's own connections while it is hovered or selected (`ATTACHED_EDGE_CLASS`, layout eval 2026-11-15): the
+   accent, at a weight between the resting line (2) and a selected one (6), so it reads as "this node's lines", never
+   as a selection, and is drawn above the others (zIndex). Stated before the selected rules: a selected line that is also attached stays selected. The accent alone is 1.2-1.6:1 against the resting grey, so
+   the extra width carries it, as for selection. Inside an agent's highlight it comes back to full strength while the
+   reader is on its node, like a keyboard ring; nothing else fades, because fading is the highlight's. */
+.archer-edge.archer-edge-attached .react-flow__edge-path {
+  stroke: var(--accent) !important;
+  stroke-width: 4 !important;
+}
+
+.archer-edge.archer-line-thick.archer-edge-attached .react-flow__edge-path {
+  stroke-width: 6 !important;
+}
+
+.archer-edge.archer-dimmed.archer-edge-attached .react-flow__edge-path {
+  opacity: 1 !important;
+}
+
+/* Selected, whether or not the pointer can select it: Hand mode drops `.selectable` from every edge, and
+   Space still selects one (aria-pressed). Without this it showed React Flow's grey, 1.4:1 against
+   unselected (round 1 R6-claude-02). The accent alone is 1.2–1.6:1 against the resting line's grey, so
+   the state is carried by WIDTH in the accent: 2 units more each side than the resting line, which keeps
+   at least one whole device pixel of accent on the canvas (6.6:1 light, 8.5:1 dark) each side down to
+   the opening zoom of a 1000px window (about 0.8), whatever the line's subpixel position. */
+.archer-edge.selected .react-flow__edge-path {
+  stroke: var(--accent) !important;
+  stroke-width: 6 !important;
+}
+
+.archer-edge.archer-line-thick.selected .react-flow__edge-path {
+  stroke-width: 8 !important;
+}
+
+.archer-edge.selected .react-flow__edge-text {
+  fill: var(--accent-on-fill) !important;
+  font-weight: 700;
+}
+
+.archer-edge.selected .react-flow__edge-textbg {
+  fill: var(--accent-fill) !important;
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+
+/*
+ * Keyboard focus on an EDGE -- the same third state the nodes have, drawn so
+ * it can be read alongside the other two.
+ *
+ * A HALO, not a stroke change. Selection already owns the edge's stroke (it
+ * recolours it to `--accent` at 4px, `!important`), and hover owns it too;
+ * a focus ring that also recoloured the stroke would be indistinguishable from
+ * a selection, and would lose whichever of the two lost the cascade. The halo
+ * is a separate property, so a focused edge that is also selected says both:
+ * an accent line inside a `--kbd-focus` glow. That mirrors the node treatment,
+ * where shape rather than colour is what tells the three states apart.
+ *
+ * The class is applied only while focus is genuinely inside the canvas, and
+ * only to the channel the keyboard is in (see `EmphasisSurface`).
+ *
+ * SOLID, NOT SOFT (round 1 G5-F4). A blurred glow fades to the canvas before
+ * it reaches 3:1 (light peaked at 2.8:1 beside the line). Unblurred shadows
+ * shifted each way dilate the line instead: first a 1.5px band of the canvas,
+ * so the ring does not merge into a dark line, then a 2px `--kbd-focus` rail
+ * each side, 13.9:1 (light) and 14.9:1 (dark) on `--bg`.
+ */
+.archer-edge.archer-kbd-focus .react-flow__edge-path {
+  filter:
+    drop-shadow(1.5px 0 0 var(--bg)) drop-shadow(-1.5px 0 0 var(--bg))
+    drop-shadow(0 1.5px 0 var(--bg)) drop-shadow(0 -1.5px 0 var(--bg))
+    drop-shadow(2px 0 0 var(--kbd-focus)) drop-shadow(-2px 0 0 var(--kbd-focus))
+    drop-shadow(0 2px 0 var(--kbd-focus)) drop-shadow(0 -2px 0 var(--kbd-focus));
+}
+
+/* A FOCUS RING NEVER FADES WITH WHAT IT RINGS (round 1 R6-claude-01). The rail above is the line's own
+   filter, so on a line outside a walkthrough step or a highlight it took the line's 0.25 and read at
+   1.7:1 (light) and 2.1:1 (dark). The line the keyboard is on comes back to full strength while it is
+   there; it steps back again when focus moves on. The sequence canvas fades its shapes the same way
+   ("Off focus" below) and is lifted the same way. */
+.archer-edge.archer-dimmed.archer-kbd-focus .react-flow__edge-path {
+  opacity: 1 !important;
+}
+
+/* A copy of the route that keyboard focus could be drawn on. Never the
+   pointer target: that one keeps its shape whatever the edge's state. */
+.archer-edge-focus-mark {
+  fill: none;
+  stroke: none;
+  pointer-events: none;
+}
+
+/* The focusable element is the edge's own `<g>`, and a UA outline on it is
+   drawn round the whole bounding box rather than the line. Ours is above. */
+.archer-edge:focus,
+.archer-edge:focus-visible {
+  outline: none;
+}
+
+/* ==================================================================
+ * Agent emphasis -- a channel of its own.
+ *
+ * COLOUR AND NOTHING ELSE (ADR 0030). An emphasised node's border, and an
+ * emphasised line and its arrowheads, take the group's hue; a `flow` group
+ * adds moving arrows (`EmphasisPacket`). No ring, glow, band, dash or tint.
+ * The hue comes from the group's POSITION (teal, violet, coral); amber is the
+ * agent's voice and never a group. "Proposed" is said in the legend label.
+ *
+ * TWO VOICES. The user's selection fills the body with the accent and glows;
+ * emphasis never fills a body. Where a node is both, selection keeps its fill
+ * and glow and the emphasis keeps the border, so both still read. On an edge,
+ * selection takes the stroke and the emphasis keeps the arrowheads.
+ *
+ * These selectors live entirely in the `archer-emph-*` namespace and never
+ * touch `archer-focus-*`. Presentation focus and emphasis are separate
+ * channels; neither may capture the other's classes. Their one shared property
+ * is opacity, which focus sets inline and no selector here can reach: that
+ * intersection is resolved in `diagrams/xflow-adapter.ts` (`dimmedBy`), where
+ * an emphasised element is exempt from focus dimming.
+ * ================================================================== */
+
+.archer-emph-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* The agent picks an enum, the enum picks a class, the class picks a token.
+   Nothing the agent sends reaches a CSS property. */
+.archer-emph-palette-teal {
+  --emph-hue: var(--g1);
+}
+
+.archer-emph-palette-violet {
+  --emph-hue: var(--g3);
+}
+
+.archer-emph-palette-coral {
+  --emph-hue: var(--g4);
+}
+
+/* After the palette classes: a walked step keeps its group's slot and draws in the quieter tone. */
+.archer-emph--walked {
+  --emph-hue: var(--walked);
+}
+/* ...and a hair thinner, so in light mode (3.8:1 against the current step's 4.0:1) the step still leads.
+   A box only: a line keeps its width, which the line key's thick and solid are told apart by. */
+.archer-node.archer-emph.archer-emph--walked {
+  border-width: var(--line-selected) !important;
+}
+
+/* ---------- emphasised nodes ---------- */
+
+/* The border, in the hue, and nothing outside it. `!important` because the
+   border is also what selection and React Flow's node styles are written in;
+   emphasis wins the border colour, and selection keeps the fill and the glow
+   (see `.archer-node.selected`). */
+.archer-node.archer-emph {
+  border-color: var(--emph-hue) !important;
+  /* Heavier than the resting 1.5px border, as it always was (ADR 0030: colour, not a ring). */
+  border-width: var(--line-emphasis) !important;
+  border-style: solid !important;
+}
+
+/* ---------- emphasised edges ---------- */
+.archer-edge.archer-emph .react-flow__edge-path {
+  stroke: var(--emph-hue);
+  /* The resting line's own weight: emphasis is colour, not width (ADR 0030). */
+  stroke-width: 2;
+}
+
+.archer-edge.archer-line-thick.archer-emph .react-flow__edge-path {
+  stroke-width: 4;
+}
+
+/* The moving arrows carry a flow's direction, so its line steps back. */
+.archer-edge.archer-emph.archer-emph-style-flow .react-flow__edge-path {
+  stroke-opacity: var(--flow-line-opacity);
+}
+
+/* A dotted line has already stepped back by its gaps. */
+.archer-edge.archer-line-dotted.archer-emph.archer-emph-style-flow .react-flow__edge-path {
+  stroke-opacity: 0.9;
+}
+
+/* Arrowheads take the line's hue: each edge's markers are its own defs, so
+   the variable inherits from the edge (`ArrowMarkers`). Selection does not
+   reach them, so a selected emphasised edge keeps the agent's colour here. */
+.archer-edge.archer-emph {
+  --edge-arrow-ink: var(--emph-hue);
+}
+
+/* A flow's moving arrows: the line's hue, a stroke and nothing more. */
+.archer-emph-chevrons {
+  color: var(--emph-hue);
+  pointer-events: none;
+}
+
+.archer-emph-chevron {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/*
+ * Reduced motion.
+ *
+ * Published as a class by `emphasis/reduced-motion.ts` rather than asked for a
+ * second time in a media query here, so the stylesheet and the component that
+ * parks the packet cannot disagree about what the viewer asked for.
+ *
+ * Nothing is hidden: the hue and the parked arrows carry the whole message
+ * with every animation switched off. Hiding them would withdraw the claim that
+ * the edge is part of the path, which is a different statement from "do not
+ * animate it".
+ */
+.archer-emph-static .archer-edge.archer-emph.archer-emph-style-flow .react-flow__edge-path {
+  /* No packet in flight to defer to, so the line carries the group itself. */
+  stroke-opacity: 1;
+}
+
+/* Emphasis arriving, changing or leaving recolours boxes at once: their 120 ms colour fades would be
+   the only thing still animating on the canvas. */
+.archer-emph-static :is(.archer-node, .archer-node-diamond, .archer-group.archer-element-group) {
+  transition: none;
+}
+
+/*
+ * Off focus (round 1, C-07): what is outside a focus or a walkthrough's path steps back by its SHAPES only. The
+ * adapter still writes `opacity: 0.25` on the node's wrapper (`focus-style.ts`); here the wrapper is lifted back to
+ * full strength, its fill and outline fade through colour, and its words take `--text-faded`, which keeps 4.5:1.
+ * A dimmed line keeps its faded stroke; its caption is coloured by the adapter (`DIMMED_CAPTION`).
+ */
+.react-flow__node.archer-dimmed {
+  opacity: 1 !important;
+  --node-bg: var(--node-bg-faded);
+  --node-border: var(--node-border-faded);
+  --node-text: var(--text-faded);
+  --group-bg: var(--group-bg-faded);
+  --group-border: var(--group-border-faded);
+  --group-text: var(--text-faded);
+  --group-caption: var(--text-faded);
+}
+/* A plain group's frame a shown highlight does not name steps back as a node's shapes do (owner, 2026-11-12); its
+   caption takes the faded ink, which keeps 4.5:1. After the family panels, so their hue fades too. */
+.react-flow__node.archer-group.archer-emph-quiet {
+  --group-bg: var(--group-bg-faded);
+  --group-border: var(--group-border-faded);
+  --group-caption: var(--text-faded);
+}
+/* The muted second lines (a C4 type, a node's kind, a relationship's technology) would fade twice; on a faded box or
+   caption they take the faded colour alone. */
+.react-flow__node.archer-dimmed :is(.archer-c4-type, .archer-node-kind),
+.archer-edge-label.archer-dimmed .archer-edge-label-technology {
+  opacity: 1;
+  color: var(--text-faded);
+}
+/* The sequence canvas fades a participant, message, note or activation by `opacity="0.25"` on its <g>: the group is
+   lifted back, its shapes keep the fade, and its words take `--text-faded`. */
+.archer-seq-svg g[opacity="0.25"] {
+  opacity: 1;
+}
+.archer-seq-svg g[opacity="0.25"] :is(rect, line, path, polyline, polygon, circle, ellipse) {
+  opacity: 0.25;
+}
+.archer-seq-svg g[opacity="0.25"] text {
+  fill: var(--text-faded);
+}
+/* ...except the keyboard's ring, and the message it is on (R6-claude-01, as on a graph edge above). */
+.archer-seq-svg g[opacity="0.25"].archer-seq-kbd-focus :is(.archer-seq-participant-ring, .archer-seq-message-ring, .archer-seq-message-stroke :is(line, path, polyline, polygon)) {
+  opacity: 1;
+}
+
+/*
+ * Group numbers (ADR 0030): the one non-colour cue, on only when the reader
+ * asks (`emphasis/group-numbers.ts` publishes `archer-emph-numbered`). A disc
+ * in the canvas colour, ringed in the group's hue, holding its number in body
+ * ink: the number survives greyscale, print and forced colours, and its
+ * contrast is the text's own. A box wears it on its top-left corner (comment
+ * pins and nest toggles take the top-right); a line, on its middle.
+ */
+.archer-emph-numbered .archer-node.archer-emph::after,
+.archer-emph-numbered .archer-element-group.archer-emph::after,
+.archer-emph-numbered .archer-journey-el.archer-emph::after {
+  position: absolute;
+  top: -0.75em;
+  left: -0.75em;
+  z-index: 2;
+  box-sizing: border-box;
+  width: 1.5em;
+  height: 1.5em;
+  border: var(--line-mark) solid var(--emph-hue);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--type-floor);
+  font-weight: 700;
+  line-height: calc(1.5em - 3px);
+  text-align: center;
+  pointer-events: none;
+}
+
+/* The number is the group's position, which its slot colour already is. */
+.archer-emph-numbered :is(.archer-node, .archer-element-group, .archer-journey-el).archer-emph.archer-emph-palette-teal::after {
+  content: "1";
+}
+
+.archer-emph-numbered :is(.archer-node, .archer-element-group, .archer-journey-el).archer-emph.archer-emph-palette-violet::after {
+  content: "2";
+}
+
+.archer-emph-numbered :is(.archer-node, .archer-element-group, .archer-journey-el).archer-emph.archer-emph-palette-coral::after {
+  content: "3";
+}
+
+.archer-emph-marker {
+  pointer-events: none;
+}
+
+.archer-emph-marker circle {
+  fill: var(--bg);
+  stroke: var(--emph-hue);
+  stroke-width: 1.5;
+}
+
+.archer-emph-marker text {
+  fill: var(--text);
+  stroke: none;
+  font-weight: 700;
+}
+
+/* ---------- the legend ---------- */
+
+/*
+ * Rests at the bottom left inside the canvas, just right of the toolbar and above the Diagram key and the
+ * Highlights / Walkthroughs entries; the person can move it (chat/movable.tsx).
+ */
+.archer-emph-legend {
+  position: absolute;
+  left: var(--toolbar-clear, 79px);
+  bottom: var(--stack-base, 15px);
+  z-index: 8;
+  min-width: 210px;
+  max-width: 300px;
+  max-height: 40%;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  font-size: var(--type-canvas-overlay);
+  box-shadow: var(--shadow-panel);
+}
+
+.archer-emph-legend-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.archer-emph-legend-title {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--text);
+  font-size: var(--type-canvas-overlay);
+  font-weight: 600;
+}
+
+/* One / All: a two-button segmented control (its frame is the shared segmented rule, "SEGMENTED"). */
+.archer-emph-legend-mode {
+  flex: none;
+}
+
+.archer-emph-legend-mode button {
+  min-height: 30px;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.archer-emph-legend-mode button[aria-pressed="true"] {
+  background: var(--accent-fill);
+  color: var(--text);
+}
+
+/* Faint words, not a faded button: the segment's border is the group's outline too (EX-R1-03). */
+.archer-emph-legend-mode button:disabled {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.archer-emph-legend-rows {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The whole row is the button: swatch, title, and one line of why. */
+.archer-emph-legend-body {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 1px 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 7px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.archer-emph-legend-body:hover {
+  background: var(--surface-2);
+}
+
+.archer-emph-legend-body:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.archer-emph-swatch {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: var(--line-chrome-strong) solid var(--emph-hue);
+  border-radius: var(--radius-mark);
+}
+
+.archer-emph-swatch-check {
+  opacity: 0;
+}
+
+.archer-emph-swatch-check path {
+  fill: none;
+  stroke: var(--panel);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.archer-emph-legend-body[aria-pressed="true"] .archer-emph-swatch {
+  background: var(--emph-hue);
+}
+
+.archer-emph-legend-body[aria-pressed="true"] .archer-emph-swatch-check {
+  opacity: 1;
+}
+
+.archer-emph-legend-label {
+  font-weight: 600;
+}
+
+.archer-emph-legend-desc {
+  grid-column: 2;
+  color: var(--text-dim);
+}
+
+/* Off: hollow swatch and muted words, still readable. */
+.archer-emph-legend-body[aria-pressed="false"] .archer-emph-legend-label,
+.archer-emph-legend-body[aria-pressed="false"] .archer-emph-legend-desc {
+  color: var(--text-faint);
+}
+
+.archer-emph-legend-note {
+  margin: 6px 7px 0;
+  color: var(--text-faint);
+}
+
+.archer-emph-legend-key {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 7px 0;
+  border-top: var(--line-chrome) solid var(--border);
+  color: var(--text-dim);
+}
+
+.archer-emph-legend-key-head {
+  color: var(--text-faint);
+  font-size: var(--type-canvas-overlay-small);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.archer-emph-legend-key-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.archer-emph-key-sample line {
+  stroke: var(--edge);
+}
+
+@media (pointer: coarse), (max-width: 720px) {
+  .archer-emph-legend-body,
+  .archer-emph-legend-mode button {
+    min-height: 44px;
+  }
+}
+
+/* One and All are short words: on a touch screen they are 44px wide too (round 1 pass 5, R4-04). */
+@media (pointer: coarse) {
+  .archer-emph-legend-mode button {
+    min-width: var(--icon-touch);
+  }
+}
+
+.archer-emph-legend-num {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1.5em;
+  height: 1.5em;
+  margin-right: 6px;
+  border: var(--line-mark) solid var(--emph-hue);
+  border-radius: 50%;
+  font-size: var(--type-floor);
+  font-weight: 700;
+  line-height: calc(1.5em - 3px);
+  text-align: center;
+  vertical-align: 1px;
+}
+
+/* Members: the text equivalent of the colours, collapsed behind one button. */
+.archer-emph-legend-members {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: var(--line-chrome) solid var(--border);
+}
+
+.archer-emph-members-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.archer-emph-members-toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.archer-emph-members-toggle:focus-visible,
+.archer-emph-members button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.archer-emph-members-chevron path {
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.archer-emph-members-toggle[aria-expanded="true"] .archer-emph-members-chevron {
+  transform: rotate(90deg);
+}
+
+.archer-emph-members {
+  display: grid;
+  gap: 8px;
+  padding: 4px 7px 2px;
+}
+
+.archer-emph-members[hidden] {
+  display: none;
+}
+
+.archer-emph-members-head {
+  margin: 0 0 2px;
+  color: var(--text);
+  font-size: var(--type-small);
+  font-weight: 600;
+}
+
+.archer-emph-members ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archer-emph-members button {
+  min-height: 24px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: var(--radius-mark);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+}
+
+.archer-emph-members button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+@media (pointer: coarse), (max-width: 720px) {
+  .archer-emph-members-toggle,
+  .archer-emph-members button {
+    min-height: 44px;
+  }
+}
+
+.archer-emph-motion-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--text-dim);
+}
+
+.archer-emph-motion-control select {
+  min-height: 36px;
+  max-width: 100%;
+  padding: 6px 26px 6px 8px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+
+@media (pointer: coarse), (max-width: 720px) {
+  .archer-emph-motion-control select { min-height: 44px; }
+}
+
+/*
+ * The web shell.
+ *
+ * Only the browser-served page renders this; the MCP-App view is the bare
+ * canvas it has always been. A flex column rather than a stack of absolutely
+ * positioned bars: the canvas has to take exactly the space the chrome leaves,
+ * and `flex: 1` is that statement, where a `calc(100vh - Npx)` would need
+ * editing every time a bar is added. Flex rather than fixed grid rows because
+ * the tab strip is absent when nothing is registered, and a row template would
+ * then hand the canvas the wrong cell.
+ */
+.archer-web-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* The `main` landmark: everything under the bar. A column of its own that
+   takes the shell's remaining height, so the chips, the connection strip and
+   the stage stack exactly as they did as the shell's own children. */
+.archer-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Edit's handover (App.tsx): the editor is laid out of sight over the stage until it has drawn, and the
+   reading drawing stays where it is meanwhile; then the editor is the stage, as it always was. */
+.archer-editor-slot { display: contents; }
+.archer-main:has(> .archer-editor-slot--pending) { position: relative; }
+.archer-editor-slot--pending { position: absolute; inset: 0; display: flex; flex-direction: column; visibility: hidden; pointer-events: none; }
+
+/* `min-height: 0` because a flex item defaults to its content's minimum size,
+   and the canvas would then refuse to shrink and push the shell taller than
+   the viewport. */
+.archer-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/*
+ * The embedded view is a column too, of two things: the canvas, and the
+ * agent's caption under it when there is one. Everything else the shell holds
+ * (the theme toggle, the connection strip, the compile notice)
+ * is positioned over the canvas and takes no part in the column.
+ */
+.archer-mcp-shell {
+  display: flex;
+  flex-direction: column;
+}
+
+.archer-mcp-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/*
+ * The agent's caption (`app/Caption.tsx`): a block under the stage, in both
+ * shells, so it takes its height out of the stage and never sits on the
+ * drawing. The region is always in the page and has no box of its own; only
+ * the caption inside it does.
+ */
+.archer-caption-region {
+  position: relative;
+  flex: none;
+}
+
+/* The header shows the caption: the copy kept for screen readers sits inside the region's (zero-height)
+   box at the foot of the stage, not one pixel below it, where it made the page scroll. */
+.archer-caption-region > .archer-visually-hidden {
+  bottom: 0;
+}
+
+.archer-caption-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  /* A long caption in a small pane scrolls here rather than taking the stage. */
+  max-height: 38vh;
+  padding: 8px 20px 9px;
+  overflow-y: auto;
+  border-top: var(--line-chrome) solid var(--border);
+  background: var(--surface);
+}
+
+.archer-caption-box:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* Whose words these are: the agent's, not Archer's -- in the agent's hue. */
+.archer-caption-by {
+  flex: none;
+  color: var(--agent-text);
+  font-size: var(--type-small);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* An exploration the agent presented, which a host page draws as its base view only (ADR 0036 A11). */
+.archer-mcp-explored { flex: none; margin: 0; padding: 4px 12px; color: var(--text-dim); font-size: var(--type-small); }
+.archer-caption {
+  flex: 1 1 28ch;
+  min-width: 0;
+  max-width: 96ch;
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-body);
+  line-height: 1.45;
+  /* The agent's own line breaks are kept; a long unbroken word still wraps. */
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * What the page says when it is not drawing a diagram.
+ *
+ * Centred and quiet, but never absent: a blank canvas would let an agent's
+ * claim about what it drew stand unchallenged, which is the whole reason these
+ * exist. The headline is the fact; the detail is why, for the reader who wants
+ * it. Both are prose at reading size -- this is a sentence, not a status LED.
+ */
+.archer-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.archer-notice-headline {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-display);
+  font-weight: 600;
+}
+
+.archer-notice-detail {
+  max-width: 44ch;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-body);
+  line-height: 1.5;
+}
+
+/*
+ * The connection warning that accompanies a diagram still on screen.
+ *
+ * Absolutely positioned by default, because the MCP shell has no layout to
+ * take part in and the canvas fills its parent; the web shell puts it in the
+ * column flow instead, where it can push the canvas down rather than cover it.
+ */
+.archer-stale-strip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 9;
+  padding: 7px 14px;
+  border-bottom: var(--line-chrome) solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: var(--type-small);
+  text-align: center;
+}
+
+.archer-main > .archer-stale-strip {
+  position: static;
+}
+
+/*
+ * The same sentences, carried more lightly.
+ *
+ * The embedded view is a pane inside someone else's window, so a full-width
+ * banner across the top of it reads as the HOST failing rather than as this
+ * pane losing its connection. It becomes a small centred pill instead --
+ * quieter, but not quieter than legible: the wording is identical to the web
+ * shell's, because a state the user cannot read is the same failure as a state
+ * the page never mentions.
+ */
+.archer-mcp-shell > .archer-stale-strip {
+  right: auto;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  transform: translateX(-50%);
+  margin-top: 10px;
+  padding: 5px 12px;
+  border: var(--line-chrome) solid var(--danger-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--type-small);
+  box-shadow: var(--shadow-panel);
+}
+
+/* The notice itself is already just centred prose, which suits both shells.
+   In the embedded pane it only loses a step of size, since it sits in a
+   smaller viewport and has no title bar above it to be weighed against. */
+.archer-mcp-shell .archer-notice-headline {
+  font-size: var(--type-body);
+}
+
+/* ==================================================================
+ * COMPILE-FAILURE NOTICE (ADR 0010) -- begin
+ *
+ * What sits OVER a drawing whose file no longer compiles, and the mark on the
+ * tab of any view in that state. Everything for both is between this banner
+ * and the matching "end" below; nothing elsewhere in the file styles them.
+ *
+ * Tokens only, and only the danger family the stale-connection strip already
+ * uses, so both schemes are covered by tokens they define.
+ *
+ * Top-left of the stage. The legend is bottom-right, the canvas controls
+ * bottom-left and the MCP shell's own controls top-right, so the one free
+ * corner is this one. It is never wider than the stage less its gutters, and
+ * never taller than six tenths of it: the list scrolls inside the notice, and
+ * most of the drawing stays in view even with twenty problems listed.
+ * ================================================================== */
+.archer-compile-notice {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  /* Over the canvas and its edge layers; under the MCP shell's controls (10)
+     and beside the stale strip (9), which it never overlaps. */
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(560px, calc(100% - 24px));
+  max-height: 60%;
+  /* A heavy frame all round is what makes it read as a warning at a glance, before any of it is read; colour alone
+     would not survive a greyscale screen, and a heavy left edge alone read as decoration (no side stripes). */
+  border: var(--line-chrome-strong) solid var(--danger-strong);
+  border-radius: var(--radius-card);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: var(--type-body);
+  line-height: 1.45;
+  box-shadow: var(--shadow-panel);
+}
+
+/* The embedded view keeps its theme toggle in the top-right
+   corner, 30px tall at a 12px inset. On a narrow pane the notice would run
+   under them, so it starts below their row instead. */
+.archer-mcp-shell > .archer-compile-notice {
+  top: 52px;
+}
+
+/* Wraps: on a narrow stage the toggle drops under the sentence rather than
+   squeezing it into a column three words wide. */
+.archer-compile-notice-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  align-items: flex-start;
+  padding: 9px 12px;
+}
+
+.archer-compile-notice-mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--danger-strong);
+  color: var(--danger-bg);
+  font-size: var(--type-small);
+  font-weight: 500;
+  line-height: 17px;
+}
+
+.archer-compile-notice-mark {
+  /* Level with the first line of the sentence beside it. */
+  margin-top: 1px;
+}
+
+.archer-compile-notice-text {
+  flex: 1 1 22ch;
+  min-width: 0;
+  margin: 0;
+}
+
+.archer-compile-notice-headline {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.archer-compile-notice-toggle {
+  flex: none;
+  min-height: 26px;
+  padding: 2px 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  /* A soft-tint button inside the warning: the neutral fill, in the warning's
+     ink (6.9:1 light, 9.5:1 dark; 5.4:1 / 8.0:1 on the hover step). */
+  background: var(--surface-2);
+  color: var(--danger-text);
+  font: inherit;
+  font-size: var(--type-small);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.archer-compile-notice-toggle:hover {
+  background: var(--border);
+}
+
+.archer-compile-notice-toggle:focus-visible,
+.archer-compile-notice-problems:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* `min-height: 0` lets the list shrink inside the notice's own height limit
+   and scroll, instead of pushing the notice past it. The scroll stays in the
+   list: reaching its end must not start zooming the diagram underneath. */
+.archer-compile-notice-problems {
+  display: grid;
+  gap: 9px;
+  min-height: 0;
+  margin: 0;
+  padding: 9px 12px 11px;
+  border-top: var(--line-chrome) solid var(--danger-border);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+/* `display: grid` above outranks the `hidden` attribute's own `display: none`. */
+.archer-compile-notice-problems[hidden] {
+  display: none;
+}
+
+/* Where it is and which rule it broke on one line, what to do about it on
+   the next. The message is the long part, so it gets the full width. */
+.archer-compile-notice-problem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1px 12px;
+}
+
+.archer-compile-notice-where {
+  grid-column: 1;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.archer-compile-notice-code {
+  grid-row: 1;
+  grid-column: 2;
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-size: var(--type-small);
+}
+
+/* Written for an agent, so it can hold a long unbroken token -- an id, a
+   path -- which must wrap rather than widen the notice past the stage. */
+.archer-compile-notice-message {
+  grid-column: 1 / -1;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+/* ==================================================================
+ * COMPILE-FAILURE NOTICE (ADR 0010) -- end
+ * ================================================================== */
+
+/*
+ * The dataflow chips: the named emphases stored for the active diagram.
+ *
+ * Joined to the tab strip above and the canvas below -- same surface, no
+ * border between them -- so the three read as one sheet. Picking a diagram and
+ * picking a flow through it is one continuous gesture, not two controls in
+ * different parts of the page.
+ */
+.archer-dataflows {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 20px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  background: var(--surface);
+}
+
+.archer-dataflows-label {
+  margin-right: 4px;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-dataflow-chip {
+  padding: 4px 11px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.archer-dataflow-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+/* The active chip wears the ACCENT, not a palette hue: it marks the user's own
+   choice of what to look at, which is the same voice as selection. The agent's
+   palette stays on the canvas, where it says what the emphasis means. */
+.archer-dataflow-chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-fill);
+  color: var(--accent-on-fill);
+}
+
+/* PRESSED, SELECTED, CURRENT: the accent fill AND an accent edge, everywhere.
+   `--accent-fill` alone sits at 1.2–1.4:1 on the panel, under the 3:1 a state
+   cue needs (WCAG 1.4.11, round 1 G5-F1). The edge is the chip's 1px accent
+   border above (6–9:1 against the panel and the fill). A control with its own
+   border takes it as `border-color` in its rule; these segment and icon
+   buttons have none, so they draw it inset, which moves no layout. */
+:is(
+  .archer-pan-select-button,
+  .archer-walk-follow,
+  .archer-expand-actions .archer-expand-open,
+  .authoring-edit-cluster button
+):is([aria-pressed="true"], [aria-selected="true"]) {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* SEGMENTED: One/All, the walkthrough's Steps/Sequence tabs and the chat's scope, one look (round 1
+   R6-claude-04..06). Each segment carries its own border and the next overlaps it by 1px, so the group's
+   frame is the segments' borders: a pressed segment's border turns accent and IS the frame there (an inset
+   edge inside a grey frame drew two lines), and the ends take the group's radius (an inset edge drew a
+   square corner inside a round one). Nothing clips, so focus is the page's own outer ring, 2px off the
+   segment, and reads apart from the pressed edge (a ring laid on that edge changed 1px; a clipping group
+   cut the chat switch's ring to a bar). */
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) {
+  display: inline-flex;
+  border: 0;
+  overflow: visible;
+}
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) > button {
+  position: relative;
+  margin: 0;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: 0;
+}
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) > button + button {
+  margin-left: -1px;
+}
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) > button:first-child {
+  border-start-start-radius: var(--radius-card);
+  border-end-start-radius: var(--radius-card);
+}
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) > button:last-child {
+  border-start-end-radius: var(--radius-card);
+  border-end-end-radius: var(--radius-card);
+}
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) > button:is([aria-pressed="true"], [aria-selected="true"]) {
+  z-index: 1;
+  border-color: var(--accent);
+}
+:is(.archer-emph-legend-mode, .archer-walk-tabs, .archer-chat-switch) > button:focus-visible {
+  z-index: 2;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Placeholders: one quiet ink for every field, at 4.5:1 on the panel and the
+   tint in both themes (`--text-dim`; the UA's #757575 is 4.0–4.3:1, G5-F3). */
+::placeholder {
+  color: var(--text-dim);
+  opacity: 1;
+}
+
+.archer-dataflow-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * The reader is on a different diagram from the one the agent is presenting
+ * (`app/ReaderViewNotice.tsx`, ADR 0011).
+ *
+ * A line of the page's own chrome, in the column under the tabs like the
+ * dataflow bar, so it pushes the stage down and never sits on the drawing.
+ * Quiet on purpose: it is a fact about where the reader is, not a fault, so
+ * it wears the surface and the dim text rather than the warning strip's
+ * colours. It wraps on a narrow window instead of clipping a title.
+ */
+.archer-reader-view {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 6px 20px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-reader-view-text {
+  flex: 1 1 16ch;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.archer-reader-view-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* The line's one action, so a primary soft-tint button. */
+.archer-reader-view-return {
+  flex: none;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--accent-fill);
+  color: var(--accent-on-fill);
+  font: inherit;
+  font-size: var(--type-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.archer-reader-view-return:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.archer-reader-view-return:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The theme control. Positioned entirely here so the component stays a bare
+   button and can be relocated into an app bar without touching its markup.
+   Above the canvas, which sets no z-index of its own beyond its edge layers. */
+.archer-theme-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  /* Floating over the canvas it keeps the panel under it, so the icon is not
+     drawn straight on the drawing; in a bar it is an icon-only button. */
+  background: var(--panel);
+  color: var(--text-dim);
+  cursor: pointer;
+  box-shadow: var(--shadow-panel);
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.archer-theme-toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.archer-theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The embedded view has no bar of its own. Beside the side panel, Theme takes the end of the panel's bar,
+   after Collapse, and the top of the folded rail, above Expand: it covered Collapse (round 1, R5-01). With no
+   panel, or the panel as a phone sheet, it floats in the corner as above. */
+.archer-mcp-shell:has(.archer-stage-row > .archer-diagram-panel) > .archer-theme-toggle {
+  width: var(--icon-button);
+  height: var(--icon-button);
+  background: transparent;
+  box-shadow: none;
+}
+.archer-mcp-shell:has(.archer-stage-row > .archer-diagram-panel:not([data-collapsed])) > .archer-theme-toggle {
+  top: 2px;
+  right: 6px;
+}
+.archer-mcp-shell .archer-diagram-panel:not([data-collapsed]) > .archer-panel-bar {
+  padding-inline-end: calc(6px + var(--icon-button) + 8px);
+}
+.archer-mcp-shell:has(.archer-stage-row > .archer-diagram-panel[data-collapsed]) > .archer-theme-toggle {
+  top: 6px;
+  right: calc((44px - var(--icon-button)) / 2);
+}
+.archer-mcp-shell .archer-diagram-panel[data-collapsed] {
+  padding-top: calc(6px + var(--icon-button) + 4px);
+}
+/* A touch screen's Theme is 44 px (the coarse floor above): the same places, sized for it. */
+@media (pointer: coarse) {
+  .archer-mcp-shell:has(.archer-stage-row > .archer-diagram-panel) > .archer-theme-toggle {
+    width: var(--icon-touch);
+    height: var(--icon-touch);
+  }
+  .archer-mcp-shell .archer-diagram-panel:not([data-collapsed]) > .archer-panel-bar {
+    padding-inline-end: calc(6px + var(--icon-touch) + 8px);
+  }
+  .archer-mcp-shell:has(.archer-stage-row > .archer-diagram-panel[data-collapsed]) > .archer-theme-toggle {
+    right: 0;
+  }
+  .archer-mcp-shell .archer-diagram-panel[data-collapsed] {
+    padding-top: calc(6px + var(--icon-touch) + 4px);
+  }
+}
+
+/*
+ * Sequence diagrams, drawn from the SAME token set as the graph canvas.
+ *
+ * They used to carry a private `COLORS` object in the component -- a light
+ * slate palette painted on the dark graph canvas. Participants, lifelines and
+ * messages therefore reuse the graph tokens outright; only fragments and
+ * activations, which have no graph equivalent, have tokens of their own.
+ *
+ * Colours live here rather than on the elements because an SVG presentation
+ * attribute is not a CSS value, so `fill="var(--x)"` never resolves -- and
+ * because a component with no colour in it has nowhere to grow a palette.
+ */
+.archer-seq-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.archer-seq-canvas {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.archer-seq-canvas--panning {
+  cursor: grabbing;
+}
+
+.archer-seq-svg {
+  display: block;
+}
+
+.archer-seq-svg text {
+  font-family: inherit;
+}
+
+/* A label has to stay readable where a lifeline runs behind it. A halo in the
+   canvas colour, painted under the glyphs, breaks the line without a box. */
+.archer-seq-message text {
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* Frames nest, and a translucent fill compounds with every level: three deep
+   it was a solid block that the label halos above showed up against. Thinned
+   so a nested frame reads as a step, not a slab. */
+.archer-seq-fragment > rect:first-of-type {
+  fill-opacity: 0.55;
+}
+
+/* A message is a hairline: the notation's line is a relation, and the
+   participants and labels carry the reading (edge weight follows the
+   notation: see the graph's rule). Hover, selection and emphasis are heavier
+   and outrank this; the attribute the component sets does not. */
+.archer-seq-message-stroke line,
+.archer-seq-message-stroke path {
+  stroke-width: 1.25;
+}
+
+/* Both canvases are one sheet. React Flow paints its own near-black in dark
+   mode, which made the graph canvas a different colour from the sequence
+   canvas and from the page around it. Its control cluster is matched to the
+   one the sequence canvas draws for the same reason. */
+.react-flow {
+  --xy-background-color: var(--bg);
+}
+
+/* The cluster is a small panel; its buttons are icon-only soft-tint buttons
+   inside it -- transparent, a 6px tile of `--surface-2` on hover -- so the
+   panel's 3px inset and 9px corner keep the tile's corner concentric. */
+.react-flow__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--icon-gap);
+  padding: var(--icon-group-inset);
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-cluster);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.react-flow__controls-button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  fill: currentColor;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.react-flow__controls-button:disabled {
+  color: var(--text-faint);
+  opacity: 0.5;
+}
+
+/* On a phone-width pane the legend's fixed corner covers most of the drawing.
+   Span the width beside the controls instead, and stay short. */
+@media (max-width: 560px) {
+  .archer-emph-legend {
+    right: 10px;
+    bottom: 10px;
+    left: 56px;
+    max-width: none;
+    max-height: 28%;
+  }
+}
+
+/* The cluster the sequence canvas draws for itself, matched to the one React
+   Flow draws on the graph canvas so the two are one control in two places. */
+.archer-canvas-controls {
+  position: absolute;
+  left: 15px;
+  bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--icon-gap);
+  padding: var(--icon-group-inset);
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-cluster);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.archer-canvas-controls button {
+  /* Sized with the graph's controls in diagrams/PanSelectControl.css, so both
+     clusters draw every button, and every icon, in the same box. */
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.archer-canvas-controls button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.archer-canvas-controls button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* Every icon-only control draws its glyph at the scale's size, whatever its
+   markup's width/height say. (The canvas clusters size theirs in
+   diagrams/PanSelectControl.css; a rule that owns its control's glyph sets it
+   there.) */
+:is(.archer-theme-toggle, .archer-review-toggle, .archer-project-settings-gear, .archer-search-submit,
+    .archer-filter-variant, .archer-browser-close, .archer-panel-collapse, .archer-panel-expand,
+    .archer-panel-close, .archer-panel-rail-icon, .archer-diagram-key-action, .primary-drawer-button,
+    .archer-canvas-tools-trigger, .archer-walk-icon, .archer-project-settings-close, .archer-dock-sheet-close,
+    .archer-chat-acts button, .archer-chat-send) svg {
+  width: var(--icon);
+  height: var(--icon);
+  flex: none;
+}
+/* One stroke, in real pixels, for every chrome glyph: icon-only controls,
+   icon-and-word buttons, menu rows and small indicators, and the glyphs named
+   by their own class (pictograms beside a word, a thread's disclosure, a
+   legend's tick, the nest toggle on a node). The Archer mark, a diagram card's
+   large placeholder and the diagram's own notation are not chrome and keep
+   their drawing. */
+:is(.primary-rail :is(button, a):not(.primary-brand), .primary-drawer-button, .archer-settings-launcher,
+    .archer-settings-close, .archer-canvas-controls, .react-flow__controls, .archer-journey-tools,
+    .archer-theme-toggle, .archer-review-toggle, .archer-project-settings-gear, .archer-search-submit,
+    .archer-filter-variant, .archer-browser-close, .archer-panel-collapse, .archer-panel-expand,
+    .archer-panel-close, .archer-diagram-key-action, .archer-panel-rail-icon, .archer-reader-edit,
+    .archer-reader-source, .primary-icon-close, .archer-chat-fab, .archer-diagram-key-head > button,
+    .archer-diagram-key-title > button, .archer-folder-tree-disclose, .archer-files-sort, .archer-offscreen-cue,
+    .archer-walk-icon, .archer-walk-pick, .archer-project-settings-close, .archer-dock-sheet-close, .archer-chat-acts,
+    .archer-chat-grip, .archer-chat-to-pick, .archer-search-project-scope, .archer-emph-members-toggle,
+    .archer-project-fact-code, .authoring-pencil)
+  svg :is(path, circle, rect, line, polyline, polygon, ellipse),
+:is(.archer-files-glyph:not(.archer-diagram-card-placeholder *), .primary-inbox-chevron, .archer-emph-swatch-check,
+    .archer-nest-toggle-mark) :is(path, circle, rect, line, polyline, polygon, ellipse) {
+  vector-effect: non-scaling-stroke;
+  stroke-width: var(--icon-stroke);
+}
+/* Small indicators: the key's +/−, folder disclosures, the off-screen cue's chevron, pickers' chevrons, a chip's
+   clear mark, a legend's tick, a resize grip, a pictogram beside small text. */
+:is(.archer-diagram-key-head > button:not(.archer-diagram-key-action), .archer-diagram-key-title > button,
+    .archer-folder-tree-disclose, .archer-offscreen-cue, .archer-walk-pick, .archer-search-project-scope,
+    .archer-emph-members-toggle, .archer-emph-swatch, .archer-chat-grip, .archer-chat-to-pick,
+    .archer-project-fact-code) svg {
+  width: var(--icon-indicator);
+  height: var(--icon-indicator);
+  flex: none;
+}
+/* A touch target is never under the floor. The canvas clusters keep their own
+   rules (PanSelectControl.css, stage-dock.css): on a short phone their buttons
+   give up height so every one stays in the drawing. */
+@media (pointer: coarse) {
+  :is(.archer-theme-toggle, .archer-review-toggle, .archer-notification-toggle, .archer-project-settings-gear,
+      .archer-search-submit, .archer-filter-variant, .archer-browser-close, .archer-panel-collapse,
+      .archer-panel-expand, .archer-panel-close, .archer-panel-rail-icon, .archer-diagram-key-action,
+      .primary-icon-close, .archer-settings-close) {
+    min-width: var(--icon-touch);
+    min-height: var(--icon-touch);
+  }
+}
+
+/*
+ * The off-screen cue (`diagrams/OffscreenCue.tsx`): one pill, on both
+ * canvases, naming each edge of the canvas the diagram continues past.
+ *
+ * QUIET. It is chrome, drawn as the control cluster and the legend are -- the
+ * panel's surface, a hairline, dim ink -- and only "Show all" is in full ink,
+ * because that is the part that is an offer. No accent: the accent is the
+ * reader's own voice (selection), and this is the canvas speaking.
+ *
+ * NOT ON THE DRAWING. A framing that leaves anything off screen keeps a band
+ * free along the top of the canvas (`CUE_BAND_PX` in `chrome-clearance.ts`:
+ * this 10px inset, the pill's 26px, and a gap), and the pill sits in it, at
+ * the end the drawing runs past -- "more to the right" on the right -- or in
+ * the middle when it runs past more than one edge. That is all this sheet
+ * decides. Once the page is laid out the component measures the pill against
+ * what is drawn and the canvas's other chrome, and moves it to free canvas if
+ * this place is taken; its inline position then overrides the three rules
+ * below.
+ *
+ * It sits under the legend in the stack, so even a collision nobody foresaw
+ * covers the cue and not the legend.
+ *
+ * `.archer-overview-cue` is the same pill saying the other thing it can say:
+ * everything is in view and too small to read. One at a time, never both, so
+ * they share every rule and differ only in name.
+ */
+.archer-offscreen-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.archer-offscreen-cue,
+.archer-overview-cue {
+  position: absolute;
+  z-index: 6;
+  top: 10px;
+  display: flex;
+  /* Four edges at once on a phone-width canvas is wider than the canvas: the
+     pill then wraps and is taller than the band, and is placed by measurement. */
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  align-items: center;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  min-height: 26px;
+  padding: 0 11px 0 8px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-canvas-overlay);
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--shadow-panel);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+/* A multi-direction cue must leave a usable horizontal corridor on phones.
+   Wrapping its complete labels is preferable to covering a routed edge. */
+@media (max-width: 720px) {
+  .archer-offscreen-cue,
+  .archer-overview-cue { max-width: min(220px, calc(100% - 20px)); }
+}
+
+.archer-offscreen-cue--left {
+  left: 14px;
+}
+
+.archer-offscreen-cue--right {
+  right: 14px;
+}
+
+.archer-offscreen-cue--center,
+.archer-overview-cue--center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.archer-offscreen-cue-side {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.archer-offscreen-cue:hover,
+.archer-overview-cue:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.archer-offscreen-cue:focus-visible,
+.archer-overview-cue:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.archer-offscreen-cue-action {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.archer-seq-participant rect {
+  fill: var(--node-bg);
+  stroke: var(--node-border);
+}
+
+.archer-seq-participant text {
+  fill: var(--node-text);
+  font-size: var(--type-canvas-participant);
+}
+
+.archer-seq-lifeline {
+  stroke: var(--lifeline);
+}
+
+.archer-seq-message line,
+.archer-seq-message path,
+.archer-seq-message polyline {
+  stroke: var(--edge);
+}
+
+.archer-seq-message polygon {
+  fill: var(--edge);
+}
+
+/* The label is TEXT, and `--edge` is the arrow's colour: a mark, held to 3:1.
+   Lettered in it, a label measured 4.34:1 on Current's light canvas and under
+   4:1 inside a frame's tint (`tests/browser/state-marks.e2e.ts`, on the `rust`
+   branch, measures what is painted; axe does not look at SVG text). The direct
+   child only: the autonumber badge has an ink of its own. */
+.archer-seq-message > text {
+  fill: var(--text-dim);
+}
+
+/* A reply is subordinate to the call it answers, so it sits a step back. The
+   dash pattern carries the same distinction, so this never depends on colour
+   alone. */
+.archer-seq-message--reply line,
+.archer-seq-message--reply path,
+.archer-seq-message--reply polyline {
+  stroke: var(--text-faint);
+}
+
+/* The arrowhead only. A reply's LABEL keeps the label ink: a fainter word
+   was under 4.5:1, and the dashed line already says reply. */
+.archer-seq-message--reply polygon {
+  fill: var(--text-faint);
+}
+
+.archer-seq-fragment > rect:first-of-type {
+  fill: var(--fragment-bg);
+  stroke: var(--fragment-border);
+}
+
+/* The kind chip belongs to the frame: a tint of the frame's own rule, outlined
+   by it. It used to be a solid accent fill, which in the light theme was the
+   loudest thing on the canvas and spent the one colour that means "the reader
+   selected this" on a label. The text is `--text`, not `--fragment-text`:
+   on the tint the dimmer ink measured under 4.5:1 in light
+   (`sequence-annotation-theme.test.ts` computes both themes). */
+.archer-seq-fragment-chip {
+  fill: var(--fragment-border);
+  fill-opacity: 0.25;
+  stroke: var(--fragment-border);
+  stroke-width: 1;
+}
+
+.archer-seq-fragment-chip-text {
+  fill: var(--text);
+}
+
+/* Haloed like a message label, and for its reason: a lifeline runs behind
+   the header wherever the frame starts left of one. */
+.archer-seq-fragment-label {
+  fill: var(--fragment-text);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.archer-seq-fragment-divider {
+  stroke: var(--fragment-border);
+}
+
+/* Whole sequence blocks have one header stop. The border hit remains a stroke so enclosed messages keep priority. */
+.archer-seq-fragment-border-hit {
+  cursor: context-menu;
+}
+.archer-seq-block-header[data-seq-id] {
+  cursor: context-menu;
+  outline: none;
+}
+.archer-seq-block-header:hover .archer-seq-fragment-header-hit {
+  fill: var(--accent-fill);
+}
+.archer-seq-block-header:focus .archer-seq-fragment-header-hit {
+  stroke: var(--accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.archer-seq-block-header.archer-commented .archer-seq-fragment-chip {
+  stroke: var(--you);
+  stroke-width: 2px;
+}
+@media (pointer: coarse) {
+  .archer-seq-fragment-border-hit {
+    stroke-width: 44px;
+  }
+}
+
+.archer-seq-activation {
+  fill: var(--activation-bg);
+  stroke: var(--fragment-border);
+}
+
+/* An actor's figure: line only, in the name's own ink. */
+.archer-seq-participant .archer-seq-actor-glyph {
+  fill: none;
+  stroke: var(--node-text);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* A note is an annotation, and is drawn like one: a sheet of the chrome's
+   quiet surface with a turned-down corner and dimmer ink, so it is neither a
+   participant (a node) nor a frame. Its outline is the frame's rule, the
+   neutral that holds 3:1 on the canvas in both themes. It takes the default
+   cursor until comments are available. A separate button then opens its discussion. */
+.archer-seq-note-sheet {
+  fill: var(--surface-2);
+  stroke: var(--fragment-border);
+}
+
+.archer-seq-note-comment-target { cursor: context-menu; outline: none; }
+.archer-seq-note-comment-target:hover .archer-seq-note-sheet { fill: var(--accent-fill); }
+.archer-seq-note-comment-target:focus .archer-seq-note { opacity: 1; }
+.archer-seq-note-comment-target:focus .archer-seq-note-sheet {
+  stroke: var(--accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.archer-seq-note-fold {
+  fill: none;
+  stroke: var(--fragment-border);
+}
+
+.archer-seq-note text {
+  fill: var(--text-dim);
+}
+
+/* The autonumber badge: a pill of the canvas colour on the start of the
+   arrow, ruled in the arrow's own stroke. The digits are 10px, so they take
+   `--text` rather than the arrow's ink, which is under 4.5:1 in light. The
+   label halo that `.archer-seq-message text` paints is switched off: on the
+   pill it would only thicken the digits. */
+.archer-seq-message .archer-seq-message-number rect {
+  fill: var(--bg);
+  stroke: var(--edge);
+  stroke-width: 1;
+}
+
+.archer-seq-message .archer-seq-message-number text {
+  fill: var(--text);
+  stroke: none;
+}
+
+.archer-seq-message--reply .archer-seq-message-number rect {
+  stroke: var(--text-faint);
+}
+
+/*
+ * Sequence interaction: hover, selection and keyboard focus, in the graph
+ * canvas's visual language and from its tokens.
+ *
+ * A participant is a node and a message is an edge, so each state is the one
+ * the graph draws for that kind of thing: hover lifts the border / the stroke,
+ * selection fills a participant with the accent and plates a message's label,
+ * and keyboard focus is a THIRD shape (an inset ring, a halo) so that focused
+ * and selected can be read on one element at once.
+ *
+ * The state classes are set by `SequenceCanvas`, not by `:hover`, because a
+ * participant is two elements -- box and lifeline -- that are not nested.
+ *
+ * Order matters below: hover, then selected, then focus. A selected element
+ * that is hovered stays selected.
+ */
+.archer-seq-selectable {
+  cursor: pointer;
+}
+
+/* Ours is drawn below; the UA outline would box the whole group. */
+.archer-seq-selectable:focus,
+.archer-seq-selectable:focus-visible {
+  outline: none;
+}
+
+/* The pointer targets: no paint, all of the hit. */
+.archer-seq-hit {
+  fill: none;
+  stroke: none;
+  pointer-events: all;
+}
+
+.archer-seq-lifeline-hit {
+  stroke: var(--edge);
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+/*
+ * Agent emphasis on a sequence diagram: the graph's rule, in this notation
+ * (ADR 0030). Colour and nothing else:
+ *
+ *   participant   its box's border in the group's hue
+ *   message       its line and arrowhead in the hue; a `flow` message adds
+ *                 moving arrows (`EmphasisChevrons`)
+ *
+ * A reply keeps its dash: that dash is the notation's, and emphasis never
+ * changes a pattern. The lifeline stays the notation's plain line.
+ */
+.archer-seq-participant.archer-emph .archer-seq-participant-box {
+  stroke: var(--emph-hue);
+  stroke-width: 2;
+}
+
+.archer-seq-message.archer-emph line,
+.archer-seq-message.archer-emph path,
+.archer-seq-message.archer-emph polyline {
+  stroke: var(--emph-hue);
+}
+
+.archer-seq-message.archer-emph polygon {
+  fill: var(--emph-hue);
+}
+
+.archer-seq-message.archer-emph-style-highlight line,
+.archer-seq-message.archer-emph-style-highlight path,
+.archer-seq-message.archer-emph-style-highlight polyline {
+  stroke-width: 2;
+}
+
+/* The route a flow message's arrows ride: a path with an id and no paint. */
+.archer-seq-message path.archer-seq-emph-route {
+  fill: none;
+  pointer-events: none;
+}
+
+.archer-seq-participant.archer-seq-hover .archer-seq-participant-box {
+  stroke: var(--node-border-hover);
+}
+
+.archer-seq-lifeline.archer-seq-hover {
+  stroke: var(--node-border-hover);
+  stroke-width: 1.5;
+}
+
+.archer-seq-message.archer-seq-hover line,
+.archer-seq-message.archer-seq-hover path,
+.archer-seq-message.archer-seq-hover polyline {
+  stroke: var(--edge-hover);
+  stroke-width: 2.5;
+}
+
+.archer-seq-message.archer-seq-hover polygon,
+.archer-seq-message.archer-seq-hover text {
+  fill: var(--edge-hover);
+}
+
+.archer-seq-participant.archer-seq-selected .archer-seq-participant-box {
+  fill: var(--accent-fill);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.archer-seq-participant.archer-seq-selected text {
+  fill: var(--accent-on-fill);
+}
+
+.archer-seq-participant.archer-seq-selected .archer-seq-actor-glyph {
+  stroke: var(--accent-on-fill);
+}
+
+/* The selection glow of `--node-shadow-selected`, which is a `box-shadow` and
+   so cannot be put on an SVG rect: the same accent, as a wide soft stroke. */
+.archer-seq-participant .archer-seq-participant-halo {
+  fill: none;
+  stroke: var(--accent);
+  stroke-opacity: 0.24;
+  stroke-width: 8;
+}
+
+.archer-seq-lifeline.archer-seq-selected {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.archer-seq-message.archer-seq-selected line,
+.archer-seq-message.archer-seq-selected path,
+.archer-seq-message.archer-seq-selected polyline {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.archer-seq-message.archer-seq-selected polygon {
+  fill: var(--accent);
+}
+
+/* On its plate the label needs no halo, and takes the plate's own ink. */
+.archer-seq-message.archer-seq-selected text {
+  fill: var(--accent-on-fill);
+  stroke: none;
+  font-weight: 700;
+}
+
+.archer-seq-message-plate {
+  fill: var(--accent-fill);
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+
+/* The badge follows its message: hover lifts its rule, selection plates it
+   exactly as it plates the label. Its digits keep their weight either way. */
+.archer-seq-message.archer-seq-hover .archer-seq-message-number rect {
+  stroke: var(--edge-hover);
+  stroke-width: 1.5;
+}
+
+.archer-seq-message.archer-seq-selected .archer-seq-message-number rect {
+  fill: var(--accent-fill);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.archer-seq-message.archer-seq-hover .archer-seq-message-number text {
+  fill: var(--text);
+}
+
+.archer-seq-message.archer-seq-selected .archer-seq-message-number text {
+  fill: var(--accent-on-fill);
+  font-weight: 600;
+}
+
+/* Keyboard focus on a participant: an INSET ring, as on a graph node. */
+.archer-seq-participant .archer-seq-participant-ring {
+  fill: none;
+  stroke: var(--kbd-focus);
+  stroke-width: 3;
+}
+
+/* ...and on a message: a halo round the arrow, as on a graph edge, leaving
+   the stroke itself to say hovered or selected. The band is listed with the
+   message's own `path` rules in mind: it must out-rank them, or it would be
+   drawn as a second arrow. */
+.archer-seq-message path.archer-seq-message-ring,
+.archer-seq-message.archer-seq-hover path.archer-seq-message-ring,
+.archer-seq-message.archer-seq-selected path.archer-seq-message-ring {
+  fill: none;
+  stroke: var(--kbd-focus);
+  stroke-opacity: 0.5;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Selection takes an emphasised message's line, but the agent's colour stays
+   on its arrowhead and moving arrows, and on a participant's border (ADR 0030). */
+.archer-seq-message.archer-emph.archer-seq-selected polygon,
+.archer-seq-message.archer-emph.archer-seq-hover polygon {
+  fill: var(--emph-hue);
+}
+
+/* An open arrowhead (async, reply) is a stroke, so it keeps the hue there. */
+.archer-seq-message.archer-emph.archer-seq-selected polyline.archer-seq-arrowhead,
+.archer-seq-message.archer-emph.archer-seq-hover polyline.archer-seq-arrowhead {
+  stroke: var(--emph-hue);
+}
+
+.archer-seq-message.archer-emph path.archer-emph-chevron {
+  stroke: var(--emph-hue);
+  stroke-width: 2.25;
+}
+
+.archer-seq-message path.archer-seq-emph-route {
+  stroke: none;
+}
+
+.archer-seq-participant.archer-emph.archer-seq-selected .archer-seq-participant-box,
+.archer-seq-participant.archer-emph.archer-seq-hover .archer-seq-participant-box {
+  stroke: var(--emph-hue);
+}
+
+/* The same solid ring as a focused edge (G5-F4): a soft glow falls below 3:1 beside the line. */
+.archer-seq-message.archer-seq-kbd-focus .archer-seq-message-stroke {
+  filter:
+    drop-shadow(1.5px 0 0 var(--bg)) drop-shadow(-1.5px 0 0 var(--bg))
+    drop-shadow(0 1.5px 0 var(--bg)) drop-shadow(0 -1.5px 0 var(--bg))
+    drop-shadow(2px 0 0 var(--kbd-focus)) drop-shadow(-2px 0 0 var(--kbd-focus))
+    drop-shadow(0 2px 0 var(--kbd-focus)) drop-shadow(0 -2px 0 var(--kbd-focus));
+}
+
+/* Handles are React Flow's connection affordances. Archer draws ELK's routed
+   polylines itself and the graph is read-only, so a visible dot on every node
+   perimeter advertises an attachment point that means nothing -- it reads as a
+   dangling connector. Keep them in the DOM for React Flow's internals. */
+.react-flow__handle {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* React Flow renders each edge in its own <svg> and assigns it a z-index,
+   elevating to 1 any edge it judges needs to clear a group node. The edge-label
+   layer is a later sibling but sits at `auto`, so z-index 1 wins on stacking
+   level regardless of DOM order and those strokes paint over the caption
+   plates. Only edges left at 0 looked right. Lift the label layer above every
+   edge layer so a caption always occludes its own line.
+
+   EVERY edge layer, which includes the ones a selection lifts: React Flow
+   raises a selected node by 1000 and each route touching it to the same
+   height (plus its group's depth), so the 4 this was first held at put those
+   routes straight through any caption they crossed. 2000 clears that with
+   room for nesting; `tests/caption-layer.test.tsx` reads the heights React
+   Flow really assigns. The number is local: the viewport is transformed, so
+   it is a stacking context of its own and nothing here competes with the
+   controls or the legend.
+
+   Safe against nodes: layout places captions clear of every node box, and the
+   regression check asserts zero label-node overlaps. */
+.react-flow__edgelabel-renderer {
+  z-index: 2000;
+}
+
+/* ---------- keyboard help overlay ----------
+   Ported from `docs/prototypes/emphasis/common.css`. The panel is a fixed
+   overlay rather than a canvas child so it is never clipped by the stage and
+   never inherits the canvas transform. */
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  /* `--scrim`, not a mix of `--bg`: a scrim must always DARKEN what is behind
+     it, and deriving it from the background inverts in the light theme. The
+     token block at the top of this file records that trap. */
+  background: var(--scrim);
+  backdrop-filter: blur(3px);
+}
+
+.help-panel {
+  width: min(58rem, calc(100vw - 32px));
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  padding: 22px 26px 18px;
+  background: var(--surface);
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-dialog);
+  box-shadow: var(--shadow-modal);
+}
+
+/* The panel takes focus when it opens so the reader's next Tab stays inside
+   it; the ring would be a distraction on a container that is not itself
+   actionable. */
+.help-panel:focus {
+  outline: none;
+}
+
+.help-panel h2 {
+  margin: 0 0 16px;
+  font-size: var(--type-title);
+  font-weight: 700;
+}
+
+/* Two wide columns, the sections flowing down them, rather than three narrow
+   ones that wrapped every meaning onto four lines. One column when the panel
+   is too narrow for two of 22rem. */
+.help-cols {
+  columns: 2 22rem;
+  column-gap: 40px;
+}
+
+.help-cols section {
+  break-inside: avoid;
+  margin-bottom: 22px;
+}
+
+.help-cols h3 {
+  margin: 0 0 10px;
+  font-size: var(--type-body);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.help-cols dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(7.5rem, auto) 1fr;
+  gap: 8px 14px;
+  align-items: baseline;
+}
+
+/* A row whose "key" is a control on the page ("Submit all"), not a key cap. */
+.help-control {
+  color: var(--text);
+  font-size: var(--type-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.help-cols dt {
+  margin: 0;
+}
+
+.help-cols dd {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-body);
+  line-height: 1.35;
+}
+
+.help-foot {
+  margin: 18px 0 0;
+  padding-top: 12px;
+  border-top: var(--line-chrome) solid var(--border);
+  color: var(--text-faint);
+  font-size: var(--type-small);
+}
+
+kbd {
+  font: inherit;
+  font-size: var(--type-floor);
+  background: var(--surface-2);
+  border: var(--line-chrome) solid var(--border-strong);
+  border-bottom-width: var(--line-chrome-strong);
+  border-radius: var(--radius-mark);
+  padding: 1px 5px;
+  color: var(--text-dim);
+}
+
+.help-close {
+  display: block;
+  margin: 14px 0 0 auto;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: var(--type-small);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.help-close:hover {
+  background: var(--border);
+}
+
+/*
+ * Comments and notes (`src/comments/`): the side panel, its toggle in the
+ * bar, and the marks on the drawing. None of it renders unless the server
+ * says it supports comments or notes, so with no `capabilities` nothing here
+ * matches and the page is the page it was.
+ *
+ * The panel is the page's own chrome: the surface and its rules, the dim
+ * voice for what the page says, the text voice for what people wrote. The
+ * person's words and the agent's are told apart by a rule at the side, never
+ * by a colour alone; a thread's status is a word in a ruled chip.
+ */
+/* Read, never laid out: no padding or border of the element's own class (the caption bar's made its
+   copy in the header 19px tall, past the bottom of the page, which then scrolled). */
+.archer-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The bar's control, in the shape of the appearance controls beside it. */
+.archer-review-toggle {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  height: 1.875rem;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-small);
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.archer-review-toggle:hover,
+.archer-review-toggle[aria-expanded="true"] {
+  background: var(--border);
+  color: var(--text);
+}
+
+.archer-review-toggle-count {
+  min-width: 1.125rem;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-fill);
+  color: var(--accent-on-fill);
+  font-size: var(--type-floor);
+  line-height: 1.125rem;
+  text-align: center;
+}
+
+/* The stage and the panel, side by side. The stage keeps `flex: 1`. */
+/* A diagram's address while the page learns which view it is and what the agent presents (App.tsx
+   `routeSettling`): the stage keeps its box but paints nothing, so what comes above it does not move a painted
+   "Loading..." down (PF-6). */
+[data-route-settling] { visibility: hidden; }
+
+.archer-review-row {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.archer-review-row > .archer-stage {
+  min-width: 0;
+}
+
+.archer-review {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: min(24rem, 38vw);
+  min-height: 0;
+  border-left: var(--line-chrome) solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--type-body);
+}
+
+.archer-review[hidden] {
+  display: none;
+}
+
+.archer-review-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 10px 16px;
+  border-bottom: var(--line-chrome) solid var(--border);
+}
+
+.archer-review-title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--type-body);
+  font-weight: 600;
+}
+
+.archer-review-close {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.archer-review-close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Focusable through its threads and notes; scrolls on its own so the submit
+   bar stays in reach. */
+.archer-review-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.archer-review-section {
+  padding: 12px 16px 14px;
+  border-bottom: var(--line-chrome) solid var(--border);
+}
+
+.archer-review-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.archer-review-heading {
+  margin: 0 0 8px;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.archer-review-section-head .archer-review-heading {
+  margin: 0;
+}
+
+/* A file address resolving (App.tsx FileRouteGate): no margin to collapse through the body and move it (PF-6). */
+.archer-route-pending {
+  margin: 0;
+  padding: 16px 22px;
+}
+
+.archer-review-quiet {
+  margin: 4px 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  line-height: 1.45;
+}
+
+/*
+ * SOFT TINT BUTTONS (picked 2026-10-08). One rule for every button in
+ * the chrome, so a button never looks like a badge:
+ *   - 6px corners and NO border; what can be pressed sits on a tinted fill.
+ *     Pills (999px) are kept for what is read, not pressed -- badges, pins,
+ *     status chips, filter chips -- so the two shapes stay apart.
+ *   - Ordinary: `--surface-2` fill in the text colour, a step darker
+ *     (`--border`) on hover. Text 13.7:1 dark / 14.5:1 light on the fill,
+ *     11.5:1 / 11.4:1 on the hover step.
+ *   - Primary (the one action a panel exists for): the accent's tint,
+ *     `--accent-fill` / `--accent-on-fill` (13.8:1 / 11.9:1), going solid,
+ *     `--accent` / `--accent-ink` (8.5:1 both), on hover.
+ *   - Icon-only: transparent until hover, then `--surface-2`.
+ *   - Disabled: the muted fill and `--text-faint`, 4.7:1 / 4.9:1 -- dimmer,
+ *     still legible.
+ *   - Focus: the page's 2px `--accent` ring (`:focus-visible` above), 8.1:1 /
+ *     7.4:1 against the fill. Nothing here removes it.
+ */
+.archer-review-button {
+  padding: 5px 11px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.archer-review-button:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.archer-review-button:disabled {
+  background: var(--surface-2);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+/* The one action that sends, and the one that saves: the reader's own voice. */
+.archer-review-button--primary:not(:disabled) {
+  background: var(--accent-fill);
+  color: var(--accent-on-fill);
+  font-weight: 600;
+}
+
+.archer-review-button--primary:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.archer-review-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-small);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.archer-review-link:hover {
+  color: var(--text);
+}
+
+.archer-review-link--danger {
+  color: var(--danger-text);
+}
+
+/* ---- Notes ---- */
+
+.archer-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archer-note + .archer-note {
+  border-top: var(--line-chrome) solid var(--border);
+}
+
+.archer-note-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.archer-note-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.archer-note-toggle:hover .archer-note-title {
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+}
+
+.archer-note-chevron {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-right: var(--line-mark) solid var(--text-dim);
+  border-bottom: var(--line-mark) solid var(--text-dim);
+  transform: translateY(-2px) rotate(-45deg);
+  transition: transform 120ms ease;
+}
+
+.archer-note-toggle[aria-expanded="true"] .archer-note-chevron {
+  transform: translateY(-3px) rotate(45deg);
+}
+
+.archer-note-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.archer-note-file {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-size: var(--type-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archer-note-count {
+  flex: none;
+  min-width: 18px;
+  padding: 0 5px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+  line-height: 16px;
+  text-align: center;
+}
+
+.archer-note-region {
+  padding: 0 0 12px 14px;
+}
+
+.archer-note-region[hidden] {
+  display: none;
+}
+
+/* Someone's writing, at reading size: prose, not chrome. */
+.archer-note-body {
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 2px 10px 2px 0;
+  color: var(--text);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.archer-note-body[hidden] {
+  display: none;
+}
+
+.archer-note-body:focus-visible {
+  outline-offset: 2px;
+}
+
+/* Drawn as h5 and h6 under the note's own title (`markdown.ts`), sized by
+   the level they were written at. */
+.archer-note-body h5,
+.archer-note-body h6 {
+  margin: 12px 0 6px;
+  font-size: var(--type-body);
+  font-weight: 600;
+}
+
+.archer-note-body .archer-note-h1 {
+  font-size: var(--type-title);
+}
+
+.archer-note-body p,
+.archer-note-body ul,
+.archer-note-body ol,
+.archer-note-body blockquote,
+.archer-note-body pre,
+.archer-note-body table {
+  margin: 0 0 8px;
+}
+
+.archer-note-body p,
+.archer-note-body li,
+.archer-note-body blockquote {
+  text-wrap: pretty;
+}
+
+.archer-note-body ul,
+.archer-note-body ol {
+  padding-left: 20px;
+}
+
+.archer-note-body blockquote {
+  padding-left: 10px;
+  border-left: var(--line-chrome-strong) solid var(--border-strong);
+  color: var(--text-dim);
+}
+
+.archer-note-body code {
+  padding: 0 3px;
+  border-radius: var(--radius-mark);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-size: var(--type-small);
+}
+
+.archer-note-body pre {
+  overflow-x: auto;
+  padding: 8px 10px;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+}
+
+.archer-note-body pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.archer-note-body table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--type-small);
+}
+
+.archer-note-body th,
+.archer-note-body td {
+  overflow-wrap: break-word;
+  padding: 3px 8px;
+  border: var(--line-chrome) solid var(--border);
+}
+
+.archer-note-body td code {
+  white-space: nowrap;
+}
+
+.archer-note-body a {
+  color: var(--accent-quiet);
+  text-underline-offset: 2px;
+}
+
+.archer-note-body hr {
+  border: 0;
+  border-top: var(--line-chrome) solid var(--border);
+}
+
+.archer-note-image {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* A passage a thread is about. The dashed shape stays legible when a named
+   highlight behind it happens to use the same hue as the thread's author. */
+.archer-passage {
+  background: transparent;
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--discussion-hue);
+  text-underline-offset: 4px;
+}
+
+.archer-passage--person {
+  --discussion-hue: var(--you);
+}
+
+.archer-passage--agent {
+  --discussion-hue: var(--agent);
+}
+
+.archer-passage[data-active-discussion="true"] {
+  background: color-mix(in srgb, var(--discussion-hue, var(--text)) 18%, transparent);
+  text-decoration-thickness: 3px;
+}
+
+.archer-passage[role="button"]:focus-visible {
+  outline: 2px solid var(--kbd-focus);
+  outline-offset: 2px;
+}
+
+.archer-note-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+.archer-note-tools .archer-review-quiet {
+  flex-basis: 100%;
+}
+
+/* ---- Threads ---- */
+
+.archer-threads {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.archer-thread {
+  padding: 9px 11px 10px;
+  border: var(--line-chrome) solid var(--border);
+  border-radius: var(--radius-card);
+  background: transparent;
+}
+
+.archer-thread:focus-visible {
+  outline-offset: 1px;
+}
+
+.archer-thread-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 8px;
+}
+
+.archer-thread-anchor {
+  min-width: 0;
+  margin: 0;
+  font-size: var(--type-small);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.archer-thread-show {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.archer-thread-show:hover {
+  text-decoration-color: var(--accent);
+}
+
+.archer-thread-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Each status is its word; the hue only repeats it. */
+.archer-thread-status {
+  padding: 0 7px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+/* The person's states in the person's hue: outlined while still theirs to
+   send, filled once it is with the agent. The agent's in the agent's hue. */
+.archer-thread-status[data-status="draft"],
+.archer-thread-status[data-status="changed"] {
+  border-color: var(--you);
+  color: var(--text);
+}
+
+.archer-thread-status[data-status="sent"],
+.archer-thread-status[data-status="read"] {
+  border-color: var(--you);
+  background: var(--you-fill);
+  color: var(--text);
+}
+
+.archer-thread-status[data-status="answered"] {
+  border-color: var(--agent);
+  color: var(--agent-text);
+}
+
+.archer-thread-status[data-status="resolved"] {
+  border-color: var(--agent);
+  background: var(--agent);
+  color: var(--agent-ink);
+}
+
+/* The pin's number on the thread it belongs to: the same pin as on the
+   drawing, so the reader matches one to the other at a glance. */
+.archer-thread-pin {
+  position: relative;
+  flex: none;
+  margin-right: 6px;
+  vertical-align: 1px;
+  pointer-events: none;
+}
+
+/* The thread a pin was just pressed on, for a moment. */
+.archer-thread[data-active="true"] {
+  border-color: var(--you);
+  box-shadow: 0 0 0 1px var(--you);
+}
+
+.archer-thread[data-status="resolved"] {
+  border-style: dashed;
+}
+
+.archer-thread-resolved-note {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-thread-status[data-status="orphaned"] {
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+
+.archer-thread-orphan-note {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+/* Where a thread sits in a walkthrough: the person's blue, never the walkthrough's teal. */
+.archer-thread-walk {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-thread-chip {
+  padding: 1px 8px;
+  border: var(--line-chrome) solid color-mix(in srgb, var(--you) 55%, transparent);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--you);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.archer-thread-chip:hover {
+  background: color-mix(in srgb, var(--you) 12%, transparent);
+}
+
+/* Where the thread sits, said as text: not a control, so not drawn as one. */
+.archer-thread-chip[data-plain] {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-weight: inherit;
+  cursor: default;
+}
+
+.archer-thread-comments {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The person's words and the agent's. The agent's reply sits on its own
+   wash, under a named author mark with its glyph; the person's are plain,
+   under theirs. Told apart by the mark's word and shape as well as its hue. */
+.archer-comment {
+  margin-top: 8px;
+}
+
+.archer-comment[data-author="agent"] {
+  padding: 7px 9px 8px;
+  border: var(--line-chrome) solid color-mix(in srgb, var(--agent) 45%, transparent);
+  border-radius: var(--radius-control);
+  background: var(--agent-fill);
+}
+
+.archer-comment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-comment-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+[data-author="person"] .archer-comment-author {
+  color: var(--text);
+}
+
+[data-author="person"] .archer-comment-author::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--you);
+}
+
+[data-author="agent"] .archer-comment-author {
+  color: var(--agent-text);
+}
+
+.archer-comment-glyph {
+  flex: none;
+  fill: var(--agent);
+}
+
+.archer-comment-body {
+  margin: 2px 0 0;
+  font-size: var(--type-body);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.archer-comment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 3px;
+}
+
+.archer-comment-confirm,
+.archer-comment-note {
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-thread-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+/* ---- Writing ---- */
+
+.archer-composer,
+.archer-thread-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+.archer-composer {
+  padding: 9px 11px 10px;
+  border: var(--line-chrome) solid var(--accent);
+  border-radius: var(--radius-card);
+  background: transparent;
+}
+
+.archer-composer-about {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-composer-kept {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-composer-kept[role="alert"] {
+  color: var(--text);
+}
+
+.archer-composer-about select {
+  min-width: 0;
+  max-width: 100%;
+  padding: 3px 6px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-small);
+}
+
+.archer-composer-anchor {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.archer-composer-text {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 8px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-body);
+  line-height: 1.45;
+  resize: none;
+  overflow-y: hidden;
+}
+
+.archer-composer-text:focus-visible {
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
+.archer-composer-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ---- Sending ---- */
+
+.archer-review-submit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+  padding: 10px 16px;
+  border-top: var(--line-chrome) solid var(--border);
+}
+
+.archer-review-pending {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-review-error {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 16px;
+  border-top: var(--line-chrome) solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: var(--type-small);
+}
+
+.archer-review-error p {
+  flex: 1;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.archer-review-error .archer-review-link {
+  color: var(--danger-text);
+}
+
+/* ---- Marks on the drawing ---- */
+
+/*
+ * PINS: every thread on an element is a numbered pin on it, in the person's
+ * hue -- outlined while a draft, filled once sent -- with the agent's small
+ * mark once it has answered (`diagrams/CommentPins.tsx`). Pressing one opens
+ * its thread. They stand off the element's top-right corner, outside its
+ * label, in a row that grows leftwards.
+ */
+.archer-pins {
+  position: absolute;
+  top: -11px;
+  right: -9px;
+  z-index: 3;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 3px;
+  pointer-events: none;
+}
+
+/* A frame's pins sit inside its corner, clear of the frame's neighbours. */
+.archer-pins--inside {
+  top: 6px;
+  right: 6px;
+}
+
+/* Lifted out of a faded box (`PinRow`): placed by the canvas layer, its right end at `left`. */
+.archer-pins.archer-pins--lifted {
+  right: auto;
+  transform: translateX(-100%);
+}
+
+.archer-pin {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: var(--line-chrome-strong) solid var(--you);
+  border-radius: var(--radius-pill);
+  background: var(--node-bg);
+  color: var(--you);
+  font-family: inherit;
+  font-size: var(--type-floor);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--bg);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* A bigger target than the pin is drawn: a finger is not a 20px thing. */
+.archer-pin::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+
+.archer-pin[data-state="sent"],
+.archer-pin[data-state="answered"],
+.archer-pin[data-state="resolved"] {
+  background: var(--you);
+  color: var(--you-ink);
+}
+
+.archer-pin:hover {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px color-mix(in srgb, var(--you) 40%, transparent);
+}
+
+/* The agent has answered (or resolved): its mark, in its hue, on the pin. */
+.archer-pin-agent {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: var(--line-chrome-strong) solid var(--node-bg);
+  border-radius: 50%;
+  background: var(--agent);
+}
+
+/* On a sequence diagram the pins are drawn in SVG, in the same voice. */
+.archer-svg-pin {
+  cursor: pointer;
+}
+
+.archer-svg-pin-body {
+  fill: var(--node-bg);
+  stroke: var(--you);
+  stroke-width: 2px;
+}
+
+.archer-svg-pin-hit {
+  fill: transparent;
+}
+
+.archer-svg-pin text {
+  fill: var(--you);
+  font-weight: 700;
+}
+
+.archer-svg-pin:is([data-state="sent"], [data-state="answered"], [data-state="resolved"]) .archer-svg-pin-body {
+  fill: var(--you);
+}
+
+.archer-svg-pin:is([data-state="sent"], [data-state="answered"], [data-state="resolved"]) text {
+  fill: var(--you-ink);
+}
+
+.archer-svg-pin-agent {
+  fill: var(--agent);
+  stroke: var(--node-bg);
+  stroke-width: 2px;
+}
+
+/* An edge's pins ride beside its label (or its middle) in the label layer. */
+.archer-edge-pins {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  gap: 3px;
+  pointer-events: none;
+}
+
+/* On a phone-width window the panel takes the stage while it is open: a
+   column beside a 400px drawing would leave room for neither. */
+@media (max-width: 720px) {
+  .archer-review {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    width: auto;
+    border-left: 0;
+  }
+
+  .archer-review-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ==================================================================
+ * Diagram types beyond the flowchart, on the graph canvas
+ * (`diagrams/figures.ts`, `FigureNode.tsx`, `FrameNode.tsx`).
+ *
+ * Every figure is still an `.archer-node` (or, for a group that is an
+ * element, an `.archer-element-group`), so selection, the keyboard ring and
+ * the agent's emphasis are the rules above, unchanged. What is here is only
+ * what each figure IS: a shape, a line pattern, rows of text -- never a hue,
+ * so each reads in greyscale and in both schemes from the tokens alone.
+ * ================================================================== */
+
+/* ---------- group panels ---------- */
+
+/* A flowchart subgraph (DESIGN.md, Diagram palette): an opaque panel rounded at 16px. Three roles (redesign slice 5,
+   after the home rig): the OUTER boundary, clear with a 2px dark outline and its caption top right; a STRUCTURAL
+   panel inside it, pale slate with a quieter 1.5px outline and caption; a FAMILY panel, tinted with a 1.5px outline
+   and caption in the family's colours. Its family or nesting step only rewrites the tokens it paints from (below),
+   so a nested panel is told from its parent by its border and shade, never by stacked transparency. */
+.react-flow__node.archer-group:not(.archer-element-group) {
+  border: var(--line-boundary) solid var(--group-border);
+  border-radius: var(--radius-panel);
+  background: var(--group-bg);
+  color: var(--group-text);
+}
+
+/* A neutral panel inside another panel: pale slate with a quieter outline. The outermost is clear, on the
+   canvas, with the dark outline (the root's `--group-*`). */
+.archer-group.archer-group-nested {
+  --group-bg: var(--group-bg-alt);
+  --group-border: var(--group-border-alt);
+  --group-caption: var(--group-caption-alt);
+  --group-bg-faded: color-mix(in srgb, var(--group-bg-alt) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--group-border-alt) 25%, transparent);
+}
+
+.archer-group.archer-family-violet {
+  --group-bg: var(--family-violet-panel);
+  --group-border: var(--family-violet-border);
+  --group-caption: var(--family-violet-ink);
+  --group-bg-faded: color-mix(in srgb, var(--family-violet-panel) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--family-violet-border) 25%, transparent);
+}
+
+.archer-group.archer-family-teal {
+  --group-bg: var(--family-teal-panel);
+  --group-border: var(--family-teal-border);
+  --group-caption: var(--family-teal-ink);
+  --group-bg-faded: color-mix(in srgb, var(--family-teal-panel) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--family-teal-border) 25%, transparent);
+}
+
+.archer-group.archer-family-green {
+  --group-bg: var(--family-green-panel);
+  --group-border: var(--family-green-border);
+  --group-caption: var(--family-green-ink);
+  --group-bg-faded: color-mix(in srgb, var(--family-green-panel) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--family-green-border) 25%, transparent);
+}
+
+.archer-group.archer-family-plum {
+  --group-bg: var(--family-plum-panel);
+  --group-border: var(--family-plum-border);
+  --group-caption: var(--family-plum-ink);
+  --group-bg-faded: color-mix(in srgb, var(--family-plum-panel) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--family-plum-border) 25%, transparent);
+}
+
+.archer-group.archer-family-rust {
+  --group-bg: var(--family-rust-panel);
+  --group-border: var(--family-rust-border);
+  --group-caption: var(--family-rust-ink);
+  --group-bg-faded: color-mix(in srgb, var(--family-rust-panel) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--family-rust-border) 25%, transparent);
+}
+
+.archer-group.archer-family-red {
+  --group-bg: var(--family-red-panel);
+  --group-border: var(--family-red-border);
+  --group-caption: var(--family-red-ink);
+  --group-bg-faded: color-mix(in srgb, var(--family-red-panel) 25%, transparent);
+  --group-border-faded: color-mix(in srgb, var(--family-red-border) 25%, transparent);
+}
+
+.react-flow__node.archer-group.archer-category-dashed {
+  border-style: dashed;
+}
+
+/* A panel inside the outer boundary, structural or family, draws a lighter line than the boundary round it. */
+.react-flow__node.archer-group.archer-group-nested,
+.react-flow__node.archer-group.archer-family-violet,
+.react-flow__node.archer-group.archer-family-teal,
+.react-flow__node.archer-group.archer-family-green,
+.react-flow__node.archer-group.archer-family-plum,
+.react-flow__node.archer-group.archer-family-rust,
+.react-flow__node.archer-group.archer-family-red {
+  border-width: var(--line-panel);
+}
+
+/* ---------- groups that are elements ---------- */
+
+/* A panel like a subgraph's, which is also a thing the reader can point at:
+   a composite state, a C4 boundary, an architecture group. */
+.archer-group.archer-element-group {
+  box-sizing: border-box;
+  border: var(--line-boundary) solid var(--group-border);
+  border-radius: var(--radius-node);
+  background: var(--group-bg);
+  color: var(--group-text);
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.archer-element-group.selectable:hover:not(.selected):not(.archer-emph) {
+  border-color: var(--node-border-hover);
+}
+
+/* The reader's selection: the accent rule and glow a selected node wears.
+   The body is NOT filled -- it holds other elements, which stay readable. */
+.archer-element-group.selected {
+  border: var(--line-selected) solid var(--accent) !important;
+  box-shadow: var(--node-shadow-selected) !important;
+}
+
+.archer-element-group.archer-kbd-focus {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus) !important;
+}
+
+.archer-element-group.archer-kbd-focus.selected {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus), var(--node-shadow-selected) !important;
+}
+
+.archer-element-group:focus,
+.archer-element-group:focus-visible {
+  outline: none;
+}
+
+/* An emphasised frame: its border, in the hue, as a node's (ADR 0030). */
+.archer-element-group.archer-emph {
+  border-color: var(--emph-hue) !important;
+  border-width: var(--line-emphasis) !important;
+  border-style: solid !important;
+}
+
+/* In the band ELK keeps across the top of the frame, where the layout placed
+   it clear of every wire and arrowhead; `left` and `top` are the layout's,
+   inline (`layout/captions.ts`, which states this size and row height). */
+.archer-frame-caption {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  height: 20px;
+  color: var(--group-caption);
+  font-size: var(--type-canvas-frame);
+  font-weight: 700;
+  line-height: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.archer-frame-kind {
+  font-weight: 400;
+}
+
+/* A composite state is a state: the rounded box a state is, grown round its
+   children. */
+.archer-element-group.archer-frame-composite {
+  border-radius: var(--radius-panel);
+}
+
+/* ---------- states ---------- */
+
+/* A state is a rounded box, as UML draws one; the radius is the one the
+   layout ends wires on (`ROUNDED_RADIUS_PX`). */
+.archer-node.archer-state-state {
+  border-radius: 16px;
+}
+
+/* What a start or end mark is, in a word beside it (`FigureNode`'s
+   `StateMark`), in the dim label ink: below it when the flow runs across,
+   to its right when it runs down -- clear of the wires either way. */
+.archer-node .archer-state-mark-label {
+  position: absolute;
+  color: var(--text-dim);
+  /* font-size: STATE_MARK_FONT_PX (figure-metrics.ts), set by FigureNode. */
+  font-weight: 500;
+  line-height: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.archer-node .archer-state-mark-label[data-side="below"] {
+  top: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.archer-node .archer-state-mark-label[data-side="right"] {
+  top: 50%;
+  left: calc(100% + 6px);
+  transform: translateY(-50%);
+}
+
+/* The tooltip's target: the whole mark. */
+.archer-node .archer-state-mark-hover {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+/* The initial pseudo-state: a solid dot in the node's own ink. */
+.archer-node.archer-state-initial {
+  border-color: var(--node-text);
+  border-radius: 50%;
+  background: var(--node-text);
+}
+
+/* The final pseudo-state: a ring with a dot in it -- a bullseye. */
+.archer-node.archer-state-final {
+  border: var(--line-node) solid var(--node-text);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.archer-state-final-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+}
+
+/* A choice: the diamond, small and unlabelled; its name is in its
+   accessible name. */
+.archer-shape-diamond.archer-state-choice .archer-node-diamond {
+  border-color: var(--node-text);
+}
+
+/* A fork and a join: a bar across the flow, solid in the node's ink. UML
+   draws the two alike; which one it is shows in how many wires leave it. */
+.archer-node.archer-state-fork,
+.archer-node.archer-state-join {
+  border-color: var(--node-text);
+  border-radius: 3px;
+  background: var(--node-text);
+}
+
+/* A note: an annotation beside its state, drawn as the sequence canvas
+   draws one -- the chrome's quiet sheet with dimmer ink. It takes no state
+   of its own and no pointer: it belongs to the state it is tied to. */
+.archer-state-note {
+  position: absolute;
+  box-sizing: border-box;
+  border: var(--line-chrome) solid var(--fragment-border);
+  border-radius: 2px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-weight: 400;
+  text-align: left;
+  pointer-events: none;
+}
+
+.archer-state-note-row {
+  display: block;
+  white-space: nowrap;
+}
+
+.archer-state-note-tie {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.archer-state-note-tie line {
+  stroke: var(--fragment-border);
+  stroke-dasharray: 3 3;
+}
+
+/* ---------- entities ---------- */
+
+/* A table: the name in a title band, ruled off from the attribute rows.
+   Everything inside takes the node's own ink (dimmer by opacity, never by a
+   colour of its own), so a selected entity's whole table inverts with it. */
+.archer-node.archer-figure-entity {
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 4px;
+  text-align: left;
+}
+
+/* An entity with no attributes is its name, centred as any node's is. */
+.archer-figure-entity > .archer-node-text {
+  margin: auto;
+}
+
+.archer-er-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.archer-er-title {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-bottom: var(--line-chrome) solid currentColor;
+  white-space: nowrap;
+}
+
+.archer-er-row {
+  display: grid;
+  flex: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.archer-er-row > span {
+  overflow: hidden;
+}
+
+.archer-er-type,
+.archer-er-comment {
+  font-weight: 400;
+  opacity: 0.78;
+}
+
+.archer-er-comment {
+  font-style: italic;
+}
+
+.archer-er-name {
+  font-weight: 600;
+}
+
+.archer-er-keys {
+  display: flex;
+  align-items: center;
+}
+
+/* A key is a word in a small frame -- PK tinted, FK outlined, UK outlined
+   and dashed -- so the three are told apart by their words and their
+   shapes, and never by hue. */
+.archer-er-key {
+  box-sizing: border-box;
+  border: var(--line-chrome) solid currentColor;
+  border-radius: 3px;
+  font-weight: 700;
+  line-height: 14px;
+}
+
+.archer-er-key-PK {
+  background: color-mix(in srgb, currentColor 24%, transparent);
+}
+
+.archer-er-key-FK {
+  border-style: solid;
+}
+
+.archer-er-key-UK {
+  border-style: dashed;
+}
+
+/* Crow's feet: drawn in the wire's own ink, and following it when the wire
+   is hovered, selected or emphasised. The ring is filled with the canvas so
+   the wire does not show through the "zero". */
+.archer-er-mark {
+  fill: none;
+  stroke: var(--edge);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.archer-er-ring {
+  fill: var(--bg);
+}
+
+.archer-edge.selectable:hover .archer-er-mark {
+  stroke: var(--edge-hover);
+}
+
+.archer-edge.selected .archer-er-mark {
+  stroke: var(--accent);
+}
+
+.archer-edge.archer-emph .archer-er-mark {
+  stroke: var(--emph-hue);
+}
+
+/* ---------- C4 ---------- */
+
+/* What a C4 element is, told by its words (`[Container: TypeScript]`) and
+   by its outline: a person's box is rounded and carries the figure, a system
+   is ruled heavier, a component squarer, an external element dashed; a
+   database is the cylinder and a queue a pipe lying on its side. */
+.archer-c4-text {
+  max-width: 100%;
+}
+
+/* Secondary by size and brackets, in the card's full ink: never faded by opacity, which put a family's ink near grey
+   and dim ink under 4.5:1. The same style as a relationship's technology (`.archer-edge-label-technology`). */
+.archer-c4-type {
+  display: block;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.archer-c4-description {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 400;
+}
+
+.archer-c4-person-glyph {
+  margin-bottom: 2px;
+}
+
+.archer-node.archer-c4-person {
+  border-radius: 18px;
+}
+
+.archer-node.archer-c4-system {
+  border-width: var(--line-node-strong);
+}
+
+.archer-node.archer-c4-container {
+  border-radius: 6px;
+}
+
+.archer-node.archer-c4-component {
+  border-radius: 2px;
+}
+
+.archer-node.archer-c4-external {
+  border-style: dashed;
+}
+
+/* Shape outranks C4 kind: container/component corner radii must not flatten
+   the cylinder. The node owns body, fill and rings; the SVG closes its lid. */
+.archer-node.archer-c4-shape-database {
+  border-radius: 50% / 7px;
+}
+
+.archer-node.archer-c4-shape-database::before {
+  content: none;
+}
+
+.archer-c4-database-cap {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: calc(100% + 2px);
+  height: 14px;
+  fill: none;
+  stroke: var(--node-border);
+  stroke-width: 1.5px;
+  pointer-events: none;
+}
+
+.archer-c4-system .archer-c4-database-cap { stroke-width: 2px; }
+.archer-c4-external .archer-c4-database-cap { stroke-dasharray: 5 3; }
+.archer-node.archer-emph .archer-c4-database-cap { stroke: var(--emph-hue); }
+.archer-node.selectable:hover:not(.selected):not(.archer-emph) .archer-c4-database-cap { stroke: var(--node-border-hover); }
+.archer-node.selected .archer-c4-database-cap { stroke: var(--accent); stroke-width: 2.5px; }
+.archer-node.selected.archer-emph .archer-c4-database-cap { stroke: var(--emph-hue); }
+
+/* Mermaid's C4 queue is a horizontal cylinder. Its full end ellipse is
+   essential: rounded corners alone read as a capsule. */
+.archer-node.archer-c4-shape-queue {
+  border-radius: 16px / 50%;
+}
+
+.archer-node.archer-c4-shape-queue .archer-c4-text {
+  max-width: calc(100% - 52px);
+}
+
+.archer-c4-queue-cap {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 32px;
+  height: calc(100% + 2px);
+  fill: none;
+  stroke: var(--node-border);
+  stroke-width: 1.5px;
+  pointer-events: none;
+}
+
+.archer-c4-external .archer-c4-queue-cap { stroke-dasharray: 5 3; }
+.archer-node.archer-emph .archer-c4-queue-cap { stroke: var(--emph-hue); }
+.archer-node.selectable:hover:not(.selected):not(.archer-emph) .archer-c4-queue-cap { stroke: var(--node-border-hover); }
+.archer-node.selected .archer-c4-queue-cap { stroke: var(--accent); }
+.archer-node.selected.archer-emph .archer-c4-queue-cap { stroke: var(--emph-hue); }
+
+/* Boundaries: C4 draws them dashed; the kind is in the caption's words, and
+   in the rule -- an enterprise heavier, a container's dotted, a plain
+   boundary's finer. The pattern is notation and stays on the panel. */
+.archer-element-group.archer-frame-boundary {
+  border-style: dashed;
+}
+
+.archer-element-group.archer-boundary-enterprise {
+  border-width: var(--line-emphasis);
+}
+
+.archer-element-group.archer-boundary-system {
+  border-style: dashed;
+}
+
+.archer-element-group.archer-boundary-container {
+  border-style: dotted;
+  border-width: var(--line-boundary);
+}
+
+.archer-element-group.archer-boundary-generic {
+  border-style: dotted;
+}
+
+/* ---------- architecture ---------- */
+
+.archer-node.archer-figure-service {
+  border-radius: 8px;
+}
+
+.archer-service-text .archer-arch-icon {
+  margin-bottom: 4px;
+}
+
+/* A junction: a point where wires meet, drawn in the wires' own ink. */
+.archer-node.archer-figure-junction {
+  border-color: var(--edge);
+  border-radius: 50%;
+  background: var(--edge);
+}
+
+.archer-element-group.archer-frame-zone {
+  border-radius: var(--radius-node);
+}
+
+/* ==================================================================
+ * The journey canvas (`diagrams/JourneyCanvas.tsx`): sections as columns of
+ * task cards on a board that scrolls. A task card is drawn as a node is, and
+ * wears the node's three voices the node's way: selection fills it with the
+ * accent, the keyboard is an inset ring, the agent's emphasis a detached ring
+ * that breathes. A score is five pips and its number; the card's left rule
+ * repeats it as a shape -- dashed for a bad step (1-2), thin for a neutral
+ * one (3), heavy for a good one (4-5) -- and never as a hue.
+ * ================================================================== */
+
+/* A deliberate composition at any width: the sections share the board's
+   width as equal columns, each between a readable minimum and a maximum past
+   which a card is only longer lines, and the board -- its heading with it --
+   is centred at the width its columns need (an inline `max-width`, set by
+   `JourneyCanvas`). More columns than fit scroll sideways; on a phone they
+   stack (below). */
+.archer-journey {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.archer-journey-head,
+.archer-journey-board {
+  box-sizing: border-box;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.archer-journey-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 14px 16px 0;
+}
+
+.archer-journey-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-canvas-journey-title);
+  font-weight: 600;
+}
+
+.archer-journey-actors-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archer-journey-actor {
+  display: inline-block;
+  padding: 0 7px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: var(--type-canvas-journey-detail);
+  line-height: 18px;
+}
+
+.archer-journey-board {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  align-items: flex-start;
+  min-height: 0;
+  padding: 16px;
+  overflow: auto;
+}
+
+.archer-journey-section {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 320px;
+  gap: 8px;
+  padding: 10px;
+  border: var(--line-chrome) solid var(--group-border);
+  border-radius: var(--radius-card);
+  background: var(--group-bg);
+}
+
+.archer-journey-el {
+  position: relative;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.archer-journey-el:focus,
+.archer-journey-el:focus-visible {
+  outline: none;
+}
+
+.archer-journey-section-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border: var(--line-chrome) solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--group-text);
+}
+
+.archer-journey-section-label {
+  font-size: var(--type-canvas-journey);
+  font-weight: 600;
+}
+
+.archer-journey-section-count {
+  color: var(--text-dim);
+  font-size: var(--type-canvas-journey-detail);
+}
+
+.archer-journey-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archer-journey-task {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  /* A card like any other: its score is its pips and "n/5", never a weighted left edge (no side stripes). */
+  border: var(--line-node) solid var(--node-border);
+  border-radius: 6px;
+  background: var(--node-bg);
+  color: var(--node-text);
+}
+
+.archer-journey-task-label {
+  font-size: var(--type-canvas-journey);
+  font-weight: 600;
+}
+
+.archer-journey-score {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: var(--type-canvas-journey-detail);
+}
+
+.archer-journey-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.archer-journey-pip {
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: var(--line-chrome) solid currentColor;
+  border-radius: 50%;
+}
+
+.archer-journey-pip-filled {
+  background: currentColor;
+}
+
+.archer-journey-score-text {
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-journey-task-actors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.archer-journey-task .archer-journey-actor {
+  border-color: currentColor;
+  color: inherit;
+}
+
+/* A task nobody is named for still has its third row, so it reads as a card
+   that says so rather than one that stopped short. */
+.archer-journey-no-actors {
+  color: var(--text-dim);
+  font-size: var(--type-canvas-journey-detail);
+  font-style: italic;
+  line-height: 20px;
+}
+
+.archer-journey-el.selected .archer-journey-no-actors {
+  color: inherit;
+}
+
+.archer-journey-el:hover:not(.selected) {
+  border-color: var(--node-border-hover);
+}
+
+.archer-journey-el.selected {
+  border-color: var(--accent) !important;
+  background: var(--accent-fill) !important;
+  box-shadow: var(--node-shadow-selected);
+  color: var(--accent-on-fill) !important;
+}
+
+.archer-journey-el.selected .archer-journey-section-count {
+  color: inherit;
+}
+
+.archer-journey-el.archer-kbd-focus {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus);
+}
+
+.archer-journey-el.archer-kbd-focus.selected {
+  box-shadow: inset 0 0 0 3px var(--kbd-focus), var(--node-shadow-selected);
+}
+
+/* Colour only (ADR 0030): the card's border in the hue. The score rail keeps
+   its width and dash, which are the score; only its colour joins the group.
+   After `.selected`, which keeps its fill and glow. */
+.archer-journey-el.archer-emph,
+.archer-journey-el.archer-emph:hover {
+  border-color: var(--emph-hue) !important;
+}
+
+.archer-journey-dimmed {
+  opacity: 0.25;
+}
+
+/* On a phone the sections stack, so the board scrolls one way only. */
+@media (max-width: 560px) {
+  .archer-journey-board {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .archer-journey-section {
+    flex: none;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* What the model says it is, over the canvas's top-left corner. */
+.archer-canvas-heading {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  z-index: 5;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 3px 8px;
+  overflow: hidden;
+  border-radius: var(--radius-mark);
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ==================================================================
+ * THE FRONT DOOR (phase3-front-door.md): the contents page, the project
+ * name as the way back to it, the diagram's presence line and the change
+ * pulse.
+ *
+ * Structure is neutral. Hue says who: the person's blue (`--you`) on their
+ * drafts and sent threads, the agent's amber (`--agent`) on its caption, its
+ * changes and the threads it has read or answered.
+ * ================================================================== */
+
+/* ----------------------------------------------------- the contents page */
+
+/* The page scrolls; the shell does not. */
+.archer-contents-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--border-strong) transparent;
+  overscroll-behavior: contain;
+}
+
+.archer-contents {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 28px 32px 56px;
+  color: var(--text);
+}
+
+.archer-contents-tally {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A folder of the Archer folder, from the breadcrumb (FolderPage.tsx), and the project browser a folder's or
+   project's name in the tree moves to (SearchPage.tsx): a region that takes the focus, not a control. */
+.archer-folder:focus,
+.archer-project-browser:focus,
+.archer-search-page:focus {
+  outline: none;
+}
+
+.archer-folder-path {
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+
+.archer-folder-empty {
+  margin: 24px 0 0;
+  color: var(--text-dim);
+  font-size: var(--type-body);
+  line-height: 1.6;
+}
+
+/* Where a search result matched, field by field (SearchMatches.tsx), under its
+   row on the search page. The field names the kind of thing in the dim voice,
+   the matched text reads in the body colour; what can be jumped to is a button. */
+.archer-search-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--type-small);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.archer-search-match {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.archer-search-match-field {
+  font-weight: 600;
+}
+
+.archer-search-match-text {
+  color: var(--text);
+}
+
+.archer-search-match-plain {
+  display: block;
+  padding: 2px 4px;
+  margin-left: -4px;
+}
+
+.archer-search-match-jump {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 2px 4px;
+  margin-left: -4px;
+  border: 0;
+  border-radius: var(--radius-mark);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.archer-search-match-jump .archer-search-match-text {
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+}
+
+.archer-search-match-jump:hover {
+  background: var(--surface-2);
+}
+
+.archer-search-match-jump:hover .archer-search-match-text {
+  text-decoration-color: currentColor;
+}
+
+.archer-search-match-jump:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+
+.archer-search-match-more {
+  padding: 2px 0;
+}
+
+@media (max-width: 720px) {
+  .archer-contents {
+    padding: 16px 16px 40px;
+  }
+}
+
+/* ------------------------------------------------- the diagram's header */
+
+.archer-diagram-header {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  min-width: 0;
+  padding: 6px 14px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  background: var(--surface);
+  font-size: var(--type-small);
+}
+
+/* One line; a long caption is cut at the end, and read in full under the drawing. */
+.archer-presence {
+  flex: 1 1 18rem;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The presence line's row, held blank under the in-place editor until the line is known (O176). */
+.archer-presence-reserved {
+  flex: 1 1 18rem;
+  margin: 0;
+}
+
+/* Carrying the agent's caption, the line wraps rather than cutting it: the
+   caption is shown here and nowhere else (`CAPTION_IN_HEADER_MAX_CHARS`). */
+.archer-presence[data-caption="true"] {
+  white-space: normal;
+}
+
+.archer-presence[data-voice="agent"] .archer-presence-lead {
+  color: var(--agent-text);
+}
+
+.archer-presence-detail {
+  color: var(--text);
+}
+
+.archer-change {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.archer-change-text {
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+}
+
+.archer-change-headline {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Amber only when the agent made the change: amber is the agent's voice. */
+.archer-change[data-by="agent"] .archer-change-headline {
+  color: var(--agent-text);
+}
+
+.archer-change-summary,
+.archer-change-removed {
+  color: var(--text-dim);
+}
+
+.archer-change-show,
+.archer-change-dismiss {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.75rem;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Icon-only: transparent until hovered. */
+.archer-change-dismiss {
+  min-width: 1.75rem;
+  padding: 0;
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.archer-change-show:hover {
+  background: var(--border);
+}
+
+.archer-change-dismiss:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.archer-change-show:focus-visible,
+.archer-change-dismiss:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * The change pulse (`diagrams/ChangePulse.tsx`): one swell of the agent's
+ * colour round each added or changed element, out of a resting state that is
+ * already fully visible. Two names for the same moment, so "Show changes" can
+ * start it again on an element that already ran it.
+ */
+@keyframes archer-change-pulse-0 {
+  0% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  22% {
+    filter: drop-shadow(0 0 2px var(--agent)) drop-shadow(0 0 9px var(--agent));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+@keyframes archer-change-pulse-1 {
+  0% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  22% {
+    filter: drop-shadow(0 0 2px var(--agent)) drop-shadow(0 0 9px var(--agent));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* The diagram key in the drawing's lower-left corner, just inside the toolbar (DiagramKey.tsx): closed to
+   its header, or open to its rows, scrolling inside a bounded footprint; it never resizes the canvas. The
+   Highlights legend stacks above it. Either can be moved (chat/movable.tsx). A phone docks them under the
+   drawing instead (stage-dock.tsx). */
+.archer-stage, .archer-mcp-stage {
+  display: flex;
+  flex-direction: column;
+  /* The key's own height, measured by the key; a closed key's header until then. */
+  --diagram-key-height: 38px;
+  --diagram-key-inset: 12px;
+  --emphasis-legend-limit: 40%;
+  /* The toolbar's column: its 15px inset, its 52px width and a gap. The key and the legend start right of it. */
+  --toolbar-clear: 79px;
+  /* How far up the floating key starts. */
+  --stack-base: 15px;
+  /* What the stage holds under the drawing (the walkthrough transport bar), which the key is lifted over. */
+  --stage-below: 0px;
+}
+.archer-diagram-content { position: relative; flex: 1; min-height: 0; }
+/* Highlights and Walkthroughs are the side panel's mode switcher now (app/diagram-panel.css). */
+.archer-diagram-key {
+  position: absolute; left: var(--toolbar-clear, 79px); bottom: calc(var(--stage-below, 0px) + var(--stack-base, 15px)); z-index: 6;
+  box-sizing: border-box; width: 260px; max-height: min(360px, calc(100% - 2 * var(--diagram-key-inset)));
+  display: flex; flex-direction: column;
+  background: var(--surface); border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control); color: var(--text); font-size: var(--type-small);
+}
+.archer-diagram-key[data-open="false"] { width: auto; min-width: 150px; }
+/* Stack the two independent keys without reserving drawing space. Both remain absolute overlays; long
+   Highlights lists scroll within the space above the key. A key that was moved leaves the stack: the
+   legend then rests where the key did. */
+:is(.archer-stage, .archer-mcp-stage):has(> .archer-diagram-key:not([data-moved])) .archer-emph-legend:not([data-moved]) {
+  box-sizing: border-box;
+  bottom: calc(var(--stack-base, 15px) + var(--diagram-key-height) + 12px);
+  max-height: min(var(--emphasis-legend-limit), calc(100% - var(--diagram-key-height) - var(--stack-base, 15px) - 24px));
+}
+.archer-diagram-key-head { display: flex; align-items: stretch; flex: none; }
+/* The disclosure fills the head; the key's own action (pop out, dock) keeps its size at the right. */
+.archer-diagram-key-head > button:not(.archer-diagram-key-action) {
+  display: flex; align-items: center; justify-content: space-between;
+  flex: 1 1 auto; min-width: 0; min-height: 36px; padding: 6px 10px 6px 4px;
+  border: 0; border-radius: var(--radius-mark); background: transparent;
+  color: var(--text); font: inherit; font-weight: 600; cursor: pointer; gap: 12px;
+}
+.archer-diagram-key[data-open="true"] .archer-diagram-key-head { border-bottom: var(--line-chrome) solid var(--border); }
+.archer-diagram-key-head > button:not(.archer-diagram-key-action):hover { background: var(--surface-2); }
+.archer-diagram-key-head > button:not(.archer-diagram-key-action):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* The grip a panel is moved by, and its Reset once moved (chat/movable.tsx). */
+.archer-move { display: inline-flex; align-items: center; flex: none; }
+.archer-move button {
+  display: inline-grid; place-items: center; width: 28px; min-height: 28px; padding: 0; border: 0; border-radius: var(--radius-control);
+  background: transparent; color: var(--text-faint); cursor: grab; touch-action: none;
+}
+.archer-move .archer-move-reset { cursor: pointer; }
+.archer-move button:hover { background: var(--surface-2); color: var(--text); }
+.archer-move button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; color: var(--text); }
+.archer-diagram-key[data-moved], .archer-emph-legend[data-moved] { box-shadow: var(--shadow-panel); }
+.archer-diagram-key-panel { min-height: 0; overflow: auto; padding: 8px 10px; line-height: 1.45; }
+.archer-diagram-key-panel dl { margin: 0; }
+.archer-diagram-key-panel dl > div + div { margin-top: 6px; }
+.archer-diagram-key-panel dt { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.archer-diagram-key-panel dt svg { flex: none; width: 28px; height: 22px; }
+.archer-diagram-key-panel dd { margin: 4px 0 10px 36px; color: var(--text-dim); }
+.archer-diagram-key-voices { margin: 12px 0 0; color: var(--text-dim); }
+/* The Key's colours (DESIGN.md, "The Key"; `diagrams/palette-key.ts`): a compact row per kind, group and
+   category, like the owner's reference legend -- a real sample (its members' fill, 2px border and dash,
+   inline from the same tokens) beside a plain name, the kind of row in quiet small text, and Members. */
+.archer-key-palette { margin: 0 0 12px; padding-bottom: 10px; border-bottom: var(--line-chrome) solid var(--border); }
+.archer-diagram-key-panel .archer-key-palette dt { align-items: flex-start; }
+.archer-key-swatch {
+  flex: none; box-sizing: border-box; width: 28px; height: 18px; margin-top: 1px;
+  border-width: var(--line-node); border-radius: var(--radius-mark);
+}
+/* A panel's sample draws the panel's line (1.5px), as the family panels it stands for do. */
+.archer-key-swatch[data-sample="group"] { border-width: var(--line-panel); border-radius: var(--radius-control); }
+.archer-key-palette-name { display: flex; align-items: flex-start; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.archer-diagram-key-panel .archer-key-palette-name svg { width: 20px; height: 20px; }
+.archer-diagram-key-panel .archer-key-palette dd { margin: 0 0 0 36px; }
+.archer-key-palette-detail { display: block; }
+.archer-key-palette-members { margin-left: -6px; }
+.archer-key-palette-members > summary {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 2px 6px;
+  border-radius: var(--radius-control); color: var(--text-dim); cursor: pointer; list-style: none;
+}
+.archer-key-palette-members > summary::-webkit-details-marker { display: none; }
+.archer-key-palette-members > summary:hover { background: var(--surface-2); color: var(--text); }
+.archer-key-palette-members > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.archer-key-members-chevron path { fill: none; stroke: currentcolor; stroke-linecap: round; stroke-linejoin: round; }
+.archer-key-palette-members[open] .archer-key-members-chevron { transform: rotate(90deg); }
+.archer-key-palette-members > ul { margin: 2px 0 4px; padding: 0 0 0 22px; color: var(--text); }
+@media (pointer: coarse) {
+  .archer-key-palette-members > summary { min-height: 44px; }
+}
+/* The key covers only its own corner footprint. Keep the entire drawing
+   viewport available for rendering, panning and pointer interaction. */
+@media (max-width: 720px) {
+   .archer-stage, .archer-mcp-stage {
+    --diagram-key-height: 46px;
+    --diagram-key-inset: 10px;
+  }
+  .archer-diagram-key { width: 220px; }
+  .archer-diagram-key-head > button { min-height: 44px; }
+  /* Leave the controls below a long error list in the clipped reading area;
+     scroll diagnostics instead of extending their panel into that cluster. */
+  .archer-stage:has(.archer-diagram-key) .archer-compile-notice {
+    max-height: min(60%, calc(100% - 368px));
+  }
+  .archer-mcp-shell:has(.archer-diagram-key) > .archer-compile-notice {
+    max-height: min(60%, calc(100% - 408px));
+  }
+
+}
+
+@media (max-width: 560px) {
+  .archer-stage, .archer-mcp-stage { --emphasis-legend-limit: 28%; }
+}
+
+/* An address that names nothing (App's missing-route page; the shell's, so it needs no editor stylesheet). */
+.archer-route-missing{padding:32px 24px;max-width:640px;color:var(--text)}
+.archer-route-missing h1,.archer-route-missing h2{font-size:var(--type-title);margin:0 0 8px}
+.archer-route-missing p{color:var(--text-dim);line-height:1.5}
+
+/*
+ * Forced colours (Windows high contrast) replace every hue with system ink, so
+ * an emphasised border would read as any other. Emphasis takes the system's
+ * Highlight colour and a heavier line, and Group numbers' Auto turns the
+ * numbers on to tell the groups apart. Last in the sheet, so it outweighs each
+ * notation's own emphasis width.
+ */
+@media (forced-colors: active) {
+  .archer-emph-palette-teal,
+  .archer-emph-palette-violet,
+  .archer-emph-palette-coral {
+    --emph-hue: Highlight;
+  }
+
+  /* A heavier line for an emphasised box or frame; a journey card keeps its own line (its colour still turns
+     Highlight). */
+  .archer-node.archer-emph,
+  .archer-element-group.archer-emph {
+    border-width: var(--line-emphasis) !important;
+  }
+
+  .archer-seq-message.archer-emph line,
+  .archer-seq-message.archer-emph path,
+  .archer-seq-message.archer-emph polyline,
+  .archer-seq-participant.archer-emph .archer-seq-participant-box,
+  .archer-shape-diamond.archer-emph .archer-node-diamond,
+  .archer-shape-hexagon.archer-emph .archer-node-hexagon-body {
+    stroke-width: 3;
+  }
+
+  .archer-seq-message.archer-emph path.archer-emph-chevron {
+    stroke-width: 2.25;
+  }
+
+  /* Within the guards on emphasised lines: thick stays 1.5 heavier, and never past 4. */
+  .archer-emph-surface .archer-edge.archer-emph .react-flow__edge-path {
+    stroke-width: 2.5;
+  }
+
+  .archer-emph-surface .archer-edge.archer-line-thick.archer-emph .react-flow__edge-path {
+    stroke-width: 4;
+  }
+
+  .archer-emph-numbered .archer-node.archer-emph::after,
+  .archer-emph-numbered .archer-element-group.archer-emph::after,
+  .archer-emph-numbered .archer-journey-el.archer-emph::after {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .archer-emph-marker circle {
+    fill: Canvas;
+  }
+
+  .archer-emph-marker text {
+    fill: CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Round 1 #19 (C-13): with the OS asking for less motion, nothing in the page eases between states. Hover, focus
+     and selection still change at once, so the feedback stays; only the 120 ms fades go. The flow's moving arrows
+     are content with their own control (`emphasis/reduced-motion.ts`) and are not CSS transitions. */
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+
+/* Last, so it outranks each control's own rule above (same specificity). */
+@media (pointer: coarse) {
+  /* Round 1, G7 [H]: the text controls a phone taps. The cue grows round its one line; the framing keeps
+     its taller band free (`cueBandPx` in chrome-clearance.ts). */
+  :is(.archer-offscreen-cue, .archer-overview-cue, .archer-compile-notice-toggle, .archer-journey-section-head) {
+    min-width: var(--icon-touch);
+    min-height: var(--icon-touch);
+  }
+  :is(.archer-offscreen-cue, .archer-overview-cue) { border-radius: var(--radius-pill); }
+  .archer-journey-section-head { align-items: center; }
+  .archer-compile-notice-toggle { display: inline-flex; align-items: center; }
+}
+
+/* A source's frame added by Expand (ADR 0036 A12): another diagram's piece, set apart from the view's own
+   containers by a heavier dashed line; its tools sit on its top edge, right. */
+.react-flow__node.archer-group.archer-source-frame { border: var(--line-panel) dashed var(--border-strong) !important; background: transparent !important; }
+.archer-source-frame-tools {
+  position: absolute; top: -13px; right: 8px; display: inline-flex; align-items: center; gap: 2px; padding: 0 2px;
+  border-radius: var(--radius-control); background: var(--bg); pointer-events: auto; font-size: var(--type-small);
+}
+.archer-source-frame-proposed { padding: 0 6px; border: var(--line-chrome) dashed var(--border-strong); border-radius: var(--radius-mark); color: var(--text-dim); }
+.archer-source-frame-button {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 6px;
+  border: var(--line-chrome) solid var(--border); border-radius: var(--radius-control); background: var(--surface); color: var(--text-dim); font: inherit; cursor: pointer;
+}
+.archer-source-frame-button:hover { border-color: var(--border-hover); color: var(--text); }
+.archer-source-frame-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

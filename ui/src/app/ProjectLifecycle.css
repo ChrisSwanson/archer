@@ -1,0 +1,8 @@
+.archer-inactive-projects{margin-top:24px;border-top:var(--line-chrome) solid var(--border);padding-top:12px}
+.archer-inactive-projects>summary{display:flex;align-items:center;gap:8px;min-height:36px;color:var(--text-dim);font-size:var(--type-small);font-weight:600;cursor:pointer;list-style-position:inside}
+.archer-inactive-count{min-width:22px;padding:2px 7px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--text);font-variant-numeric:tabular-nums;text-align:center}
+.archer-inactive-matches{font-weight:400;color:var(--text-dim)}
+.archer-inactive-help{max-width:70ch;margin:4px 0 14px;color:var(--text-dim);font-size:var(--type-small);line-height:1.5}
+@media(max-width:720px){
+ .archer-inactive-projects>summary{min-height:44px}
+}

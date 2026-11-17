@@ -1,0 +1,178 @@
+{
+  "type": "sequence-trace",
+  "participants": [
+    {
+      "id": "actor",
+      "label": "Actor"
+    },
+    {
+      "id": "note",
+      "label": "Note"
+    },
+    {
+      "id": "rect",
+      "label": "Rect",
+      "kind": "actor"
+    },
+    {
+      "id": "box",
+      "label": "Box"
+    }
+  ],
+  "events": [
+    {
+      "type": "message",
+      "id": "msg-0",
+      "from": "actor",
+      "to": "note",
+      "label": "declared below",
+      "kind": "sync"
+    },
+    {
+      "type": "message",
+      "id": "msg-1",
+      "from": "note",
+      "to": "box",
+      "label": "hello",
+      "kind": "sync"
+    },
+    {
+      "type": "activate",
+      "participant": "box"
+    },
+    {
+      "type": "activate",
+      "participant": "box"
+    },
+    {
+      "type": "message",
+      "id": "msg-2",
+      "from": "box",
+      "to": "rect",
+      "label": "stacked, and one left open",
+      "kind": "sync"
+    },
+    {
+      "type": "activate",
+      "participant": "rect"
+    },
+    {
+      "type": "message",
+      "id": "msg-3",
+      "from": "rect",
+      "to": "box",
+      "label": "the shorthand closes its own",
+      "kind": "reply"
+    },
+    {
+      "type": "deactivate",
+      "participant": "rect"
+    },
+    {
+      "type": "deactivate",
+      "participant": "box"
+    },
+    {
+      "type": "activate",
+      "participant": "rect"
+    },
+    {
+      "type": "message",
+      "id": "msg-4",
+      "from": "rect",
+      "to": "actor",
+      "label": "the shorthand closes an explicit activate",
+      "kind": "reply"
+    },
+    {
+      "type": "deactivate",
+      "participant": "rect"
+    },
+    {
+      "type": "fragment",
+      "id": "frag-0",
+      "kind": "alt",
+      "label": "outer",
+      "sections": [
+        {
+          "label": "outer",
+          "events": [
+            {
+              "type": "fragment",
+              "id": "frag-1",
+              "kind": "opt",
+              "label": "inner",
+              "sections": [
+                {
+                  "label": "inner",
+                  "events": [
+                    {
+                      "type": "fragment",
+                      "id": "frag-2",
+                      "kind": "par",
+                      "label": "first",
+                      "sections": [
+                        {
+                          "label": "first",
+                          "events": [
+                            {
+                              "type": "message",
+                              "id": "msg-5",
+                              "from": "actor",
+                              "to": "note",
+                              "label": "one",
+                              "kind": "async"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "second",
+                          "events": [
+                            {
+                              "type": "message",
+                              "id": "msg-6",
+                              "from": "note",
+                              "to": "actor",
+                              "label": "two",
+                              "kind": "async"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "otherwise",
+          "events": [
+            {
+              "type": "fragment",
+              "id": "frag-3",
+              "kind": "loop",
+              "label": "retry",
+              "sections": [
+                {
+                  "label": "retry",
+                  "events": [
+                    {
+                      "type": "message",
+                      "id": "msg-7",
+                      "from": "box",
+                      "to": "rect",
+                      "label": "again",
+                      "kind": "sync"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

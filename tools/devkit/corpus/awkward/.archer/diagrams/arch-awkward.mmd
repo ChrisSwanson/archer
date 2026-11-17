@@ -1,0 +1,18 @@
+architecture-beta
+    title Pageturner deployment
+    service payments(internet)[Payment provider]
+    group region(cloud)[Hosting region]
+    group apps(server)[App cluster] in region
+    group data(database)[Data] in region
+    service cdn(internet)[CDN with the Storefront] in region
+    service api(server)[Shop API] in apps
+    service backoffice(server)[Back office] in apps
+    service worker(server)[Worker] in apps
+    service db(database)[Shop database] in data
+    service queue(disk)[Job queue] in data
+    cdn:R -[calls]-> L:api
+    backoffice:B -[calls]-> T:api
+    api:R -[SQL]-> L:db
+    api:B -[queues work]-> T:queue
+    worker:R -[takes work]-> L:queue
+    api:T -[payment sessions]-> B:payments

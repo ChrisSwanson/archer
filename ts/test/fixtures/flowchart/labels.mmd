@@ -1,0 +1,18 @@
+%% Label text of the flowchart profile on real Mermaid syntax. Blank lines and
+%% comments may precede the header, and `graph` is the header's other spelling.
+%% Text holding parentheses, brackets or braces is quoted, as Mermaid requires.
+
+graph RL
+  bare["API (v2)"]
+  quoted["API (v2)"]
+  punctuated["Orders API, v2: read - write/replay (EU)"]
+  nested_paren("API (v2)")
+  nested_bracket["Bracket [inner]"]
+  unbalanced("API (v2")
+  literal["(Db)"]
+  store[("Orders (primary)")]
+  percent[50 %% off]
+  padded[   Padded   ]
+  %% Mermaid has no trailing comments in a flowchart: a comment is its own line.
+  commented[Commented]
+	tabbed[Indented with a tab]

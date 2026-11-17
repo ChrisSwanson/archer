@@ -1,0 +1,72 @@
+/* Shared by the Diagrams and Notes views: the metadata pieces, the open control, the empty state. */
+
+.archer-project-view-kind,
+.archer-project-view-project {
+  flex: none;
+  max-width: 14ch;
+  padding: 1px 7px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archer-project-view-folder {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-size: var(--type-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archer-project-view-threads, .archer-project-view-walks {
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+.archer-project-view-threads[data-open="true"] { color: var(--text); font-weight: 600; }
+
+/* The title is the row's or card's control: plain text until hovered or focused. */
+.archer-project-view-open {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.archer-project-view-open:hover { text-decoration: underline; text-underline-offset: 3px; }
+.archer-project-view-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-mark); }
+
+.archer-project-view-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+  border: var(--line-chrome) dashed var(--border-strong);
+  border-radius: var(--radius-card);
+  color: var(--text-dim);
+  text-align: center;
+}
+.archer-project-view-empty p { margin: 0; color: var(--text); font-weight: 500; }
+.archer-project-view-empty button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.archer-project-view-empty button:hover { background: var(--surface-2); }
+.archer-project-view-empty button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

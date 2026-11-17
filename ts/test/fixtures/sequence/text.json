@@ -1,0 +1,103 @@
+{
+  "type": "sequence-trace",
+  "participants": [
+    {
+      "id": "web",
+      "label": "Web (EU)"
+    },
+    {
+      "id": "quoted",
+      "label": "Web (EU)"
+    },
+    {
+      "id": "main",
+      "label": "Web (EU) - main, v2"
+    },
+    {
+      "id": "taker",
+      "label": "Note taker"
+    }
+  ],
+  "events": [
+    {
+      "type": "message",
+      "id": "msg-0",
+      "from": "web",
+      "to": "quoted",
+      "label": "GET /resource?id=1 (cached), please",
+      "kind": "sync"
+    },
+    {
+      "type": "message",
+      "id": "msg-1",
+      "from": "quoted",
+      "to": "web",
+      "label": "100% complete",
+      "kind": "reply"
+    },
+    {
+      "type": "message",
+      "id": "msg-2",
+      "from": "web",
+      "to": "main",
+      "label": "\"100 %% pure\"",
+      "kind": "async"
+    },
+    {
+      "type": "message",
+      "id": "msg-3",
+      "from": "main",
+      "to": "web",
+      "label": "POST /refresh",
+      "kind": "sync"
+    },
+    {
+      "type": "note",
+      "id": "note-0",
+      "position": "right-of",
+      "participants": [
+        "taker"
+      ],
+      "text": "keywords match in any case"
+    },
+    {
+      "type": "note",
+      "id": "note-1",
+      "position": "over",
+      "participants": [
+        "web",
+        "quoted"
+      ],
+      "text": "TLS 1.3, mutual auth"
+    },
+    {
+      "type": "fragment",
+      "id": "frag-0",
+      "kind": "loop",
+      "label": "token refresh (every 15 min)",
+      "sections": [
+        {
+          "label": "token refresh (every 15 min)",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-4",
+              "from": "web",
+              "to": "main",
+              "label": "POST /refresh (refresh_token)",
+              "kind": "sync"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "id": "msg-5",
+      "from": "main",
+      "to": "taker",
+      "label": "trimmed",
+      "kind": "async"
+    }
+  ]
+}

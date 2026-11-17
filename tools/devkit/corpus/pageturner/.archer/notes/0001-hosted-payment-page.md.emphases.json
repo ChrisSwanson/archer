@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "notePath": "notes/0001-hosted-payment-page.md",
+  "revision": 1,
+  "emphases": [
+    {
+      "id": "payment-boundary",
+      "title": "Payment Boundary",
+      "author": "agent",
+      "groups": [
+        {
+          "id": "hosted-checkout",
+          "label": "Hosted checkout",
+          "palette": "teal",
+          "passages": [
+            {
+              "kind": "passage",
+              "quote": "The Shop API creates a payment session with the payment provider",
+              "prefix": "",
+              "suffix": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

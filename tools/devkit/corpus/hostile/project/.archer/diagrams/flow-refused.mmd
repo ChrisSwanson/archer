@@ -1,0 +1,6 @@
+flowchart LR
+  a["<img src=x onerror=window.__xss='fr1'>"]
+  b["#lt;img src=x onerror=window.__xss='fr2'#gt;"]
+  c["<script>window.__xss='fr3'</script>"]
+  a e1@--> b
+  b e2@-->|"<b onmouseover=alert('fr4')>x</b>"| c

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "view": {
+    "id": "container-view",
+    "kind": "c4-container",
+    "title": "Container view"
+  },
+  "revision": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "model": {
+    "type": "sequence-trace",
+    "participants": [
+      {
+        "id": "client",
+        "label": "Client"
+      }
+    ],
+    "events": []
+  }
+}

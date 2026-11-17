@@ -1,0 +1,39 @@
+/* The Archer Settings dialog, added to the page when it first opens (ArcherSettings.tsx, theme/on-demand-styles.ts):
+   no page shows it on first load (performance rubric S2). The launcher stays in ArcherSettings.css. */
+.archer-settings-scrim{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:var(--scrim)}
+.archer-settings-dialog{box-sizing:border-box;width:min(560px,100%);max-height:min(680px,calc(100dvh - 48px));overflow:auto;border:var(--line-chrome) solid var(--border-strong);border-radius:var(--radius-dialog);background:var(--surface);color:var(--text);box-shadow:var(--shadow-panel);outline:none}
+.archer-settings-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:24px 24px 18px;border-bottom:var(--line-chrome) solid var(--border)}
+.archer-settings-heading h2{margin:0;font-size:var(--type-title);line-height:1.3;font-weight:700}
+.archer-settings-close{display:grid;place-items:center;width:var(--icon-button);height:var(--icon-button);flex:none;margin:-6px -6px 0 0;padding:0;border:0;border-radius:var(--radius-control);background:transparent;color:var(--text-dim);cursor:pointer}
+.archer-settings-close:hover{background:var(--surface-2);color:var(--text)}
+.archer-settings-close svg{width:var(--icon);height:var(--icon);fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round}
+.archer-settings-content{display:grid;gap:24px;padding:24px}
+.archer-settings-identity{display:grid;gap:14px;margin:0}
+.archer-settings-identity div{display:grid;grid-template-columns:minmax(110px,140px) minmax(0,1fr);gap:12px;align-items:baseline}
+.archer-settings-identity dt{color:var(--text-dim);font-size:var(--type-small)}
+.archer-settings-identity dd{min-width:0;margin:0;font-size:var(--type-body);overflow-wrap:anywhere}
+.archer-settings-identity code{font:inherit;font-family:var(--font-mono);--type-tracking:0;color:var(--text-dim)}
+/* A runtime with no service (the Playground) says the values are its example, first, in plain words. */
+.archer-settings-example{margin:0;padding:10px 12px;border:var(--line-chrome) solid var(--border);border-radius:var(--radius-card);background:var(--surface-2);color:var(--text);font-size:var(--type-small);line-height:1.5;overflow-wrap:anywhere}
+.archer-settings-hint,.archer-settings-status{margin:0;color:var(--text-dim);font-size:var(--type-small);line-height:1.5}
+.archer-settings-error{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;border:var(--line-chrome) solid var(--danger-border);border-radius:var(--radius-card);background:var(--danger-bg);color:var(--danger-text);font-size:var(--type-body);line-height:1.45}
+.archer-settings-error button{flex:none;padding:4px 0;border:0;background:transparent;color:inherit;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.archer-settings-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:var(--line-chrome) solid var(--border)}
+.archer-settings-actions button{min-height:36px;padding:7px 14px;border:0;border-radius:var(--radius-control);font:inherit;cursor:pointer}
+.archer-settings-cancel{background:transparent;color:var(--text-dim)}
+.archer-settings-cancel:hover{background:var(--surface-2);color:var(--text)}
+.archer-settings-actions button:disabled,.archer-settings-close:disabled{cursor:default;opacity:.55}
+.archer-settings-dialog button:focus-visible,.archer-settings-dialog input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:720px){.archer-settings-close{width:44px;height:44px}.archer-settings-scrim{align-items:end;padding:0}.archer-settings-dialog{width:100%;max-height:calc(100dvh - 24px);border-radius:var(--radius-dialog) var(--radius-dialog) 0 0}.archer-settings-heading,.archer-settings-content{padding-left:18px;padding-right:18px}.archer-settings-actions{padding:14px 18px}.archer-settings-actions button{min-height:44px}.archer-settings-identity div{grid-template-columns:1fr;gap:3px}.archer-settings-error{align-items:flex-start;flex-direction:column;gap:8px}}
+.archer-settings-list{display:grid;gap:0;margin:0;padding:0;list-style:none;border:var(--line-chrome) solid var(--border);border-radius:var(--radius-card);color:var(--text-dim)}
+.archer-settings-list li{display:grid;grid-template-columns:minmax(120px,160px) minmax(0,1fr);gap:2px 12px;padding:10px 12px;border-top:var(--line-chrome) solid var(--border)}
+.archer-settings-list li:first-child{border-top:0}
+.archer-settings-name{font-size:var(--type-body)}
+.archer-settings-value{min-width:0;font-size:var(--type-body);overflow-wrap:anywhere}
+.archer-settings-list small{grid-column:2;font-size:var(--type-small);opacity:.85}
+@media(max-width:720px){.archer-settings-list li{grid-template-columns:1fr}.archer-settings-list small{grid-column:1}}
+.archer-settings-network h3{margin:0 0 6px;font-size:var(--type-body);font-weight:700}
+.archer-settings-toggle{display:flex;align-items:center;gap:8px;min-height:44px;font-size:var(--type-body);line-height:1.4;cursor:pointer}
+.archer-settings-network p{margin:0;color:var(--text-dim);font-size:var(--type-small);line-height:1.5;overflow-wrap:anywhere}
+.archer-settings-network strong{color:var(--text);font-weight:600}
+.archer-settings-network code{font-family:var(--font-mono);--type-tracking:0}

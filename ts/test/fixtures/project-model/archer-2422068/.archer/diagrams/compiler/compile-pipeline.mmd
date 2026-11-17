@@ -1,0 +1,45 @@
+flowchart TB
+  %% archer-key dotted: Refused
+  %% compileDiagram (project/envelope.ts) and compile (mermaid/compile.ts).
+  %% Nothing is laid out here: the page and export lay out the model with ELK.
+  src[".mmd file or a note's mermaid fence"]:::external
+  bytes["Read bytes; revision = sha256 of the exact bytes"]:::component
+  utf8{"UTF-8?"}
+  size{"At most 256 KiB?"}
+  pre["preamble: refuse front matter, blank init directives, find the header"]:::component
+  family{"familyOf header"}
+  subgraph per_family[Per family: flowchart, sequence, state, er, c4, architecture, journey]
+    scan["scan.ts: Archer's profile rules, spans and fix hints"]:::component
+    engine["engine.ts: real Mermaid 12.1.0 parse, one at a time, DOMPurify stubbed"]:::component
+    db["db.ts: read Mermaid's diagram db, shape-checked against the pinned version"]:::component
+    adapt["adapt.ts: db to Archer model; db items the scan never saw are parser_disagreement"]:::component
+    merge["reconcile: scan errors win; Mermaid's refusal added only on lines the scan passed"]:::component
+  end
+  validate["validateModel: ids, enums, labels, duplicates, dangling refs, group cycles"]:::component
+  diags["Diagnostics: sorted, deduped, at most 20 errors"]:::component
+  kind["View: archer.toml entry, else file stem with defaultKind; kind must fit the model"]:::component
+  envelope[["Envelope: schemaVersion 2, view, revision, model"]]
+  refused["No model: diagnostics only (validate, write_diagram, list)"]:::external
+  consumers["Service, MCP results, archer compile, export, draw"]:::external
+  src read@--> bytes
+  bytes enc@--> utf8
+  utf8 not_utf8@-.->|no: not UTF-8| refused
+  utf8 dec@-->|yes| size
+  size too_big@-.->|no: too large| refused
+  size fits@-->|yes| pre
+  pre header@--> family
+  family no_header@-.->|unknown header| refused
+  family dispatch@-->|known| scan
+  family parse@-->|known| engine
+  engine read_db@-->|accepted| db
+  db to_model@--> adapt
+  scan s_merge@--> merge
+  adapt a_merge@--> merge
+  engine e_merge@-.->|refused, with position| merge
+  merge checked@-->|model| validate
+  validate collect@--> diags
+  merge errs@-->|errors| diags
+  diags any_error@-.->|any error| refused
+  diags clean@-->|no errors| kind
+  kind wrap@--> envelope
+  envelope use@--> consumers

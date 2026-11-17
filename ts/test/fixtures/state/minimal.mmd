@@ -1,0 +1,6 @@
+stateDiagram-v2
+    state Idle
+    state Busy
+    [*] --> Idle
+    Idle --> Busy : start
+    Busy --> [*]

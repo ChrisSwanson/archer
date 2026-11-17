@@ -1,0 +1,47 @@
+/*
+ * Connection handles while editing: shown on the node under the pointer, the selected node and the
+ * keyboard's node (ux:F13:b), on every node during a connect drag (any of them is a target), and always
+ * on touch screens, where there is no hover. Hidden ones still take a press.
+ */
+.archer-authoring-canvas .archer-node .react-flow__handle {
+  opacity: 0 !important;
+  transition: opacity 120ms ease-out;
+  pointer-events: auto !important;
+  width: 12px;
+  height: 12px;
+  border: var(--line-chrome-strong) solid var(--node-bg);
+  background: var(--accent);
+}
+
+.archer-authoring-canvas .archer-node:is(:hover, .selected, :focus-within, .archer-kbd-focus) .react-flow__handle,
+.archer-authoring-canvas.archer-connecting .archer-node .react-flow__handle {
+  opacity: 1 !important;
+}
+@media (pointer: coarse) {
+  .archer-authoring-canvas .archer-node .react-flow__handle { opacity: 1 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .archer-authoring-canvas .archer-node .react-flow__handle { transition: none; }
+}
+
+.archer-authoring-canvas .archer-node .react-flow__handle:hover {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A selected arrow shows its two ends while editing: drag one onto another element to reattach it.
+   Hollow rings, where a node's connection handle is a filled dot, so the two read apart (ux:F19). */
+.archer-authoring-canvas .react-flow__edge.selected .react-flow__edgeupdater {
+  fill: var(--node-bg);
+  stroke: var(--accent);
+  stroke-width: 3;
+  r: 6;
+  cursor: grab;
+}
+.archer-authoring-canvas .react-flow__edgeupdater { cursor: grab; }
+
+/* A frame's caption can hold a line break (`<br/>` in the source arrives as "\n"): keep it. */
+.archer-frame-caption,
+.archer-frame-name {
+  white-space: pre-line;
+}

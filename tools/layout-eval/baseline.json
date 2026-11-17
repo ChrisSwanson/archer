@@ -1,0 +1,326 @@
+[
+  {
+    "diagram": "library-pricing",
+    "variant": "baseline",
+    "frames": 3,
+    "framesKept": true,
+    "score": 23,
+    "valid": true,
+    "bends": 72,
+    "excessBends": 46,
+    "maxBends": 8,
+    "crossings": 13,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 2,
+    "junctionLoad": 32,
+    "peakEvents": 12,
+    "tightRuns": 24,
+    "shortJogs": 2,
+    "ambiguousTurns": 35,
+    "width": 2593,
+    "height": 607,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.38,
+        "labelPx": 4.9
+      },
+      "laptop-1440": {
+        "zoom": 0.44,
+        "labelPx": 5.8
+      },
+      "desktop-1920": {
+        "zoom": 0.6,
+        "labelPx": 7.8
+      }
+    }
+  },
+  {
+    "diagram": "home-rig",
+    "variant": "baseline",
+    "frames": 5,
+    "framesKept": true,
+    "score": 80,
+    "valid": true,
+    "bends": 12,
+    "excessBends": 4,
+    "maxBends": 4,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 3,
+    "tightRuns": 1,
+    "shortJogs": 1,
+    "ambiguousTurns": 3,
+    "width": 1385,
+    "height": 1472,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.58,
+        "labelPx": 7.5
+      },
+      "laptop-1440": {
+        "zoom": 0.47,
+        "labelPx": 6.1
+      },
+      "desktop-1920": {
+        "zoom": 0.58,
+        "labelPx": 7.5
+      }
+    }
+  },
+  {
+    "diagram": "flow-styled",
+    "variant": "baseline",
+    "frames": 2,
+    "framesKept": true,
+    "score": 99,
+    "valid": true,
+    "bends": 4,
+    "excessBends": 0,
+    "maxBends": 2,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 1,
+    "tightRuns": 0,
+    "shortJogs": 0,
+    "ambiguousTurns": 0,
+    "width": 831,
+    "height": 880,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.96,
+        "labelPx": 12.5
+      },
+      "laptop-1440": {
+        "zoom": 0.79,
+        "labelPx": 10.2
+      },
+      "desktop-1920": {
+        "zoom": 0.97,
+        "labelPx": 12.6
+      }
+    }
+  },
+  {
+    "diagram": "c4-boundaries",
+    "variant": "baseline",
+    "frames": 3,
+    "framesKept": true,
+    "score": 84,
+    "valid": true,
+    "bends": 6,
+    "excessBends": 2,
+    "maxBends": 2,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 2,
+    "tightRuns": 1,
+    "shortJogs": 0,
+    "ambiguousTurns": 0,
+    "width": 646,
+    "height": 1687,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.5,
+        "labelPx": 6.5
+      },
+      "laptop-1440": {
+        "zoom": 0.41,
+        "labelPx": 5.3
+      },
+      "desktop-1920": {
+        "zoom": 0.51,
+        "labelPx": 6.6
+      }
+    }
+  },
+  {
+    "diagram": "containers",
+    "variant": "baseline",
+    "frames": 1,
+    "framesKept": true,
+    "score": 84,
+    "valid": true,
+    "bends": 12,
+    "excessBends": 2,
+    "maxBends": 4,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 2,
+    "tightRuns": 1,
+    "shortJogs": 0,
+    "ambiguousTurns": 0,
+    "width": 1024,
+    "height": 1354,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.63,
+        "labelPx": 8.1
+      },
+      "laptop-1440": {
+        "zoom": 0.51,
+        "labelPx": 6.6
+      },
+      "desktop-1920": {
+        "zoom": 0.63,
+        "labelPx": 8.2
+      }
+    }
+  },
+  {
+    "diagram": "deployment",
+    "variant": "baseline",
+    "frames": 3,
+    "framesKept": true,
+    "score": 82,
+    "valid": true,
+    "bends": 8,
+    "excessBends": 2,
+    "maxBends": 4,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 2,
+    "tightRuns": 1,
+    "shortJogs": 0,
+    "ambiguousTurns": 2,
+    "width": 1510,
+    "height": 538,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.65,
+        "labelPx": 8.4
+      },
+      "laptop-1440": {
+        "zoom": 0.76,
+        "labelPx": 9.9
+      },
+      "desktop-1920": {
+        "zoom": 1,
+        "labelPx": 13
+      }
+    }
+  },
+  {
+    "diagram": "system-context",
+    "variant": "baseline",
+    "frames": 0,
+    "framesKept": true,
+    "score": 99,
+    "valid": true,
+    "bends": 6,
+    "excessBends": 0,
+    "maxBends": 2,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 2,
+    "tightRuns": 1,
+    "shortJogs": 0,
+    "ambiguousTurns": 2,
+    "width": 1229,
+    "height": 352,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.79,
+        "labelPx": 10.3
+      },
+      "laptop-1440": {
+        "zoom": 0.94,
+        "labelPx": 12.2
+      },
+      "desktop-1920": {
+        "zoom": 1,
+        "labelPx": 13
+      }
+    }
+  },
+  {
+    "diagram": "fulfilment",
+    "variant": "baseline",
+    "frames": 0,
+    "framesKept": true,
+    "score": 87,
+    "valid": true,
+    "bends": 2,
+    "excessBends": 2,
+    "maxBends": 2,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 2,
+    "tightRuns": 0,
+    "shortJogs": 0,
+    "ambiguousTurns": 0,
+    "width": 1205,
+    "height": 228,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.81,
+        "labelPx": 10.5
+      },
+      "laptop-1440": {
+        "zoom": 0.96,
+        "labelPx": 12.4
+      },
+      "desktop-1920": {
+        "zoom": 1,
+        "labelPx": 13
+      }
+    }
+  },
+  {
+    "diagram": "ship-loop",
+    "variant": "baseline",
+    "frames": 0,
+    "framesKept": true,
+    "score": 88,
+    "valid": true,
+    "bends": 10,
+    "excessBends": 0,
+    "maxBends": 2,
+    "crossings": 0,
+    "throughNode": 0,
+    "labelOverlaps": 0,
+    "junctions": 0,
+    "junctionLoad": 0,
+    "peakEvents": 1,
+    "tightRuns": 0,
+    "shortJogs": 0,
+    "ambiguousTurns": 0,
+    "width": 1089,
+    "height": 1941,
+    "fit": {
+      "archer-canvas": {
+        "zoom": 0.44,
+        "labelPx": 5.7
+      },
+      "laptop-1440": {
+        "zoom": 0.36,
+        "labelPx": 4.6
+      },
+      "desktop-1920": {
+        "zoom": 0.44,
+        "labelPx": 5.7
+      }
+    }
+  }
+]

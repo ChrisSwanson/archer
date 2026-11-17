@@ -1,0 +1,1276 @@
+/* The docs landing, as the owner's R3-2 design draws it: a coloured stage (in both themes) with the side-by-side
+   film, then How it works, the uses, the install and the footer in the docs theme's own tokens. Inside the film,
+   Archer is drawn in the app's own tokens (`ui/src/styles.css`), light or dark with the page. */
+:root {
+  --landing-stage: #34499e;
+  --landing-on-stage: #ffffff;
+  --landing-on-stage-dim: rgb(255 255 255 / 88%);
+  --landing-on-stage-quiet: rgb(255 255 255 / 80%);
+  --landing-line: #cbd5e1;
+  --landing-band: #f8fafc;
+  --landing-band-line: #e2e8f0;
+}
+.dark {
+  --landing-line: #384456;
+  --landing-band: #0b0f15;
+  --landing-band-line: #273141;
+}
+
+/* ---------- the nav, on the stage until the reader scrolls past it ---------- */
+html.landing-on-stage .VPNavBar,
+html.landing-on-stage .VPNavBar .content-body,
+html.landing-on-stage .VPNavBar .title {
+  --vp-nav-bg-color: var(--landing-stage);
+  --vp-c-text-1: var(--landing-on-stage);
+  --vp-c-text-2: var(--landing-on-stage-dim);
+  --vp-c-brand-1: var(--landing-on-stage);
+  --vp-c-gutter: transparent;
+  --vp-c-divider: rgb(255 255 255 / 28%);
+  --vp-c-bg-alt: rgb(255 255 255 / 12%);
+  --vp-c-bg-soft: rgb(255 255 255 / 12%);
+  --vp-c-default-soft: rgb(255 255 255 / 16%);
+  --vp-c-border: rgb(255 255 255 / 35%);
+  --vp-switch-bg-color: rgb(0 0 0 / 22%);
+  --vp-c-brand-soft: rgb(255 255 255 / 20%);
+  background-color: var(--landing-stage);
+}
+html.landing-on-stage .VPNavBar .divider-line {
+  background-color: transparent;
+}
+html.landing-on-stage .VPNavBar :focus-visible {
+  outline-color: var(--landing-on-stage);
+}
+.VPNavBar {
+  transition: background-color 0.25s, color 0.25s;
+}
+/* ---------- page ---------- */
+.landing {
+  overflow-x: clip;
+  --type-tracking: 0.01em;
+  line-height: 1.55;
+  color: var(--vp-c-text-1);
+}
+.landing-wrap {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(72rem + 4rem);
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+.landing h1,
+.landing h2,
+.landing h3,
+.landing p {
+  margin: 0;
+}
+.landing code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.875em;
+  --type-tracking: 0;
+}
+.landing a {
+  text-underline-offset: 0.2em;
+}
+/* A picture for the other theme is never displayed, so a lazy image is never fetched for it. */
+.landing img.only-dark,
+.dark .landing img.only-light {
+  display: none;
+}
+.dark .landing img.only-dark {
+  display: block;
+}
+
+/* ---------- the stage ---------- */
+.landing-stage {
+  background: var(--landing-stage);
+  color: var(--landing-on-stage);
+}
+.landing-stage ::selection {
+  background: #e1e6f6;
+  color: #13235a;
+}
+.landing-stage-inner {
+  max-width: 90rem;
+  padding-top: 0.5rem;
+  padding-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+.landing-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  text-align: center;
+}
+.landing-title {
+  color: var(--landing-on-stage);
+  font-size: 2.75rem;
+  line-height: 1.08;
+  font-weight: 700;
+  --type-tracking: -0.02em;
+  text-wrap: balance;
+}
+.landing-sub {
+  max-width: 44rem;
+  color: var(--landing-on-stage-dim);
+  font-size: 1.0625rem;
+  text-wrap: balance;
+}
+
+/* ---------- the film ---------- */
+.film {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.film-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.film-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 0;
+}
+.film-head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 36px;
+}
+.film-head h2 {
+  color: var(--landing-on-stage);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.film-head > span {
+  color: var(--landing-on-stage-quiet);
+  font-size: 0.875rem;
+}
+.film-head > .film-badge {
+  margin-left: auto;
+  padding: 0.125rem 0.625rem;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 85%);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.film-lights {
+  display: flex;
+  gap: 6px;
+}
+.film-lights i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+.film-lights i:nth-child(2) {
+  background: #febc2e;
+}
+.film-lights i:nth-child(3) {
+  background: #28c840;
+}
+.film-lights--small {
+  gap: 4px;
+}
+.film-lights--small i {
+  width: 7px;
+  height: 7px;
+}
+
+/* The terminal: a long answer, scrolling. */
+.film-term {
+  height: 512px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0d1117;
+  box-shadow: 0 30px 70px -26px rgb(0 0 0 / 70%);
+}
+.film-term-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 32px;
+  padding: 0 0.75rem;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+}
+.film-term-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #9aa6b6;
+  font: 0.75rem var(--vp-font-family-mono);
+  --type-tracking: 0;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.film-log {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  padding: 16px 22px 16px 18px;
+  font: 12.5px/20px var(--vp-font-family-mono);
+  --type-tracking: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 32%) transparent;
+  overscroll-behavior: contain;
+}
+.film-log:focus-visible {
+  outline: 2px solid #9db4ff;
+  outline-offset: -2px;
+}
+.film-log ::selection {
+  background: #1f2b52;
+  color: #ffffff;
+}
+.film-gap {
+  flex: none;
+  height: 10px;
+}
+.film-line-meta {
+  padding-left: 1.375rem;
+  color: #9aa6b6;
+  overflow-wrap: anywhere;
+}
+.film-line-head {
+  padding-left: 1.375rem;
+  color: #ffffff;
+  font-weight: 500;
+}
+.film-line-body {
+  padding-left: 1.375rem;
+  color: #c9d1d9;
+}
+.film-you,
+.film-agent {
+  display: flex;
+  gap: 0.625rem;
+}
+.film-you > span:first-child {
+  flex: none;
+  color: #9db4ff;
+}
+.film-you > span:last-child {
+  color: #ffffff;
+}
+.film-agent {
+  color: #e6edf3;
+}
+.film-agent > span:first-child {
+  flex: none;
+  color: #7ee2b8;
+}
+.film-ask {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0 12px 12px;
+  padding: 10px 12px;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #e6edf3;
+  font: 12.5px/20px var(--vp-font-family-mono);
+  --type-tracking: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.film-ask-mark {
+  color: #9db4ff;
+}
+.film-ask-q {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #ffffff;
+}
+.film-ask-hint {
+  color: #8590a0;
+}
+.film-caret {
+  flex: none;
+  display: inline-block;
+  width: 7px;
+  height: 15px;
+  margin-left: -4px;
+  background: #9db4ff;
+  animation: film-blink 1s steps(1) infinite;
+}
+/* Paused, nothing in the film moves: the carets hold still too. */
+.film--paused .film-caret {
+  animation: none;
+}
+.film-caret--thin {
+  width: 2px;
+  height: 14px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--accent);
+}
+@keyframes film-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The browser: Archer's page, in the app's own tokens. */
+.film-app {
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --surface-2: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-dim: #475569;
+  --text-faint: #5d6b7e;
+  --text-faded: #5d6b7e;
+  --node-bg: #f1f5f9;
+  --node-border: #64748b;
+  --node-text: #0f172a;
+  --edge: #334155;
+  --edge-arrow: #334155;
+  --edge-arrow-ink: var(--edge-arrow);
+  --group-bg: #ffffff;
+  --group-border: #475569;
+  --group-caption: #334155;
+  --lifeline: #7d8ba0;
+  --family-teal-fill: #ddf7f1;
+  --family-teal-border: #0f766e;
+  --family-teal-text: #134e4a;
+  --family-plum-fill: #fdeef6;
+  --family-plum-border: #a3216a;
+  --family-plum-text: #831843;
+  --g1: #0d8259;
+  --g3: #7e4fda;
+  --g4: #ba3826;
+  --walked: #5a7d69;
+  --accent: #2645a3;
+  --accent-fill: #e1e6f6;
+  --accent-on-fill: #13235a;
+  --agent: #8a5f05;
+  --agent-fill: #fbf1dc;
+  --agent-ink: #3d2a02;
+  --browser-bar: #f1f5f9;
+  --film-shadow: 0 30px 70px -24px rgb(0 0 0 / 55%), 0 0 0 1px rgb(255 255 255 / 35%);
+}
+.dark .film-app {
+  --bg: #0f141b;
+  --surface: #0b0f15;
+  --surface-2: #18202a;
+  --border: #273141;
+  --border-strong: #384456;
+  --text: #e6ebf1;
+  --text-dim: #a3aebd;
+  --text-faint: #8d99aa;
+  --text-faded: #808b9b;
+  --node-bg: #1b2430;
+  --node-border: #8a9ab0;
+  --node-text: #f1f5f9;
+  --edge: #b4c0cd;
+  --edge-arrow: #b4c0cd;
+  --group-bg: #121821;
+  --group-border: #94a3b8;
+  --group-caption: #c3ccd8;
+  --lifeline: #64738a;
+  --family-teal-fill: #122b2c;
+  --family-teal-border: #2fbfae;
+  --family-teal-text: #a0e7dd;
+  --family-plum-fill: #2e1828;
+  --family-plum-border: #ec79b5;
+  --family-plum-text: #f8c4df;
+  --g1: #63e6b2;
+  --g3: #a57ae8;
+  --g4: #ff8a7a;
+  --walked: #7fa58d;
+  --accent: #9db4ff;
+  --accent-fill: #1f2b52;
+  --accent-on-fill: #ffffff;
+  --agent: #f2b544;
+  --agent-fill: #2b2414;
+  --agent-ink: #f6e3b8;
+  --browser-bar: #18202a;
+  --film-shadow: 0 30px 70px -24px rgb(0 0 0 / 70%), 0 0 0 1px rgb(255 255 255 / 22%);
+}
+.film-browser {
+  height: 512px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--film-shadow);
+  --type-tracking: 0.04em;
+}
+.film-browser-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 0.75rem;
+  background: var(--browser-bar);
+  border-bottom: 1px solid var(--border);
+}
+.film-address {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-faint);
+  font: 0.75rem var(--vp-font-family-mono);
+  --type-tracking: 0;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.film-docbar {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 0 0.875rem;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.25;
+}
+.film-crumbs {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 0.6875rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.film-title {
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.film-body {
+  position: relative;
+  flex: none;
+  display: flex;
+  height: 434px;
+}
+.film-rail {
+  flex: none;
+  width: 5%;
+  min-width: 34px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.875rem;
+  border-right: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.film-rail svg:first-child {
+  color: var(--text);
+}
+.film-canvas {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+.film-drawing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+  font-family: var(--vp-font-family-base);
+  overflow: hidden;
+}
+.film-drawing.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s ease, visibility 0s;
+}
+.film-drawing text {
+  letter-spacing: 0.04em;
+}
+.film-cam {
+  transform-origin: 0 0;
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* The painter's highlight rules change opacities and inks; they fade in as the app's do. */
+.film-drawing :is(rect, path, ellipse, polygon, circle, polyline, g) {
+  transition: fill-opacity 0.45s, stroke-opacity 0.45s, opacity 0.45s, stroke 0.45s, fill 0.45s;
+}
+/* A selected connection, as the canvas draws one: the accent, two units wider each side; its words on the
+   accent's fill. Arrowheads keep their ink (selection does not reach them). */
+.film-drawing [data-film-selected] > path {
+  stroke: var(--accent);
+  stroke-width: 6.5;
+}
+.film-drawing [data-film-selected] > rect {
+  fill: var(--accent-fill);
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+.film-drawing [data-film-selected] > g[font-style] {
+  fill: var(--accent-on-fill);
+  font-weight: 700;
+}
+/* The comment's pin: the reader's number on the part it is about. */
+.film-pin {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.film-pin circle {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+.film-pin text {
+  fill: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.dark .film-pin text {
+  fill: #101a3a;
+}
+[data-film-pin="shown"] .film-pin {
+  opacity: 1;
+}
+
+/* The side panel: the walkthrough over the Diagram Key; comments open over it, as the review sidebar does. */
+.film-panel {
+  position: relative;
+  flex: none;
+  width: 28%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+}
+.film-panel-label {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.film-panel-title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.film-play-walk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+}
+.film-play-walk.is-playing {
+  background: var(--border);
+  color: var(--text);
+}
+.film-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.film-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 5px 6px;
+  border-radius: 6px;
+  color: var(--text-dim);
+  line-height: 1.3;
+  transition: background-color 0.3s;
+}
+.film-steps li span {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--walked);
+  border-radius: 50%;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.film-steps li.is-current {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 600;
+}
+.film-steps li.is-current span {
+  border-color: var(--g1);
+  background: var(--g1);
+  color: var(--bg);
+}
+.film-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.film-highlights ol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.film-highlights li {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  background: var(--bg);
+  line-height: 1.35;
+}
+.film-swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  border-radius: 3px;
+}
+.film-highlight-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  color: var(--text-dim);
+  font-size: 11.5px;
+}
+.film-highlight-text strong {
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.film-highlight-num {
+  margin-right: 0.375rem;
+  color: var(--text-dim);
+}
+.film-key {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.film-key svg {
+  max-width: 100%;
+  height: auto;
+  font-family: var(--vp-font-family-base);
+}
+.film-comments {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(12px);
+  transition: opacity 0.3s, transform 0.3s, visibility 0s linear 0.3s;
+}
+.film-comments.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.3s, transform 0.3s, visibility 0s;
+}
+.film-draft,
+.film-posted,
+.film-reply,
+.film-waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+.film-draft {
+  gap: 8px;
+  border: 2px solid var(--accent);
+  background: var(--bg);
+  color: var(--text);
+}
+.film-draft.is-empty > span:first-child {
+  visibility: hidden;
+}
+.film-draft-send {
+  align-self: flex-end;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.film-posted {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+.film-who {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.film-waiting {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 6px;
+  border: 1px dashed var(--border-strong);
+  color: var(--text-dim);
+  font-size: 11.5px;
+}
+.film-waiting svg {
+  flex: none;
+  margin-top: 2px;
+}
+.film-reply {
+  border: 1px solid color-mix(in srgb, var(--agent) 45%, transparent);
+  background: var(--agent-fill);
+  color: var(--agent-ink);
+}
+.film-reply .film-who {
+  color: var(--agent);
+}
+.film-toast {
+  position: absolute;
+  left: 4%;
+  bottom: 14px;
+  z-index: 4;
+  width: 62%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #0d1117;
+  color: #e6edf3;
+  box-shadow: 0 20px 44px -14px rgb(0 0 0 / 60%), 0 0 0 1px rgb(15 23 42 / 30%);
+  font: 11.5px/1.6 var(--vp-font-family-mono);
+  --type-tracking: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.45s, transform 0.45s, visibility 0s linear 0.45s;
+}
+.film-toast.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.45s, transform 0.45s, visibility 0s;
+}
+.film-toast-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 5px 10px;
+  background: #161b22;
+  color: #9aa6b6;
+  font-size: 10.5px;
+}
+.film-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  color: #c9d1d9;
+}
+.film-you-mark {
+  color: #9db4ff;
+}
+.film-agent-mark {
+  color: #7ee2b8;
+}
+.film-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+}
+.film-cursor.is-placed {
+  opacity: 1;
+}
+.film-cursor svg {
+  position: absolute;
+  left: -5px;
+  top: -3px;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 35%));
+}
+.film-cursor path {
+  fill: #0f172a;
+  stroke: #ffffff;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.film-ripple {
+  position: absolute;
+  left: -16px;
+  top: -16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgb(38 69 163 / 40%);
+  animation: film-ripple 0.7s ease-out forwards;
+}
+@keyframes film-ripple {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+.film-progress {
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 22%);
+  overflow: hidden;
+}
+.film-progress div {
+  height: 100%;
+  background: #ffffff;
+  transition: width 0.5s ease;
+}
+.film-caption-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.film-captions {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.film-captions > .film-caption {
+  grid-area: 1 / 1;
+}
+.film-caption--ghost {
+  visibility: hidden;
+}
+.film-caption {
+  margin: 0;
+  color: var(--landing-on-stage-dim);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+.film-caption strong {
+  color: var(--landing-on-stage);
+  font-weight: 700;
+}
+.film-toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 36px;
+  padding: 0 0.875rem;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 22%);
+  color: #ffffff;
+  font: 500 0.8125rem var(--vp-font-family-base);
+  cursor: pointer;
+}
+.film-toggle.is-paused {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #0f172a;
+}
+.film-toggle:focus-visible,
+.film-cta:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+.film-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: -0.25rem;
+}
+.film-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 1.125rem;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.film-cta:hover {
+  background: #e1e6f6;
+}
+.film-cta--quiet {
+  gap: 0.375rem;
+  border: 1px solid rgb(255 255 255 / 55%);
+  background: transparent;
+  color: #ffffff;
+  font-weight: 500;
+}
+.film-cta--quiet:hover {
+  background: rgb(255 255 255 / 10%);
+}
+/* Reduced motion: the film starts paused, and when played it cuts rather than moves. */
+.film--still *,
+.film--still *::before,
+.film--still *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .film *,
+  .film *::before,
+  .film *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- How it works ---------- */
+.landing-main {
+  display: block;
+}
+.landing-how {
+  padding-top: 5rem;
+}
+.landing-h2 {
+  color: var(--vp-c-text-1);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  --type-tracking: -0.01em;
+}
+.landing-lede {
+  max-width: 46rem;
+  margin: 0.75rem 0 2.25rem !important;
+  color: var(--vp-c-text-1);
+  font-size: 1.1875rem;
+  opacity: 0.86;
+}
+.landing-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.landing-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--landing-line);
+}
+.landing-step-number {
+  color: var(--vp-c-text-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.landing-step h3 {
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.landing-step p {
+  color: var(--vp-c-text-2);
+  font-size: 1rem;
+}
+.landing-step code {
+  color: var(--vp-c-text-1);
+}
+.landing-repeat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem !important;
+  color: var(--vp-c-text-2);
+  font-size: 0.9375rem;
+}
+.landing-repeat svg {
+  flex: none;
+}
+
+/* ---------- What you can do with it ---------- */
+.landing-uses {
+  display: flex;
+  flex-direction: column;
+  gap: 4.5rem;
+  padding-top: 6rem;
+}
+.landing-uses .landing-h2 {
+  margin-bottom: -2rem;
+}
+.landing-use {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 4rem;
+  align-items: center;
+}
+.landing-use--flip {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+.landing-use--flip .landing-use-text {
+  order: 2;
+}
+.landing-use-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.landing-use-text h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.landing-use-text p {
+  max-width: 28rem;
+  color: var(--vp-c-text-2);
+  font-size: 1.0625rem;
+}
+.landing-use-text .landing-ask {
+  color: var(--vp-c-text-1);
+  font-size: 0.9375rem;
+  font-style: italic;
+  opacity: 0.86;
+}
+.landing-use-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+.landing-shot {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--landing-band-line);
+  border-radius: 12px;
+  background: var(--landing-band);
+}
+.landing-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The walkthrough panel is tall and narrow: drawn at its own size (the capture is 2x), centred, the frame shows its
+   step 5, the one it is open at. */
+.landing-shot--walk {
+  display: flex;
+  justify-content: center;
+}
+.landing-shot--walk img {
+  width: min(100%, 340px);
+  object-position: 50% 66%;
+}
+.landing-use-figure figcaption {
+  color: var(--vp-c-text-3);
+  font-size: 0.8125rem;
+}
+
+/* ---------- Install ---------- */
+.landing-install {
+  margin-top: 6rem;
+  border-top: 1px solid var(--landing-band-line);
+  background: var(--landing-band);
+}
+.landing-install-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding-top: 4.5rem;
+  padding-bottom: 5rem;
+  text-align: center;
+}
+.landing-install-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 44rem;
+}
+.landing-install-head p {
+  color: var(--vp-c-text-1);
+  font-size: 1.0625rem;
+  opacity: 0.86;
+}
+.landing-install .install {
+  margin-bottom: -1rem;
+}
+.landing-check {
+  max-width: 44rem;
+  color: var(--vp-c-text-1);
+  font-size: 0.9375rem;
+  opacity: 0.86;
+}
+.landing-check a,
+.landing-footer a {
+  color: var(--vp-c-brand-1);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+/* ---------- Footer ---------- */
+.landing-footer {
+  border-top: 1px solid var(--landing-band-line);
+  background: var(--vp-c-bg);
+}
+.landing-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem;
+  padding-top: 3rem;
+  padding-bottom: 2.5rem;
+  font-size: 0.9375rem;
+}
+.landing-footer-grid > div,
+.landing-footer-grid > nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.landing-footer-brand span {
+  max-width: 22rem;
+  color: var(--vp-c-text-2);
+}
+.landing-footer .landing-footer-name {
+  color: var(--vp-c-text-1);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.landing-footer-head {
+  color: var(--vp-c-text-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.landing-footer nav a {
+  color: var(--vp-c-text-1);
+  text-decoration: none;
+}
+.landing-footer nav a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Phone: the pair stacks, the terminal first; 16px gutters ---------- */
+@media (max-width: 720px) {
+  .landing-wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .landing-title {
+    font-size: 2.125rem;
+  }
+  .film-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .film-term {
+    height: 420px;
+  }
+  /* The app's phone layout: the drawing, then its panel as a sheet under it; the rail steps aside. */
+  .film-rail {
+    display: none;
+  }
+  .film-browser {
+    height: auto;
+  }
+  .film-body {
+    flex-direction: column;
+    height: auto;
+  }
+  .film-canvas {
+    flex: none;
+    height: 300px;
+  }
+  .film-panel {
+    width: 100%;
+    height: 296px;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .film-toast {
+    left: 3%;
+    width: 94%;
+  }
+  .film-head {
+    flex-wrap: wrap;
+  }
+  .landing-steps,
+  .landing-use,
+  .landing-use--flip,
+  .landing-footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .landing-steps {
+    gap: 1.5rem;
+  }
+  .landing-use {
+    gap: 1.25rem;
+  }
+  .landing-use .landing-use-text {
+    order: 0;
+  }
+  .landing-use .landing-use-figure {
+    order: 1;
+  }
+}
+@media (min-width: 721px) and (max-width: 1000px) {
+  .landing-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

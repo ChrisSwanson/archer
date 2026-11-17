@@ -1,0 +1,29 @@
+sequenceDiagram
+    %% Participants named after keywords and declared below their first use,
+    %% activations that stack and stay open, and fragments inside fragments.
+    actor->>note: declared below
+    participant actor as Actor
+    participant note as Note
+    actor rect as Rect
+    participant box as Box
+    note->>box: hello
+    activate box
+    activate box
+    box->>+rect: stacked, and one left open
+    rect-->>-box: the shorthand closes its own
+    deactivate box
+    activate rect
+    rect-->>-actor: the shorthand closes an explicit activate
+    alt outer
+        opt inner
+            par first
+                actor-)note: one
+            and second
+                note-)actor: two
+            end
+        end
+    else otherwise
+        loop retry
+            box->>rect: again
+        end
+    end

@@ -1,0 +1,26 @@
+%% description: The loop every Archer feature serves: big picture first, answer by showing, design live, keep the docs true.
+flowchart TB
+  %% archer-key dotted: Reused next time
+  %% archer-key talk: In the conversation
+  %% archer-key picture: Shown in Archer
+  %% archer-key kept: Kept in Git
+  question[Question or Idea]:::talk
+  context["Big Picture First<br/>Context, then containers, then flows"]:::picture
+  show["Answer by Showing<br/>The diagram with the path lit"]:::picture
+  react[Person Selects and Comments]:::talk
+  revise["Design Together, Live<br/>The agent revises the picture"]:::picture
+  agreed[Agreed Picture]:::picture
+  code[Code Follows]:::kept
+  docs["Living Knowledge Base<br/>Docs change with the code"]:::kept
+  question q_context@--> context
+  context detail_show@-->|Point at the answer| show
+  show show_react@--> react
+  react react_revise@-->|Comments| revise
+  revise revise_show@-->|Shown again| show
+  react react_agreed@-->|Looks right| agreed
+  agreed agreed_code@-->|Build it| code
+  agreed agreed_docs@-->|Kept with it| docs
+  docs docs_context@-.->|Next question| context
+  classDef talk fill:#7e57c2,stroke:#4527a0
+  classDef picture fill:#26a69a,stroke:#00695c
+  classDef kept fill:#8e3b6e,stroke:#5c1f47

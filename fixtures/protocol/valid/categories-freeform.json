@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 2,
+  "view": {
+    "id": "categories",
+    "kind": "freeform",
+    "title": "Categories"
+  },
+  "revision": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "model": {
+    "type": "freeform-graph",
+    "nodes": [
+      {
+        "id": "staging",
+        "label": "Staging VM",
+        "classes": ["sandbox"],
+        "groupId": "farm"
+      },
+      {
+        "id": "model",
+        "label": "Model Server",
+        "groupId": "gpu1"
+      }
+    ],
+    "edges": [],
+    "groups": [
+      {
+        "id": "farm",
+        "label": "Agent Farm"
+      },
+      {
+        "id": "gpu1",
+        "label": "GPU 1",
+        "classes": ["gpu"]
+      }
+    ],
+    "categories": [
+      {
+        "name": "sandbox",
+        "fill": "#fdf1e7",
+        "stroke": "#c2410c",
+        "dashed": true
+      },
+      {
+        "name": "gpu",
+        "fill": "#ecfdf5",
+        "stroke": "#0f766e"
+      },
+      {
+        "name": "plain"
+      }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+# Run outputs; baseline.json is the committed reference.
+last-run.json
+partial-run.json
+states-run.json

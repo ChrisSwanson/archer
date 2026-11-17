@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 2,
+  "view": { "id": "valid", "kind": "c4-context", "title": "Invalid" },
+  "revision": "garbage",
+  "model": { "type": "architecture-graph", "nodes": [], "edges": [], "groups": [] }
+}

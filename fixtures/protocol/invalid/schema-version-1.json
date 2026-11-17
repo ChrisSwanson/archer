@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "view": {
+    "id": "system-context",
+    "kind": "c4-context",
+    "title": "System context"
+  },
+  "revision": "sha256:8909d6d013c6e326b1de919f63ae9c34a566142863b3d3e2c254745cc3148852",
+  "model": {
+    "type": "architecture-graph",
+    "nodes": [
+      {
+        "id": "web",
+        "label": "Web"
+      }
+    ],
+    "edges": [],
+    "groups": []
+  }
+}

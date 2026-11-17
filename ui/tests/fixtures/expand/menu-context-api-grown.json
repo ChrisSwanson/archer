@@ -1,0 +1,224 @@
+{
+ "schemaVersion": 1,
+ "viewId": "context",
+ "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+ "modelGeneration": 3,
+ "canvas": [
+  {
+   "element": "shop",
+   "source": "containers"
+  }
+ ],
+ "dropped": [],
+ "limits": {
+  "maxAddedSources": 5,
+  "maxAddedBoxes": 60,
+  "maxAddedWires": 120,
+  "maxMenuCandidates": 12,
+  "maxRelationshipsPerElement": 24,
+  "maxPieceBoxes": 40,
+  "maxResponseBytes": 65536,
+  "maxExpansions": 24,
+  "maxExpandParamChars": 4096
+ },
+ "remaining": {
+  "sources": 4,
+  "boxes": 57,
+  "wires": 117
+ },
+ "element": {
+  "id": "api",
+  "name": "API",
+  "readings": [
+   {
+    "kind": "container",
+    "parent": "shop",
+    "views": [
+     "containers"
+    ]
+   },
+   {
+    "kind": "container",
+    "views": [
+     "notes/deploy.md#deploy"
+    ]
+   }
+  ],
+  "conflicting": false
+ },
+ "diagrams": {
+  "items": [
+   {
+    "source": "containers",
+    "title": "Containers",
+    "family": "c4",
+    "sourceRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "reading": 0,
+    "onCanvas": true,
+    "relation": "draws",
+    "adds": {
+     "boxes": 1,
+     "wires": 1
+    },
+    "piece": {
+     "source": "containers",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "c4",
+     "touches": "api",
+     "opens": false,
+     "kind": "c4",
+     "model": {
+      "type": "c4-model",
+      "level": "container",
+      "elements": [
+       {
+        "id": "mail",
+        "kind": "system",
+        "label": "Mail",
+        "external": true,
+        "boundaryId": null
+       }
+      ],
+      "boundaries": [],
+      "relationships": []
+     },
+     "attach": [
+      {
+       "key": "api--mail",
+       "from": "api",
+       "to": "mail",
+       "direction": "forward",
+       "label": "sends"
+      }
+     ],
+     "boxes": 1,
+     "wires": 1,
+     "total": {
+      "boxes": 1,
+      "wires": 1
+     },
+     "truncated": false
+    }
+   },
+   {
+    "source": "notes/deploy.md#deploy",
+    "title": "Deploy (proposed)",
+    "family": "flowchart",
+    "sourceRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "reading": 1,
+    "proposed": true,
+    "onCanvas": false,
+    "relation": "draws",
+    "adds": {
+     "boxes": 1,
+     "wires": 1
+    },
+    "piece": {
+     "source": "notes/deploy.md#deploy",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "flowchart",
+     "touches": "api",
+     "opens": false,
+     "kind": "freeform",
+     "model": {
+      "type": "freeform-graph",
+      "direction": "lr",
+      "nodes": [
+       {
+        "id": "queue",
+        "label": "Jobs",
+        "shape": "rectangle",
+        "classes": [
+         "container"
+        ],
+        "groupId": null
+       }
+      ],
+      "edges": [],
+      "groups": []
+     },
+     "attach": [
+      {
+       "key": "e1",
+       "from": "api",
+       "to": "queue",
+       "direction": "forward"
+      }
+     ],
+     "boxes": 1,
+     "wires": 1,
+     "total": {
+      "boxes": 1,
+      "wires": 1
+     },
+     "truncated": false
+    }
+   }
+  ],
+  "total": 2,
+  "truncated": false
+ },
+ "neighbours": {
+  "items": [
+   {
+    "element": "mail",
+    "name": "Mail",
+    "kinds": [
+     "system"
+    ],
+    "direction": "forward",
+    "via": "containers",
+    "viaTitle": "Containers",
+    "viaRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "alsoDrawnIn": 0,
+    "onCanvas": true,
+    "adds": {
+     "boxes": 1,
+     "wires": 1
+    },
+    "piece": {
+     "source": "containers",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "c4",
+     "touches": "api",
+     "opens": false,
+     "kind": "c4",
+     "model": {
+      "type": "c4-model",
+      "level": "container",
+      "elements": [
+       {
+        "id": "mail",
+        "kind": "system",
+        "label": "Mail",
+        "external": true,
+        "boundaryId": null
+       }
+      ],
+      "boundaries": [],
+      "relationships": []
+     },
+     "attach": [
+      {
+       "key": "api--mail",
+       "from": "api",
+       "to": "mail",
+       "direction": "forward",
+       "label": "sends"
+      }
+     ],
+     "boxes": 1,
+     "wires": 1,
+     "total": {
+      "boxes": 1,
+      "wires": 1
+     },
+     "truncated": false
+    }
+   }
+  ],
+  "total": 1,
+  "truncated": false
+ },
+ "bytesTruncated": false
+}

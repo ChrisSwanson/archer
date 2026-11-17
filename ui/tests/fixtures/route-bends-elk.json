@@ -1,0 +1,119 @@
+{
+ "_note": "Routes before route simplification (redesign slice 6), re-measured 2026-11-12 after captions wrap at 24 characters (ADR 0030 amended) and layout follows the source's written order (`sourceOrder`) with depth-first cycle breaking for flowcharts, with 18/15px type and 392px cards: `full` is ELK's layout of the whole drawing (?zoom=full); `opened` is every group opened in place in turn from all closed (the nested view's ?open= chain), as its own router routes it. Totals over all wires: bends, excess bends (beyond the fewest each wire's ends allow; a back-edge -- its target ranked above its source in the flow -- needs four leaving and entering the same way, three on perpendicular sides, two as a U), crossings, length.",
+ "ship-loop": {
+  "full": {
+   "bends": 28,
+   "excess": 6,
+   "crossings": 0,
+   "length": 7905
+  }
+ },
+ "home-rig": {
+  "full": {
+   "bends": 14,
+   "excess": 8,
+   "crossings": 0,
+   "length": 3467
+  },
+  "opened": {
+   "bends": 13,
+   "excess": 6,
+   "crossings": 1,
+   "length": 3707
+  }
+ },
+ "fulfilment": {
+  "full": {
+   "bends": 2,
+   "excess": 2,
+   "crossings": 0,
+   "length": 551
+  }
+ },
+ "containers": {
+  "full": {
+   "bends": 24,
+   "excess": 14,
+   "crossings": 0,
+   "length": 6471
+  },
+  "opened": {
+   "bends": 19,
+   "excess": 8,
+   "crossings": 1,
+   "length": 6046
+  }
+ },
+ "deployment": {
+  "full": {
+   "bends": 8,
+   "excess": 2,
+   "crossings": 0,
+   "length": 2662
+  },
+  "opened": {
+   "bends": 20,
+   "excess": 8,
+   "crossings": 0,
+   "length": 2938
+  }
+ },
+ "system-context": {
+  "full": {
+   "bends": 6,
+   "excess": 0,
+   "crossings": 0,
+   "length": 1830
+  }
+ },
+ "data-model": {
+  "full": {
+   "bends": 4,
+   "excess": 0,
+   "crossings": 0,
+   "length": 1307
+  }
+ },
+ "flow-large": {
+  "full": {
+   "bends": 372,
+   "excess": 158,
+   "crossings": 184,
+   "length": 446356
+  },
+  "opened": {
+   "bends": 387,
+   "excess": 238,
+   "crossings": 266,
+   "length": 694115
+  }
+ },
+ "c4-boundaries": {
+  "full": {
+   "bends": 10,
+   "excess": 6,
+   "crossings": 0,
+   "length": 3144
+  },
+  "opened": {
+   "bends": 11,
+   "excess": 4,
+   "crossings": 0,
+   "length": 2900
+  }
+ },
+ "flow-styled": {
+  "full": {
+   "bends": 8,
+   "excess": 4,
+   "crossings": 0,
+   "length": 2024
+  },
+  "opened": {
+   "bends": 10,
+   "excess": 4,
+   "crossings": 1,
+   "length": 1853
+  }
+ }
+}

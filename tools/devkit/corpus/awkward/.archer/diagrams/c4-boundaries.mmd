@@ -1,0 +1,26 @@
+C4Container
+    title Nested boundaries, external elements and ignored styling
+    Person(customer, "Customer", "Buys things; may be a company buyer with a very long description that wraps")
+    Person_Ext(auditor, "Auditor")
+    Enterprise_Boundary(corp, "Example Corp") {
+        System_Boundary(shop, "Web shop") {
+            Container(web, "Web app", "TypeScript, React", "Serves the pages")
+            Container(api, "API", "Node.js", "Orders & payments")
+            ContainerQueue(jobs, "Jobs", "Redis")
+            ContainerDb(orders, "Orders", "PostgreSQL", "orders, lines")
+        }
+        Boundary(ops, "Operations") {
+            System(monitor, "Monitoring", "Alerts on-call")
+        }
+    }
+    System_Ext(payments, "Payment provider")
+    SystemDb_Ext(ledger, "Ledger")
+    Rel(customer, web, "Orders from", "HTTPS")
+    Rel(web, api, "Calls", "JSON/HTTPS")
+    Rel_D(api, orders, "Reads and writes", "SQL")
+    Rel(api, jobs, "Queues")
+    BiRel(api, payments, "Pays through")
+    Rel(payments, ledger, "Posts to")
+    Rel(monitor, api, "Probes")
+    Rel(auditor, ledger, "Reviews")
+    UpdateElementStyle(customer, $fontColor="red")

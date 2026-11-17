@@ -1,0 +1,39 @@
+flowchart TB
+  %% archer-key dotted: Failure path
+  %% ProjectWatcher (watch.ts) and ProjectState.reload (project-state.ts)
+  fs[(".archer/ files and archer.toml")]:::database
+  watch["ProjectWatcher: one fs.watch per directory"]:::component
+  quiet{{"Quiet period: 60 ms after the last event"}}
+  queue["reload(): one at a time, calls during a reload fold into one more"]:::component
+  find["findProject: re-read archer.toml"]:::component
+  each["For each .mmd (view id or file stem) and each embedded note diagram"]:::component
+  same{"Source revision and view entry unchanged?"}
+  keep[Keep the previous ViewState]
+  compile["Compile; a failing source keeps its last-good envelope"]:::component
+  subgraph tx[One transaction]
+    attribute["lastChange: agent if recordWrite was within 5 s, else person"]
+    emph["Revalidate emphasis against the new model"]
+    pres["Drop or re-stamp the presentation, clear selection"]
+    reconcile["Reconcile comments and notes, orphan lost anchors"]
+    persist[("Persist recovery record to account state")]:::database
+  end
+  sse[["Publish SSE: inventory, compile, presentation, emphasis, change, comments, notes"]]
+  page[Archer page re-reads routes]:::container
+  rollback[Roll back in-memory state, publish nothing]
+  fs ev@-->|fs events| watch
+  watch debounce@--> quiet
+  quiet burst@--> queue
+  queue re_read@--> find
+  find views@--> each
+  each check@--> same
+  same yes@-->|yes| keep
+  same no@-->|no| compile
+  keep into1@--> attribute
+  compile into2@--> attribute
+  attribute t1@--> emph
+  emph t2@--> pres
+  pres t3@--> reconcile
+  reconcile t4@--> persist
+  persist ok@-->|committed| sse
+  persist fail@-.->|persist failed| rollback
+  sse push@--> page

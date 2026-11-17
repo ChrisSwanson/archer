@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "target": "view:containers",
+  "walkthroughs": [
+    {
+      "id": "checkout-tour",
+      "title": "Checkout from Basket to Dispatch",
+      "description": "Follow the hosted payment and the queued order follow-up.",
+      "revision": 1,
+      "modelRevision": "sha256:ff354f55af40cf8d5621a914c4860c42d558442ebf168a985712610ddbc365ed",
+      "author": "agent",
+      "writtenAt": "2026-10-31T00:03:23.233Z",
+      "note": "notes/0001-hosted-payment-page.md",
+      "open": [
+        "pageturner"
+      ],
+      "steps": [
+        {
+          "id": "place-the-order",
+          "title": "Place the order",
+          "kind": "sends",
+          "what": "The Storefront sends the basket to the Shop API.",
+          "code": [
+            "shop/orders.ts"
+          ],
+          "edges": [
+            {
+              "id": "web--api",
+              "source": "web",
+              "target": "api",
+              "label": "Calls"
+            }
+          ],
+          "messages": [
+            {
+              "from": "web",
+              "to": "api",
+              "label": "Place order"
+            }
+          ]
+        },
+        {
+          "id": "open-hosted-checkout",
+          "title": "Open hosted checkout",
+          "kind": "sends",
+          "what": "The Shop API creates a payment session with the provider.",
+          "edges": [
+            {
+              "id": "api--payments",
+              "source": "api",
+              "target": "payments",
+              "label": "Creates payment sessions with"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "payments",
+              "label": "Create payment session"
+            }
+          ]
+        },
+        {
+          "id": "receive-payment-outcome",
+          "title": "Receive payment outcome",
+          "kind": "sends",
+          "what": "The provider reports the payment result to the Shop API.",
+          "edges": [
+            {
+              "id": "payments--api",
+              "source": "payments",
+              "target": "api",
+              "label": "Reports payment outcomes to"
+            }
+          ],
+          "messages": [
+            {
+              "from": "payments",
+              "to": "api",
+              "label": "payment.succeeded"
+            }
+          ]
+        },
+        {
+          "id": "queue-the-follow-up",
+          "title": "Queue the follow-up",
+          "kind": "sends",
+          "what": "The API queues order confirmation and courier work.",
+          "code": [
+            "shop/orders.ts"
+          ],
+          "edges": [
+            {
+              "id": "api--jobs",
+              "source": "api",
+              "target": "jobs",
+              "label": "Queues emails and courier bookings on"
+            }
+          ],
+          "messages": [
+            {
+              "from": "api",
+              "to": "jobs",
+              "label": "Queue order follow-up"
+            }
+          ]
+        },
+        {
+          "id": "send-the-confirmation",
+          "title": "Send the confirmation",
+          "kind": "sends",
+          "what": "The worker sends the order email through the email service.",
+          "edges": [
+            {
+              "id": "worker--email",
+              "source": "worker",
+              "target": "email",
+              "label": "Sends order emails through"
+            }
+          ],
+          "messages": [
+            {
+              "from": "worker",
+              "to": "email",
+              "label": "Send confirmation"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

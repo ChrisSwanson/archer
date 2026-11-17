@@ -1,0 +1,4 @@
+architecture-beta
+    service web(internet)[Web]
+    service api(server)[API]
+    web:R --> L:api

@@ -1,0 +1,20 @@
+C4Component
+    %% Nesting for the nested view: a system boundary holding a container
+    %% boundary, parallel relationships that bundle when a boundary closes.
+    title Web shop (model)
+    Person(customer, "Customer", "Buys things")
+    System_Boundary(shop, "Web shop") {
+        Container_Boundary(api, "API") {
+            Component(checkout, "Checkout", "TypeScript", "Takes orders")
+            Component(catalog, "Catalog", "TypeScript", "Lists products")
+        }
+        Container(web, "Web app", "React", "Serves the pages")
+        ContainerDb(orders, "Orders", "PostgreSQL")
+    }
+    System_Ext(payments, "Payment provider")
+    Rel(customer, web, "Shops with", "HTTPS")
+    Rel(web, checkout, "Places orders", "JSON")
+    Rel(web, catalog, "Reads products", "JSON")
+    Rel(checkout, orders, "Writes orders", "SQL")
+    Rel(checkout, payments, "Charges cards", "HTTPS")
+    Rel(checkout, catalog, "Checks stock")

@@ -1,0 +1,18 @@
+sequenceDiagram
+    %% Every construct ADR 0009 adds to the sequence profile.
+    autonumber
+    actor user as End user
+    participant web as Web app
+    participant api as API
+    Note left of user: Signed out
+    user->>+web: Open dashboard
+    web->>+api: GET /session
+    Note over web,api: TLS 1.3, mutual auth
+    api-->>-web: 200 session
+    opt First visit
+        Note right of api: Seeds defaults
+        web-)+api: POST /events
+        api-)-web: accepted
+    end
+    Note over web: Renders from cache
+    web-->>-user: Dashboard

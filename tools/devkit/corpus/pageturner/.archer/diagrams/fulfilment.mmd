@@ -1,0 +1,12 @@
+flowchart LR
+    order[Order Placed]
+    pay{Payment accepted?}
+    pick[Pick from Shelf]
+    pack[Pack Parcel]
+    ship([Handed to Courier])
+    cancel[Cancel and Refund]
+    order placed@--> pay
+    pay accepted@-->|yes| pick
+    pay declined@-->|no| cancel
+    pick picked@--> pack
+    pack packed@--> ship

@@ -1,0 +1,18 @@
+{
+  "type": "entity-relationship",
+  "entities": [
+    { "id": "CUSTOMER", "label": "CUSTOMER", "attributes": [] },
+    { "id": "ORDER", "label": "ORDER", "attributes": [] }
+  ],
+  "relationships": [
+    {
+      "id": "CUSTOMER--ORDER",
+      "source": "CUSTOMER",
+      "target": "ORDER",
+      "sourceCardinality": "exactly-one",
+      "targetCardinality": "zero-or-more",
+      "identifying": true,
+      "label": "places"
+    }
+  ]
+}

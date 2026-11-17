@@ -1,0 +1,31 @@
+{
+  "type": "sequence-trace",
+  "participants": [
+    {
+      "id": "A",
+      "label": "Alice"
+    },
+    {
+      "id": "B",
+      "label": "Bob"
+    }
+  ],
+  "events": [
+    {
+      "type": "message",
+      "id": "msg-0",
+      "from": "A",
+      "to": "B",
+      "label": "Hello Bob",
+      "kind": "sync"
+    },
+    {
+      "type": "message",
+      "id": "msg-1",
+      "from": "B",
+      "to": "A",
+      "label": "Hi Alice",
+      "kind": "reply"
+    }
+  ]
+}

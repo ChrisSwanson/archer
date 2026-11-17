@@ -1,0 +1,10 @@
+{
+  "type": "service-architecture",
+  "groups": [],
+  "services": [
+    { "id": "web", "label": "Web", "icon": "internet" },
+    { "id": "api", "label": "API", "icon": "server" }
+  ],
+  "junctions": [],
+  "edges": [{ "id": "web--api", "source": "web", "target": "api", "sourceSide": "right", "targetSide": "left", "targetArrow": true }]
+}

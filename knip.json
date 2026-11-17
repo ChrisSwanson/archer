@@ -1,0 +1,46 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/*.{mjs,ts,mts}",
+        "tools/**/*.{mjs,mts,ts}",
+        "site/.vitepress/config.mts",
+        "site/.vitepress/theme/index.ts",
+        "site/scripts/*.{ts,mts,mjs}",
+        "site/tests/**/*.e2e.ts",
+        "site/tests/playwright.config.ts",
+        "site/.vitepress/theme/*.vue",
+        "site/.vitepress/theme/*.mts"
+      ],
+      "project": ["scripts/**", "tools/**", "site/**/*.{ts,mts,mjs,vue}", "shared/**/*.{ts,mts}"]
+    },
+    "ts": {
+      "entry": [
+        "src/bin/*.ts",
+        "scripts/*.ts",
+        "test/**/*.test.ts",
+        "src/service/*-worker.ts",
+        "scripts/evals/*.ts",
+        "test/**/*.e2e.ts",
+        "test/**/playwright.config.ts",
+        "test/support/path-anchors.ts"
+      ],
+      "project": ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts"]
+    },
+    "ui": {
+      "entry": [
+        "src/playground/main.ts",
+        "scripts/*.mjs",
+        "bench/*.mjs",
+        "tests/**/*.{test,e2e}.{ts,tsx}",
+        "src/app/page-shell-{web,mcp}.ts",
+        "scripts/*.mts",
+        "tests/**/playwright.config.ts",
+        "tests/browser-ts/support/*.ts",
+        "tests/browser-ts/fixtures/*.tsx"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "scripts/**", "tests/**/*.{ts,tsx}", "bench/**"]
+    }
+  }
+}

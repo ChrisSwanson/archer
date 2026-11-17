@@ -1,0 +1,17 @@
+%% Label text of the base flowchart profile: one node per rule in
+%% docs/supported-mermaid.md, "Label text". Blank lines and comments may
+%% precede the header, and `graph` is the header's other spelling.
+
+graph RL
+  bare[API (v2)]
+  quoted["API (v2)"]
+  punctuated[Orders API, v2: read - write/replay (EU)]
+  nested_paren(API (v2))
+  nested_bracket[Bracket [inner]]
+  unbalanced("API (v2")
+  literal["(Db)"]
+  store[(Orders (primary))]
+  percent[50 %% off]
+  padded[   Padded   ]
+  commented[Commented] %% a trailing comment
+	tabbed[Indented with a tab]

@@ -1,0 +1,18 @@
+stateDiagram-v2
+    %% One view's standing compile fact in the service (ProjectState, ADR 0010)
+    direction LR
+    state "Never compiled: no envelope, present refuses diagram_not_compiled" as Unseen
+    state "Current: envelope matches the source" as Current
+    state "Failing: last good envelope still served, compile notice shown" as Failing
+    state "Gone: file deleted or entry removed" as Gone
+    [*] --> Unseen : file appears
+    [*] --> Current : file appears and compiles
+    Unseen --> Current : edit compiles
+    Current --> Failing : edit does not compile
+    Failing --> Current : edit compiles again
+    Current --> Current : edit compiles, change event
+    Current --> Gone : deleted
+    Failing --> Gone : deleted
+    Unseen --> Gone : deleted
+    Gone --> [*]
+    note right of Failing : api/compile lists it with lastValidRevision

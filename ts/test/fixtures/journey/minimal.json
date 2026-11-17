@@ -1,0 +1,15 @@
+{
+  "type": "user-journey",
+  "title": "Buying a book",
+  "actors": ["Reader"],
+  "sections": [
+    {
+      "id": "section-find",
+      "label": "Find",
+      "tasks": [
+        { "id": "search-the-shop", "label": "Search the shop", "score": 3, "actors": ["Reader"] },
+        { "id": "pick-a-book", "label": "Pick a book", "score": 5, "actors": ["Reader"] }
+      ]
+    }
+  ]
+}

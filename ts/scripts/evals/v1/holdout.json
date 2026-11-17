@@ -1,0 +1,18 @@
+{
+  "canary": "aev-canary-5d1f8e02b7c4",
+  "ids": [
+    "holdout-a",
+    "holdout-b",
+    "holdout-c",
+    "holdout-d",
+    "holdout-e",
+    "holdout-f",
+    "holdout-g",
+    "holdout-h",
+    "holdout-i",
+    "holdout-dp-a",
+    "holdout-dp-b",
+    "holdout-oop-a"
+  ],
+  "sha256": "d2ead563e1495f53bc666c07034c159a67cfde92be3c4c1a1aad9e49317d71dc"
+}

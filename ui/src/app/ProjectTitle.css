@@ -1,0 +1,130 @@
+/* The project page's title section and README card (ProjectTitle.tsx). */
+
+.archer-project-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.archer-project-title-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.archer-project-title h1 {
+  margin: 0;
+  color: var(--text);
+  /* The page's one headline: display, the ramp's top step (round 1, V1). */
+  font-size: var(--type-display);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.archer-project-title-description {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-body);
+  line-height: 1.5;
+  max-width: 72ch;
+}
+
+.archer-project-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  margin: 6px 0 0;
+  color: var(--text-faint);
+  font-size: var(--type-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-project-fact-value { color: var(--text); }
+/* Open threads are a count, not the agent speaking: neutral, and heavier rather than amber. */
+.archer-project-fact-value[data-open="true"] { color: var(--text); font-weight: 600; }
+
+.archer-project-fact-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  overflow-wrap: anywhere;
+}
+
+.archer-project-settings-gear {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.archer-project-settings-gear:hover { background: var(--surface-2); color: var(--text); }
+
+.archer-project-readme {
+  border: var(--line-chrome) solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.archer-project-readme-heading {
+  margin: 0;
+  padding: 10px 16px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.archer-project-readme-path {
+  font-family: var(--font-mono);
+  --type-tracking: 0;
+  font-weight: 400;
+  text-transform: none;
+}
+
+/* Scoped under the card: the shared `.archer-note-body` (styles.css) loads later and would win. */
+.archer-project-readme .archer-project-readme-body {
+  max-height: none;
+  overflow: visible;
+  padding: 18px 20px 6px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.archer-project-readme .archer-project-readme-body[data-collapsed="true"] {
+  max-height: 210px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, black 70%, transparent);
+}
+.archer-project-readme-body > :first-child { margin-top: 0; }
+
+.archer-project-readme-toggle {
+  margin: 8px 20px 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-quiet);
+  font: inherit;
+  font-size: var(--type-small);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.archer-project-readme-toggle:hover { color: var(--accent); }
+
+@media (max-width: 640px) {
+  .archer-project-title { gap: 12px; }
+}

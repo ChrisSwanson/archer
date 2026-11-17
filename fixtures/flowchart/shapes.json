@@ -1,0 +1,121 @@
+{
+  "type": "freeform-graph",
+  "direction": "tb",
+  "nodes": [
+    {
+      "id": "circ",
+      "label": "Circle",
+      "shape": "circle",
+      "classes": [
+        "component"
+      ]
+    },
+    {
+      "id": "cyl",
+      "label": "Cylinder",
+      "shape": "cylinder",
+      "classes": [
+        "database"
+      ]
+    },
+    {
+      "id": "diam",
+      "label": "Diamond",
+      "shape": "diamond",
+      "classes": [
+        "external"
+      ]
+    },
+    {
+      "id": "hex",
+      "label": "Hexagon",
+      "shape": "hexagon"
+    },
+    {
+      "id": "rect",
+      "label": "Rectangle",
+      "shape": "rectangle",
+      "classes": [
+        "system"
+      ]
+    },
+    {
+      "id": "round",
+      "label": "Rounded",
+      "shape": "rounded",
+      "classes": [
+        "person"
+      ]
+    },
+    {
+      "id": "stad",
+      "label": "Stadium",
+      "shape": "stadium",
+      "classes": [
+        "container"
+      ]
+    },
+    {
+      "id": "sub",
+      "label": "Subroutine",
+      "shape": "subroutine"
+    }
+  ],
+  "edges": [
+    {
+      "id": "dotted",
+      "source": "round",
+      "target": "stad",
+      "line": "dotted"
+    },
+    {
+      "id": "dotted_label",
+      "source": "sub",
+      "target": "rect",
+      "label": "on cache miss",
+      "line": "dotted"
+    },
+    {
+      "id": "labelled",
+      "source": "hex",
+      "target": "sub",
+      "label": "reads: a, b (c)"
+    },
+    {
+      "id": "long_dotted",
+      "source": "diam",
+      "target": "cyl",
+      "line": "dotted"
+    },
+    {
+      "id": "long_solid",
+      "source": "circ",
+      "target": "diam"
+    },
+    {
+      "id": "long_thick",
+      "source": "cyl",
+      "target": "hex",
+      "line": "thick"
+    },
+    {
+      "id": "solid",
+      "source": "rect",
+      "target": "round"
+    },
+    {
+      "id": "thick",
+      "source": "stad",
+      "target": "circ",
+      "line": "thick"
+    },
+    {
+      "id": "thick_label",
+      "source": "rect",
+      "target": "hex",
+      "label": "every request",
+      "line": "thick"
+    }
+  ],
+  "groups": []
+}

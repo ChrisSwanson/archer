@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Zoom fail</title>
+<style>
+body{margin:0;font:16px/1.5 sans-serif} #wide{width:500px;height:8px;background:teal}
+#clipped{width:100px;height:24px;overflow:hidden;white-space:nowrap}
+#overlap{position:relative;height:80px} #one,#two{position:absolute;top:0;left:0}
+#text-clip{width:110px;height:26px;overflow:hidden;white-space:nowrap}
+#sample{display:inline-block;font-size:20px} #nontext{width:120px;height:30px;background:teal}
+#tight{width:80px;line-height:6px;margin-top:100px}
+.react-flow{width:100%;overflow:hidden}.react-flow__viewport{width:900px;height:60px}
+.archer-canvas-controls{width:100px;overflow:hidden;white-space:nowrap}
+@media(max-width:400px){#lost{display:none}}
+</style><main><span id="sample">MMMM</span><div id="nontext"></div><div id="wide"></div>
+<div id="clipped"><span>This sentence is permanently clipped</span></div>
+<div id="text-clip">Text fits here</div>
+<div id="overlap"><span id="one">First overlapping sentence</span><span id="two">Second overlapping sentence</span></div>
+<p id="lost">Important instruction disappears at narrow widths</p>
+<p id="tight">These words wrap across several overlapping lines</p>
+<div class="react-flow"><div class="react-flow__viewport">Exempt diagram label</div><div class="archer-canvas-controls"><button>Diagram control still counts</button></div></div>
+</main></html>

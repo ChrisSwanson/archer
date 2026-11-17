@@ -1,0 +1,138 @@
+.archer-canvas-tools {
+  position: relative;
+}
+
+.react-flow__controls .archer-canvas-tools-trigger,
+.archer-canvas-controls .archer-canvas-tools-trigger {
+  box-sizing: border-box;
+  width: 44px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.react-flow__controls .archer-canvas-tools-trigger:hover,
+.archer-canvas-controls .archer-canvas-tools-trigger:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.archer-canvas-tools-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.archer-canvas-tools-menu {
+  position: absolute;
+  bottom: 0;
+  left: calc(100% + 8px);
+  z-index: 20;
+  display: grid;
+  min-width: 132px;
+  gap: 2px;
+  padding: 4px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.archer-canvas-tools-menu > button {
+  width: auto;
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  justify-content: flex-start;
+  gap: var(--icon-label-gap);
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+/* A menu row is an icon beside its word: a row, not the cluster's centred
+   grid (on the sequence canvas the grid stacked the icon over the word), and
+   the same row on the graph, sequence and journey canvases. */
+:is(.react-flow__controls, .archer-canvas-controls) .archer-canvas-tools-menu > button {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-label-gap);
+}
+:is(.react-flow__controls, .archer-canvas-controls) .archer-canvas-tools-menu > button svg {
+  width: var(--icon-inline);
+  height: var(--icon-inline);
+  max-width: var(--icon-inline);
+  max-height: var(--icon-inline);
+}
+
+.react-flow__controls:has(.archer-canvas-tools),
+.archer-canvas-controls:has(.archer-canvas-tools) {
+  overflow: visible;
+}
+
+/* The journey's one cluster (Source, Graph tools): above the board it sits on; absent when it holds nothing. */
+.archer-journey-controls { z-index: 8; }
+.archer-journey-controls:empty { display: none; }
+
+@media (pointer: coarse) {
+  .react-flow__controls .archer-canvas-tools-trigger,
+  .archer-canvas-controls .archer-canvas-tools-trigger {
+    height: 44px;
+    min-height: 44px;
+  }
+  /* A menu row is a touch target too: 44 px both ways (G7 [H], round 1 #14). */
+  .archer-canvas-tools-menu > button,
+  :is(.react-flow__controls, .archer-canvas-controls) .archer-canvas-tools-menu > button {
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+/* A phone's folded toolbar stands in the drawing's height (stage-dock.css) and its buttons give up height to
+   fit. A touch screen's keep 44 px both ways and wrap into a second column instead: at 320 with highlights on
+   they shrank to 44×41.5 (round 1, R5-claude-05). `:has` outweighs that rule wherever either sheet loads. */
+@media (pointer: coarse) and (max-width: 599px) {
+  .react-flow .react-flow__controls:has(.archer-canvas-tools) { flex-wrap: wrap; align-content: flex-start; }
+  .react-flow .react-flow__controls:has(.archer-canvas-tools) :is(.react-flow__controls-button, .archer-pan-select-button, .archer-canvas-tools-trigger) {
+    flex: none;
+    min-height: var(--icon-touch);
+  }
+}
+/* On a phone an open sheet leaves the drawing a strip that the toolbar, riding above the sheet, fills: the
+   drawing's heading would be drawn across the buttons (round 1, R5-claude-07). The page's title still names
+   the diagram, and the heading is back when the sheet folds. */
+@media (max-width: 599px) {
+  :root:has(.archer-dock-sheet) .archer-canvas-heading { display: none; }
+}
+/* Reordering a sequence participant by dragging its header. */
+.archer-seq-reorder-marker { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.archer-seq-reordering { opacity: 0.85; cursor: grabbing; }
+.archer-seq-reordering .archer-seq-participant-box { filter: drop-shadow(0 6px 14px var(--border-strong)); }
+.archer-seq-draw-ghost line, .archer-seq-draw-ghost path { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+.archer-seq-draw-ghost path { stroke-dasharray: none; }
+.archer-seq-label-editor { pointer-events: none; }
+.archer-seq-label-editor-plate { display: flex; justify-content: center; align-items: center; height: 100%; }
+.archer-seq-label-editor-plate[data-align="end"] { align-items: flex-end; }
+.archer-seq-label-editor-plate .archer-node-label-input { pointer-events: auto; }
+/* Doubled class: authoring.css (loaded later, with the editor) resets the input to transparent at the same weight. */
+.archer-seq-label-editor-plate .archer-node-label-input.archer-node-label-input { max-width: calc(100% - 20px); background: var(--plate); color: var(--plate-text); padding: 2px 8px; border-radius: 4px; outline: 2px solid var(--accent) !important; font-size: var(--type-canvas-participant); font-weight: 600; }
+/* Editing a sequence: lifelines invite a drag, the selected message shows its two ends. */
+.archer-seq-canvas--editing .archer-seq-lifeline-hit { cursor: crosshair; stroke-width: 24px; }
+.archer-seq-canvas--editing .archer-seq-lifeline-hit:hover { stroke: var(--accent); stroke-opacity: 0.12; }
+.archer-seq-canvas--editing .archer-seq-participant { cursor: grab; }
+.archer-seq-canvas--editing .archer-seq-message.archer-seq-selected { cursor: ns-resize; }
+.archer-seq-end-handles circle { fill: var(--accent); stroke: var(--node-bg); stroke-width: 2; r: 10; cursor: ew-resize; }
+.archer-seq-end-handles circle:hover { r: 12; }
+.archer-seq-draw-ghost circle { fill: var(--accent); stroke: none; }
+
+/* A zoom button at its limit: `aria-disabled`, so it keeps focus (round 1, F46), drawn as `:disabled` is. */
+.react-flow__controls-button[aria-disabled="true"],
+.react-flow__controls-button[aria-disabled="true"]:hover {
+  background: transparent;
+  color: var(--text-faint);
+  opacity: 0.5;
+  cursor: default;
+}

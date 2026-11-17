@@ -1,0 +1,193 @@
+{
+  "type": "sequence-trace",
+  "participants": [
+    {
+      "id": "C",
+      "label": "Client"
+    },
+    {
+      "id": "S",
+      "label": "Server"
+    },
+    {
+      "id": "D",
+      "label": "Database"
+    }
+  ],
+  "events": [
+    {
+      "type": "message",
+      "id": "msg-0",
+      "from": "C",
+      "to": "S",
+      "label": "POST /login",
+      "kind": "sync"
+    },
+    {
+      "type": "activate",
+      "participant": "S"
+    },
+    {
+      "type": "message",
+      "id": "msg-1",
+      "from": "S",
+      "to": "D",
+      "label": "SELECT user",
+      "kind": "sync"
+    },
+    {
+      "type": "message",
+      "id": "msg-2",
+      "from": "D",
+      "to": "S",
+      "label": "user record",
+      "kind": "reply"
+    },
+    {
+      "type": "fragment",
+      "id": "frag-0",
+      "kind": "alt",
+      "label": "Valid credentials",
+      "sections": [
+        {
+          "label": "Valid credentials",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-3",
+              "from": "S",
+              "to": "C",
+              "label": "200 OK",
+              "kind": "reply"
+            }
+          ]
+        },
+        {
+          "label": "Invalid credentials",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-4",
+              "from": "S",
+              "to": "C",
+              "label": "401 Unauthorized",
+              "kind": "reply"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "deactivate",
+      "participant": "S"
+    },
+    {
+      "type": "fragment",
+      "id": "frag-1",
+      "kind": "opt",
+      "label": "Fetch profile",
+      "sections": [
+        {
+          "label": "Fetch profile",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-5",
+              "from": "C",
+              "to": "S",
+              "label": "GET /profile",
+              "kind": "sync"
+            },
+            {
+              "type": "message",
+              "id": "msg-6",
+              "from": "S",
+              "to": "D",
+              "label": "SELECT profile",
+              "kind": "sync"
+            },
+            {
+              "type": "message",
+              "id": "msg-7",
+              "from": "D",
+              "to": "S",
+              "label": "profile data",
+              "kind": "reply"
+            },
+            {
+              "type": "message",
+              "id": "msg-8",
+              "from": "S",
+              "to": "C",
+              "label": "200 profile",
+              "kind": "reply"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fragment",
+      "id": "frag-2",
+      "kind": "par",
+      "label": "Notify services",
+      "sections": [
+        {
+          "label": "Notify services",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-9",
+              "from": "S",
+              "to": "C",
+              "label": "push notification",
+              "kind": "async"
+            }
+          ]
+        },
+        {
+          "label": "Log event",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-10",
+              "from": "S",
+              "to": "D",
+              "label": "audit log",
+              "kind": "async"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fragment",
+      "id": "frag-3",
+      "kind": "loop",
+      "label": "Heartbeat",
+      "sections": [
+        {
+          "label": "Heartbeat",
+          "events": [
+            {
+              "type": "message",
+              "id": "msg-11",
+              "from": "C",
+              "to": "S",
+              "label": "ping",
+              "kind": "sync"
+            },
+            {
+              "type": "message",
+              "id": "msg-12",
+              "from": "S",
+              "to": "C",
+              "label": "pong",
+              "kind": "reply"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+%% Comments and an init directive before the header.
+%%{init: {"theme": "dark"}}%%
+flowchart TB
+    %% classDef, class, style, linkStyle and :::kind all at once
+    classDef async fill:#f96,stroke:#333
+    classDef hot fill:#f00
+    web[Web app]:::container
+    q[["Queue #quot;jobs#quot; & retries < 5"]]:::async
+    db[(Orders — primary, eu-west-1)]:::database
+    ext{{"Payment provider (3rd party)"}}:::external
+    long[This is a deliberately very long label that keeps going so that wrapping, truncation and the inline label editor all get exercised at once]
+    uni[Café ünïcode – “quotes” ‘single’ ✓]
+    class long hot
+    style uni fill:#fff,stroke:#333
+    subgraph backend["Backend (core): API, worker"]
+        subgraph inner[Inner / nested]
+            api("API (v2)")
+        end
+        worker([Worker])
+    end
+    web e_web_api@-->|HTTPS; JSON #59; gzip| api
+    api e_api_q@-.->|enqueue| q
+    q e_q_worker@==>|consume| worker
+    worker e_worker_db@--> db
+    api e_api_ext@-->|"pay (idempotent)"| ext
+    long e_long_uni@--> uni
+    uni e_uni_web@---> web
+    linkStyle 0 stroke:#f00

@@ -1,0 +1,38 @@
+8690 requests, 4334 bare 404, 4319 answered 503 retry cc=no-store ct=application/json code=project_loading
+GET /api/browser-projects -> 200 etag cc=no-store ct=application/json
+GET /api/connection -> 200 cc=no-store ct=application/json
+GET /api/projects -> 200 etag cc=no-store ct=application/json
+GET /api/settings -> 200 cc=no-store ct=application/json
+GET /p/{slug}/api/events -> 200 cc=no-store ct=text/event-stream
+HEAD /p/{slug}/api/authoring -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/bootstrap -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/browser-projects -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/browser-search -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/comment-activity -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/comments -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/compile -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/connection -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/diagram-source -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/diagrams -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/documents -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/emphasis -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/events -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/expand-menu -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/exploration -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/listeners -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/nope -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/note-emphases -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/notes -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/operations -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/project-lifecycle -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/project-settings -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/projects -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/reader-exploration -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/search -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/selection -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/settings -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/thumbnails -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/walkthrough-position -> 503 retry cc=no-store ct=application/json code=unparsed
+HEAD /p/{slug}/api/walkthroughs -> 503 retry cc=no-store ct=application/json code=unparsed
+POST /api/project-lifecycle -> 422 cc=no-store ct=application/json code=invalid_project_lifecycle
+PUT /api/settings -> 403 cc=no-store ct=application/json code=settings_read_only

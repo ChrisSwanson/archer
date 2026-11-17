@@ -1,0 +1,34 @@
+sequenceDiagram
+    %% ensureService (ts/src/service/client.ts) and startService (service.ts)
+    participant door as Front door (archer mcp or CLI)
+    participant client as service client
+    participant service as archer serve (detached)
+    participant account as Account state dir
+    participant project as Project checkout
+    door->>client: present_diagram, attach_project or start_service
+    client->>service: connect archer.sock, hello
+    alt a service already answers
+        service-->>client: protocolVersion, version, homeUrl
+    else nothing listening and auto-start allowed
+        client->>service: spawn node archer.js serve --foreground, detached, log to service.log
+        activate service
+        service->>account: take archer.lock, read service.json (token, port)
+        service->>service: bind explicit/configured port or remembered port with free-port fallback
+        service->>account: write service.json, new token if the port changed
+        loop each project marked attached in runtime/index.json
+            service->>account: read runtime recovery record and source blobs
+            service->>project: recompile and start a watcher
+        end
+        client->>service: hello, retried every 50 ms for up to 15 s
+        service-->>client: protocolVersion, version, homeUrl
+    end
+    client->>service: attach root
+    service->>project: findProject, ProjectState.open, reload
+    service->>account: persist record, mark attached
+    service-->>client: root, name, url .../token/p/slug/
+    client-->>door: the project page URL
+    Note over service: One service per user serves up to 64 projects
+    door->>client: stop_service
+    client->>service: stop
+    service-->>client: stopping
+    deactivate service

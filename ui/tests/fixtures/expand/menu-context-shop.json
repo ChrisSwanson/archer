@@ -1,0 +1,145 @@
+{
+ "schemaVersion": 1,
+ "viewId": "context",
+ "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+ "modelGeneration": 3,
+ "canvas": [],
+ "dropped": [],
+ "limits": {
+  "maxAddedSources": 5,
+  "maxAddedBoxes": 60,
+  "maxAddedWires": 120,
+  "maxMenuCandidates": 12,
+  "maxRelationshipsPerElement": 24,
+  "maxPieceBoxes": 40,
+  "maxResponseBytes": 65536,
+  "maxExpansions": 24,
+  "maxExpandParamChars": 4096
+ },
+ "remaining": {
+  "sources": 5,
+  "boxes": 60,
+  "wires": 120
+ },
+ "element": {
+  "id": "shop",
+  "name": "Shop",
+  "readings": [
+   {
+    "kind": "system",
+    "views": [
+     "containers",
+     "context"
+    ]
+   }
+  ],
+  "conflicting": false
+ },
+ "diagrams": {
+  "items": [
+   {
+    "source": "containers",
+    "title": "Containers",
+    "family": "c4",
+    "sourceRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "reading": 0,
+    "onCanvas": false,
+    "relation": "opens",
+    "adds": {
+     "boxes": 3,
+     "wires": 3
+    },
+    "piece": {
+     "source": "containers",
+     "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+     "family": "c4",
+     "touches": "shop",
+     "opens": true,
+     "kind": "c4",
+     "model": {
+      "type": "c4-model",
+      "level": "container",
+      "elements": [
+       {
+        "id": "web",
+        "kind": "container",
+        "label": "Web",
+        "technology": "React",
+        "boundaryId": null
+       },
+       {
+        "id": "api",
+        "kind": "container",
+        "label": "API",
+        "technology": "Node",
+        "boundaryId": null
+       },
+       {
+        "id": "db",
+        "kind": "container",
+        "label": "Orders DB",
+        "shape": "database",
+        "technology": "Postgres",
+        "boundaryId": null
+       }
+      ],
+      "boundaries": [],
+      "relationships": [
+       {
+        "id": "web--api",
+        "source": "web",
+        "target": "api",
+        "label": "calls"
+       },
+       {
+        "id": "api--db",
+        "source": "api",
+        "target": "db",
+        "label": "reads"
+       }
+      ]
+     },
+     "attach": [
+      {
+       "key": "user--web",
+       "from": "user",
+       "to": "web",
+       "direction": "forward",
+       "label": "uses"
+      }
+     ],
+     "boxes": 3,
+     "wires": 3,
+     "total": {
+      "boxes": 3,
+      "wires": 3
+     },
+     "truncated": false
+    }
+   },
+   {
+    "source": "checkout",
+    "title": "Checkout",
+    "family": "sequence",
+    "sourceRevision": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "reading": 0,
+    "onCanvas": false,
+    "relation": "draws",
+    "adds": {
+     "boxes": 0,
+     "wires": 0
+    },
+    "piece": null,
+    "omitted": "own"
+   }
+  ],
+  "total": 2,
+  "truncated": false
+ },
+ "neighbours": {
+  "items": [],
+  "total": 0,
+  "truncated": false
+ },
+ "bytesTruncated": false
+}

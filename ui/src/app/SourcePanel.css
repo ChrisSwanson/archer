@@ -1,0 +1,22 @@
+/* The raw Mermaid under a diagram on its reading page. */
+.archer-source-panel { border-top: var(--line-chrome) solid var(--border); background: var(--surface); display: flex; flex-direction: column; max-height: 42vh; min-height: 120px; }
+.archer-source-panel-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 16px; border-bottom: var(--line-chrome) solid var(--border); font-size: var(--type-small); color: var(--text-dim); }
+.archer-source-panel-title { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.archer-source-panel-path { font-family: var(--font-mono); --type-tracking: 0; color: var(--text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archer-source-panel-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.archer-source-panel-actions button { font: inherit; font-size: var(--type-small); color: var(--text); padding: 4px 10px; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface-2); cursor: pointer; }
+.archer-source-panel-actions button:hover:not(:disabled) { border-color: var(--border-hover); }
+.archer-source-panel-actions button:disabled { color: var(--text-faint); cursor: default; }
+.archer-source-panel-actions button:focus-visible, .archer-source-panel-code:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-source-panel-actions .archer-source-panel-close { border-color: transparent; background: transparent; font-size: var(--type-reading); line-height: 1; padding: 2px 8px; color: var(--text-dim); }
+.archer-source-panel-code { margin: 0; padding: 12px 16px; overflow: auto; flex: 1; font-family: var(--font-mono); --type-tracking: 0; font-size: var(--type-small); line-height: 1.6; color: var(--text); white-space: pre; tab-size: 4; }
+.archer-source-panel-note { margin: 0; padding: 12px 16px; font-size: var(--type-small); color: var(--text-dim); }
+.archer-reader-source { font: inherit; color: var(--text-dim); padding: 6px 10px; border: var(--line-chrome) solid transparent; border-radius: var(--radius-control); background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: var(--icon-label-gap); }
+.archer-reader-source:hover { color: var(--text); background: var(--surface-2); }
+.archer-reader-source[aria-pressed="true"] { color: var(--accent-on-fill); background: var(--accent-fill); border-color: var(--accent); }
+.archer-reader-source:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-reader-source svg { width: var(--icon-inline); height: var(--icon-inline); fill: none; stroke: currentColor; stroke-width: var(--icon-stroke); stroke-linecap: round; stroke-linejoin: round; }
+.archer-source-panel-editor { flex: 1; min-height: 0; overflow: hidden; }
+/* Warnings only: a neutral count. Errors take the danger colour. Amber is the agent's voice. */
+.archer-source-panel-problems { color: var(--text-dim); white-space: nowrap; }
+.archer-source-panel-problems.has-errors { color: var(--danger-text); }

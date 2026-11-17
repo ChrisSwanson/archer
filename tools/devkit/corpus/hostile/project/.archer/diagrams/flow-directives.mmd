@@ -1,0 +1,12 @@
+%%{init: {"securityLevel": "loose", "startOnLoad": true, "themeCSS": "* { background: url(https://xss-canary.invalid/init-css) }", "flowchart": {"htmlLabels": true}, "fontFamily": "x;}</style><img src=x onerror=window.__xss='init'>"}}%%
+flowchart LR
+  a[Start]
+  b[Finish]
+  a go@--> b
+  click a href "javascript:window.__xss='click-href'"
+  click b call alert('click-call')
+  click a "https://xss-canary.invalid/click" _self
+  click b href "data:text/html,<script>alert('click-data')</script>"
+  classDef evil fill:#f00,stroke:#333
+  class b evil
+  style a fill:#fff

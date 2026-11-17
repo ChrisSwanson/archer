@@ -1,0 +1,32 @@
+{
+  "type": "user-journey",
+  "title": "A working day",
+  "actors": ["Me", "Cat", "Boss"],
+  "sections": [
+    {
+      "id": "section-go-to-work",
+      "label": "Go to work",
+      "tasks": [
+        { "id": "make-tea", "label": "Make tea", "score": 5, "actors": ["Me"] },
+        { "id": "go-upstairs", "label": "Go upstairs", "score": 3, "actors": ["Me", "Cat"] },
+        { "id": "do-work", "label": "Do work", "score": 1, "actors": ["Me", "Boss"] }
+      ]
+    },
+    {
+      "id": "section-lunch-at-the-caf-ue9",
+      "label": "Lunch at the Café",
+      "tasks": [
+        { "id": "caf-ue9-visit", "label": "Café visit", "score": 4, "actors": ["Me"] },
+        { "id": "read-the-news", "label": "Read the \"news\"", "score": 3, "actors": [] }
+      ]
+    },
+    {
+      "id": "section-go-home",
+      "label": "Go home",
+      "tasks": [
+        { "id": "go-downstairs", "label": "Go downstairs", "score": 5, "actors": ["Me", "Cat"] },
+        { "id": "sit-down", "label": "Sit down", "score": 5, "actors": ["Me"] }
+      ]
+    }
+  ]
+}

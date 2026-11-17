@@ -1,0 +1,7 @@
+/* In the entry's stylesheet, not a view's: the view's own may be what failed. Fills the page or the landing's
+   frame it replaced; Retry keeps its touch size. */
+.playground-startup-failure { box-sizing: border-box; min-height: 100dvh; font: 400 var(--type-body)/1.5 var(--font-sans); }
+.playground-startup-failure .archer-review-button { margin-top: 10px; min-height: 36px; }
+@media (pointer: coarse) { .playground-startup-failure .archer-review-button { min-height: 44px; } }
+/* A project opened inside the page that did not download: the same notice in the workspace, not the whole page. */
+.playground-workspace > .playground-startup-failure { min-height: 100%; }

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "view": { "id": "category-meaning", "kind": "freeform", "title": "Invalid" },
+  "revision": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "model": {
+    "type": "freeform-graph",
+    "nodes": [
+      { "id": "farm", "label": "Farm model server", "classes": ["gpu"] },
+      { "id": "vm", "label": "Staging VM", "classes": ["sandbox"] }
+    ],
+    "edges": [],
+    "groups": [],
+    "categories": [
+      { "name": "gpu", "fill": "#ecfdf5", "stroke": "#0f766e", "meaning": "Model server on a GPU" },
+      { "name": "sandbox", "stroke": "#c2410c", "dashed": true }
+    ],
+    "sourceOrder": { "elements": [{ "id": "farm", "kind": "node" }] }
+  }
+}

@@ -1,0 +1,96 @@
+# Awkward inputs for smoke tests: comments, CRLF, styling lines, nesting, long labels,
+# special characters, a large diagram, saved positions (.devkit/positions.json) and notes
+# with embedded diagrams (one intentionally broken).
+version = 1
+name = "Awkward corpus"
+folder = ".archer"
+
+[[views]]
+id = "fixture-seq-full"
+kind = "sequence"
+title = "Fixture sequence full"
+source = ".archer/diagrams/fixture-seq-full.mmd"
+
+[[views]]
+id = "fixture-seq-widened"
+kind = "sequence"
+title = "Fixture sequence widened"
+source = ".archer/diagrams/fixture-seq-widened.mmd"
+
+[[views]]
+id = "flow-styled"
+kind = "freeform"
+title = "Styled flowchart"
+source = ".archer/diagrams/flow-styled.mmd"
+
+[[views]]
+id = "flow-crlf"
+kind = "freeform"
+title = "CRLF flowchart"
+source = ".archer/diagrams/flow-crlf.mmd"
+
+[[views]]
+id = "flow-large"
+kind = "freeform"
+title = "Large flowchart (150 nodes)"
+source = ".archer/diagrams/flow-large.mmd"
+
+[[views]]
+id = "flow-positioned"
+kind = "freeform"
+title = "Flowchart with saved positions"
+source = ".archer/diagrams/flow-positioned.mmd"
+
+[[views]]
+id = "seq-awkward"
+kind = "sequence"
+title = "Awkward sequence"
+source = ".archer/diagrams/seq-awkward.mmd"
+
+[[views]]
+id = "seq-crlf"
+kind = "sequence"
+title = "CRLF sequence"
+source = ".archer/diagrams/seq-crlf.mmd"
+
+[[views]]
+id = "state-composite"
+kind = "state"
+title = "Composite state machine"
+source = ".archer/diagrams/state-composite.mmd"
+
+[[views]]
+id = "state-crlf"
+kind = "state"
+title = "CRLF state machine"
+source = ".archer/diagrams/state-crlf.mmd"
+
+[[views]]
+id = "er-awkward"
+kind = "entity-relationship"
+title = "Awkward ER model"
+source = ".archer/diagrams/er-awkward.mmd"
+
+[[views]]
+id = "c4-boundaries"
+kind = "c4"
+title = "Nested C4 boundaries"
+source = ".archer/diagrams/c4-boundaries.mmd"
+
+[[views]]
+id = "c4-context"
+kind = "c4"
+title = "C4 context (clean)"
+source = ".archer/diagrams/c4-context.mmd"
+
+[[views]]
+id = "arch-awkward"
+kind = "architecture"
+title = "Architecture with junctions"
+source = ".archer/diagrams/arch-awkward.mmd"
+
+[[views]]
+id = "journey-awkward"
+kind = "journey"
+title = "Journey (long tasks)"
+source = ".archer/diagrams/journey-awkward.mmd"

@@ -1,0 +1,40 @@
+flowchart TB
+  %% archer-key gpu: Model server on a GPU
+  %% archer-key sandbox: Walled-off sandbox
+  you["You<br/>A laptop or a phone, at home or away"]:::person
+  vpn["Private VPN<br/>The only way in from outside"]
+  door["Front Door<br/>One sign-in for every page"]
+  subgraph server["The Home Server: One Machine, 64 GB of Memory, Two GPUs"]
+    subgraph farm["Agent Farm, on the Host"]
+      core["Farm Core<br/>The board, the chat, the task store, and a documented API that agents can read"]
+      build["Build Containers<br/>A fresh, throwaway container for each task. The agent works alone inside"]
+      staging["Staging VM, Walled Off<br/>A full copy of the agent loop with no real keys or data. The agent checks its own work in a sandboxed browser. Its only way out is model calls"]:::sandbox
+    end
+    subgraph k8s["Kubernetes Cluster, Single Node"]
+      chat["Chat and Search<br/>A private chat page and a private web search"]
+      gateway["Model Gateway<br/>One API and one set of keys in front of every model server"]
+      other["Everything Else<br/>Home automation and two game servers share the box"]
+      subgraph gpu1["GPU 1: RTX PRO 5000, 72 GB"]
+        farmModel["Farm Model Server<br/>Qwen3.8 27B with a 262K context, for build and review work"]:::gpu
+        chatModel["Chat Model Server<br/>The same model, kept free so the chat answers while a build runs"]:::gpu
+      end
+      subgraph gpu2["GPU 2: RTX PRO 4000, 24 GB"]
+        helper["Helper Model Server<br/>The same model for side jobs, like reading files for the chat"]:::gpu
+      end
+    end
+    upkeep["Upkeep, All Automatic<br/>A weekly vulnerability scan, nightly backups, and a health check every 15 minutes that alerts a phone"]
+  end
+  you you_vpn@--> vpn
+  vpn vpn_door@--> door
+  door door_core@--> core
+  door door_chat@--> chat
+  core core_build@-->|starts one per task| build
+  build build_gateway@-->|model calls| gateway
+  staging staging_gateway@--> gateway
+  chat chat_gateway@--> gateway
+  gateway gateway_farm@--> farmModel
+  gateway gateway_chat@--> chatModel
+  gateway gateway_helper@--> helper
+  classDef sandbox fill:#fdf1e7,stroke:#c2410c,stroke-dasharray: 5 3
+  classDef gpu fill:#ecfdf5,stroke:#0f766e
+  class gpu1,gpu2 gpu

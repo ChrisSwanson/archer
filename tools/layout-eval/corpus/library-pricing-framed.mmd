@@ -1,0 +1,48 @@
+%% archer-id: library-pricing
+flowchart LR
+    subgraph appHosts[Useai Application Hosts]
+        cli[CLI]
+        http[Loopback HTTP API]
+        mcp[Read Only MCP]
+        applicationHost[Application Host]
+        store[(SQLite Store)]
+    end
+    subgraph sdk[Embeddable Rust SDK]
+        core[Domain Library]
+        pricing[Pricing Library]
+        adapters[Provider Registry]
+        traces[Trace Library]
+    end
+    subgraph otherHosts[Other Application Hosts]
+        memz[Memz]
+        memzHistory[(Memz History And Search)]
+        foreignApps[Foreign Applications]
+        foreignBindings[C ABI Bindings]
+    end
+    subgraph dataSources[Data Sources]
+        localTraces[Local Trace Files]
+        rateCatalog[Versioned Rate Catalog]
+        upstream[Provider APIs And CLIs]
+    end
+    cli cli_host@-->|Calls| applicationHost
+    http http_host@-->|Calls| applicationHost
+    mcp mcp_host@-->|Reads through| applicationHost
+    applicationHost app_core@-->|Evaluates accounting| core
+    applicationHost app_pricing@-->|Values usage| pricing
+    applicationHost app_collect@-->|Refreshes accounts| adapters
+    applicationHost app_trace@-->|Reads traces| traces
+    applicationHost app_store@-->|Persists typed rows| store
+    adapters fetch@-->|Reads provider data| upstream
+    pricing price_core@-->|Uses shared types| core
+    pricing catalog_read@-->|Loads supplied catalog| rateCatalog
+    traces trace_core@-->|Emits shared contracts| core
+    traces trace_read@-->|Optionally reads| localTraces
+    memz memz_trace@-->|Imports traces| traces
+    memz memz_price@-->|Values usage| pricing
+    memz memz_collect@-->|Optionally collects| adapters
+    memz memz_history@-->|Owns records and search| memzHistory
+    foreignApps foreign_call@-->|Calls| foreignBindings
+    foreignBindings ffi_core@-->|Evaluates accounting| core
+    foreignBindings ffi_price@-->|Values usage| pricing
+    foreignBindings ffi_collect@-->|Optionally collects| adapters
+    foreignBindings ffi_trace@-->|Optionally reads traces| traces

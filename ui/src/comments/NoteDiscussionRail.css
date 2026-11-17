@@ -1,0 +1,214 @@
+.primary-note-discussion-rail {
+  position: relative;
+  width: 264px;
+  min-width: 240px;
+  align-self: stretch;
+}
+
+.primary-note-discussion-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 780px);
+  justify-content: center;
+  align-items: start;
+  gap: 24px;
+  min-width: 0;
+}
+
+.primary-note-discussion-layout[data-rail-layout="margin"] { grid-template-columns: 780px minmax(240px, 264px); }
+.primary-note-discussion-layout[data-rail-layout="compact"] .primary-note-discussion-rail {
+  width: min(100%, 780px);
+  min-width: 0;
+}
+.primary-note-discussion-layout[data-rail-layout="compact"] .primary-note-discussion[data-expanded="false"] {
+  position: relative;
+  inset: auto;
+  top: auto !important;
+  margin-bottom: 8px;
+}
+.primary-note-discussion-layout[data-rail-layout="compact"] .primary-note-discussion-connector { display: none; }
+.primary-note-discussion-layout[data-rail-layout="compact"] .primary-note-discussion-rail:has(.primary-note-discussion[data-expanded="true"]) .primary-note-discussion[data-expanded="false"] { display: none; }
+
+.primary-note-reader--has-discussions { padding-inline: 24px; }
+
+.primary-note-document-column { min-width: 0; }
+.primary-note-document-column > .archer-notes { margin: 0; padding: 0; }
+
+.primary-note-discussion-layout[data-focused-thread="true"] .archer-note-body { color: var(--text-dim); }
+.primary-note-discussion-layout mark[data-active-discussion="true"] {
+  background: color-mix(in srgb, var(--accent) 24%, var(--surface));
+  color: var(--text);
+  text-decoration-color: var(--accent);
+}
+
+.primary-note-discussion-group-cue {
+  margin: 0 0 8px;
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+  line-height: 1.35;
+}
+
+.primary-note-discussion {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 2;
+}
+
+.primary-note-discussion[data-expanded="true"] {
+  position: fixed;
+  right: auto;
+  z-index: 58;
+  max-height: calc(100dvh - var(--primary-bar-bottom) - 24px);
+  overflow: auto;
+  scrollbar-gutter: stable;
+  border-radius: var(--radius-dialog);
+}
+
+.primary-note-discussion[data-expanded="true"] .primary-note-discussion-connector { display: none; }
+
+.primary-note-discussion-connector {
+  position: absolute;
+  top: 21px;
+  right: 100%;
+  width: 24px;
+  border-top: var(--line-chrome) solid var(--border-strong);
+}
+
+.primary-note-discussion-bubble {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px 8px 12px;
+  border: var(--line-chrome) solid var(--border);
+  border-radius: var(--radius-dialog);
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: var(--shadow-panel);
+  text-align: left;
+  cursor: pointer;
+}
+
+.primary-note-discussion-bubble:hover,
+.primary-note-discussion-bubble:focus-visible {
+  border-color: var(--accent);
+}
+
+.primary-note-discussion-quote {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--type-small);
+  line-height: 1.35;
+}
+
+.primary-note-discussion-quote-start { overflow: hidden; text-overflow: clip; }
+.primary-note-discussion-quote-bridge { flex: none; padding-inline: 3px; }
+.primary-note-discussion-quote-end { display: flex; justify-content: flex-end; flex: none; max-width: 48%; overflow: hidden; }
+
+.primary-note-discussion[data-quote-expanded="true"] .primary-note-discussion-quote {
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.primary-note-discussion-count {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding-inline: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-fill);
+  color: var(--text);
+  font-size: var(--type-floor);
+  font-variant-numeric: tabular-nums;
+}
+
+.primary-note-discussion-direction {
+  grid-column: 1 / -1;
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+  line-height: 1.3;
+}
+
+.primary-note-discussion[data-expanded="true"] .primary-note-discussion-bubble {
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  box-shadow: none;
+}
+
+.primary-note-discussion-panel {
+  min-width: 0;
+  margin: 0;
+  padding: 8px;
+  border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-dialog);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-modal);
+  max-height: calc(100dvh - var(--primary-bar-bottom) - 80px);
+  overflow: auto;
+}
+
+.primary-note-discussion[data-expanded="true"] .primary-note-discussion-panel {
+  margin-top: -1px;
+  border-radius: 0 0 var(--radius-dialog) var(--radius-dialog);
+  max-height: none;
+  overflow: visible;
+}
+
+.primary-note-discussion-panel[aria-busy="true"] { cursor: progress; }
+
+.primary-note-discussion-panel .archer-thread { margin: 0; }
+
+.primary-note-discussion-unplaced {
+  position: relative;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: var(--line-chrome) solid var(--border);
+}
+
+.primary-note-discussion-unplaced > h2 {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: var(--type-body);
+}
+
+.primary-note-discussion-unplaced > p {
+  margin: 0 0 12px;
+  color: var(--text-dim);
+  font-size: var(--type-floor);
+  line-height: 1.4;
+}
+
+.primary-note-discussion-unplaced .primary-note-discussion[data-expanded="false"] {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 1050px) {
+  .primary-note-discussion-rail {
+    width: min(100%, 780px);
+    min-width: 0;
+  }
+
+  .primary-note-discussion[data-expanded="false"] {
+    position: relative;
+    inset: auto;
+    margin-bottom: 8px;
+  }
+
+  .primary-note-discussion-connector { display: none; }
+
+  .primary-note-discussion-rail:has(.primary-note-discussion[data-expanded="true"]) .primary-note-discussion[data-expanded="false"] { display: none; }
+}
+
+@media (max-width: 640px) {
+  .primary-note-discussion-layout { display: block; }
+  .primary-note-discussion-rail { margin-top: 24px; }
+}
+
+.primary-note-reader:has(.primary-note-discussion[data-expanded="true"]) .primary-note-emphasis-legend--pinned { visibility: hidden; }

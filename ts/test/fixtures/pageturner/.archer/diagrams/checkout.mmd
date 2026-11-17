@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor customer as Customer
+    participant web as Storefront
+    participant api as Shop API
+    participant db as Shop Database
+    participant payments as Payment Provider
+    participant jobs as Job Queue
+    customer->>web: Check out a basket of 2 books
+    web->>+api: POST /orders
+    api->>db: Reserve stock, save the order as Pending Payment
+    api->>payments: Create a payment session
+    payments-->>api: Session URL
+    api-->>-web: 201 Created, with the payment page URL
+    web-->>customer: Redirect to the hosted payment page
+    customer->>payments: Pay by card
+    alt card accepted
+        payments-)api: Webhook payment.succeeded
+        api->>db: Mark the order Paid
+        api-)jobs: Queue the confirmation email and the courier booking
+        payments-->>customer: Back to the Storefront: order confirmed
+    else card declined
+        payments-)api: Webhook payment.failed
+        api->>db: Release the stock, mark the order Payment Failed
+        payments-->>customer: Back to the Storefront: try another card
+    end
+    Note over api,payments: Card details never reach Pageturner

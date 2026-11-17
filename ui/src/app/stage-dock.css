@@ -1,0 +1,115 @@
+/* The stage's dock (stage-dock.tsx): on a phone, the legend and the key are chips under the
+   drawing, never over it, and each opens a bottom sheet. */
+.archer-stage-dock {
+  /* Its height, 57 px: a 44 px chip, 6 px above and below, and its top border. An open sheet's foot is padded by it. */
+  display: flex; flex: none; align-items: center; gap: 8px; min-width: 0; box-sizing: border-box; height: 57px;
+  padding: 6px 10px; border-top: var(--line-chrome) solid var(--border); background: var(--surface);
+  overflow-x: auto;
+}
+.archer-stage-dock:empty { display: none; }
+.archer-dock-chip {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; max-width: 70%;
+  min-height: 44px; padding: 0 14px; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-pill);
+  background: var(--surface); color: var(--text); font: inherit; font-size: var(--type-small); font-weight: 600;
+  cursor: pointer;
+}
+.archer-dock-chip > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archer-dock-chip:hover, .archer-dock-chip[aria-expanded="true"] { border-color: var(--border-hover); background: var(--surface-2); }
+.archer-dock-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-dock-chip-swatches { display: inline-flex; gap: 3px; }
+.archer-dock-chip-swatches > span { width: 10px; height: 10px; border-radius: var(--radius-mark); background: var(--emph-hue, var(--text-dim)); }
+/* Group numbers on: the chip shows each group's numbered disc, as the legend rows do. */
+.archer-dock-chip-swatches > span.archer-emph-legend-num { width: 1.5em; height: 1.5em; margin: 0; border-radius: 50%; background: transparent; }
+
+/* The sheet rises from the window's foot, over the strip, but the strip's chips stay on top of it (round 1
+   pass 2, F5 d): the chip that opened the sheet folds it again, and none of them is a Tab stop hidden under it.
+   Its foot is padded by the strip's height, with the strip's rule drawn across it. */
+.archer-dock-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; box-sizing: border-box;
+  max-height: min(60vh, 520px); display: flex; flex-direction: column;
+  border: var(--line-chrome) solid var(--border-strong); border-bottom: 0; border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-panel);
+  padding-bottom: 57px;
+}
+.archer-dock-sheet::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 56px;
+  border-top: var(--line-chrome) solid var(--border); pointer-events: none;
+}
+.archer-stage-dock:has(> .archer-dock-sheet) > .archer-dock-chip { position: relative; z-index: 46; }
+.archer-dock-sheet-head {
+  display: flex; flex: none; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 4px 6px 4px 16px; border-bottom: var(--line-chrome) solid var(--border); font-weight: 600;
+}
+.archer-dock-sheet-close {
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+  border: 0; border-radius: var(--radius-card); background: transparent; color: var(--text-dim); cursor: pointer;
+}
+.archer-dock-sheet-close:hover { background: var(--surface-2); color: var(--text); }
+.archer-dock-sheet-close:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.archer-dock-sheet-body { min-height: 0; overflow: auto; padding: 4px 4px 12px; }
+/* In the sheet the panels lose their floating frame: the sheet is the frame. */
+.archer-dock-sheet-body > :is(.archer-emph-legend, .archer-diagram-key) {
+  position: static; inset: auto; width: auto; height: auto; min-width: 0; max-width: none; max-height: none;
+  border: 0; box-shadow: none; background: transparent; font-size: var(--type-body);
+}
+
+/* The emphasis chips and the diagram's header line (App.tsx): two rows, or one on a phone. */
+.archer-diagram-strip { display: contents; }
+@media (max-width: 599px) {
+  .archer-diagram-strip:not(:empty) {
+    display: flex; flex: none; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-width: 0;
+    padding: 4px 12px; border-bottom: var(--line-chrome) solid var(--border); background: var(--surface);
+  }
+  .archer-diagram-strip > .archer-dataflows,
+  .archer-diagram-strip > .archer-diagram-header { flex: 0 1 auto; min-width: 0; padding: 0; border: 0; background: transparent; }
+  .archer-diagram-strip > .archer-diagram-header { flex: 1 1 8rem; }
+  .archer-diagram-strip > .archer-dataflows .archer-dataflows-label { display: none; }
+  .archer-diagram-strip > .archer-dataflows .archer-dataflow-chip { min-height: 36px; }
+}
+@media (max-width: 599px) and (pointer: coarse) {
+  .archer-diagram-strip > .archer-dataflows .archer-dataflow-chip { min-height: 44px; }
+}
+
+/* An open sheet covers the drawing's lower part, where the canvas toolbar sits: the toolbar rides just above
+   the sheet, laid out as a row so it stays inside the drawing's visible strip, and Select / Hand and zoom
+   stay one press away without folding the sheet (0.6.4 D5). React Flow's panel margin is dropped, so the row's
+   width is the window's less the 10 px each side; a narrower phone wraps it to a second row. The follow camera
+   frames a step above it (`FollowCamera`). */
+:root:has(.archer-dock-sheet) :is(.react-flow__controls, .archer-canvas-controls) {
+  position: fixed; left: 10px; right: auto; top: auto; z-index: 46; margin: 0;
+  bottom: calc(var(--archer-dock-sheet-height, 0px) + 8px);
+  flex-direction: row; flex-wrap: wrap; max-width: calc(100vw - 20px); max-height: none; box-sizing: border-box;
+}
+/* Its buttons keep their full size (44 px under a coarse pointer, G7), and the row leaves the right-hand corner
+   to the chat button, which waits there while a sheet is open (chat.css): a phone wraps the row instead. */
+:root:has(.archer-dock-sheet):has(.archer-chat-fab) :is(.react-flow__controls, .archer-canvas-controls) {
+  max-width: calc(100vw - 20px - 52px - 16px);
+}
+@media (pointer: coarse) {
+  :root:has(.archer-dock-sheet) :is(.react-flow__controls, .archer-canvas-controls) button { min-width: 44px; min-height: 44px; }
+}
+/* Folded, on a phone the toolbar stands in the drawing's height, under the header strip (which grows with the
+   agent's highlights) and over the transport: it stays under the drawing's heading, and its buttons give up height
+   (to 24 px, the WCAG 2.5.8 minimum: at 390x460 all eight then fit) rather than run under the header. The tools button's wrapper steps aside so it shrinks too; its menu
+   then opens beside the toolbar's foot. */
+@media (max-width: 599px) {
+  /* 15 px React Flow margin below; above, the drawing's heading (`.archer-canvas-heading`, 10 px down, ~24 px tall) and a gap. */
+  .react-flow .react-flow__controls { max-height: calc(100% - 56px); box-sizing: border-box; }
+  .react-flow .react-flow__controls > .archer-canvas-tools { display: contents; }
+  .react-flow .react-flow__controls :is(.react-flow__controls-button, .archer-pan-select-button, .archer-canvas-tools-trigger) { flex: 0 1 auto; min-height: 24px; }
+}
+
+/* The fold (DiagramCanvas `archer-controls-fold`): shown only on a phone with a sheet open. Folded there, the cluster
+   keeps Fit, Select / Hand (one press away, 0.6.4 D5) and Follow steps, with the toggle, in one row: unfolded it wrapped
+   to two rows and took 82 of the drawing's 204 px at 320x640 (flows-r1 claude-06, O95). The toggle unfolds zoom,
+   Source and the tools menu in place; pinch still zooms. Five 44 px buttons are 236 px, so the folded row may come
+   to 4 px from the chat button (left 10 px, the button 52 px and 16 px in from the right). Hidden by a selector more
+   specific than PanSelectControl.css's `display: flex` for every control button, not by coming after it: the static
+   Playground loads that sheet in its view's chunk, after this one, and drew the fold on a desktop. */
+.react-flow__controls .react-flow__controls-button.archer-controls-fold { display: none; }
+@media (max-width: 599px) {
+  :root:has(.archer-dock-sheet) .react-flow__controls .archer-controls-fold { display: flex; }
+  :root:has(.archer-dock-sheet) .react-flow__controls:not(.archer-controls-unfolded) { max-width: calc(100vw - 10px - 52px - 16px - 4px); }
+  :root:has(.archer-dock-sheet) .react-flow__controls:not(.archer-controls-unfolded) > :not(.react-flow__controls-fitview, .archer-pan-select-button, .archer-walk-follow, .archer-controls-fold) { display: none; }
+  .react-flow__controls .archer-controls-fold[aria-expanded="true"] { color: var(--text); background: var(--surface-2); }
+}

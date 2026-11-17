@@ -1,0 +1,70 @@
+/* The Mermaid source editor (CodeMirror). Every colour is a theme token, so both themes follow. */
+.archer-mermaid-editor { display: flex; min-height: 0; min-width: 0; flex: 1; }
+.archer-mermaid-editor .cm-editor { flex: 1; min-width: 0; height: 100%; background: var(--surface); color: var(--text); font-size: var(--type-small); }
+.archer-mermaid-editor .cm-editor.cm-focused { outline: 2px solid var(--accent); outline-offset: -2px; }
+.archer-mermaid-editor .cm-scroller { font-family: var(--font-mono); --type-tracking: 0; line-height: 1.6; overflow: auto; }
+.archer-mermaid-editor .cm-content { caret-color: var(--text); padding: 8px 0; }
+.archer-mermaid-editor .cm-editor .cm-cursor { border-left-color: var(--text); }
+.archer-mermaid-editor .cm-editor .cm-selectionBackground,
+.archer-mermaid-editor .cm-editor.cm-focused .cm-selectionBackground,
+.archer-mermaid-editor .cm-editor .cm-content ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.archer-mermaid-editor .cm-editor .cm-activeLine { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
+.archer-mermaid-editor.is-readonly .cm-editor:not(.cm-focused) .cm-activeLine,
+.archer-mermaid-editor.is-readonly .cm-editor:not(.cm-focused) .cm-activeLineGutter { background: transparent; color: inherit; }
+.archer-mermaid-editor .cm-editor .cm-gutters { background: var(--surface); color: var(--text-faint); border-right: var(--line-chrome) solid var(--border); }
+.archer-mermaid-editor .cm-editor .cm-activeLineGutter { background: var(--surface-2); color: var(--text-dim); }
+.archer-mermaid-editor .cm-editor .cm-lineNumbers .cm-gutterElement { padding: 0 8px 0 12px; }
+.archer-mermaid-editor .cm-editor .cm-selectionMatch { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.archer-mermaid-editor .cm-editor .cm-searchMatch { background: color-mix(in srgb, var(--g2) 28%, transparent); outline: 1px solid var(--g2); }
+.archer-mermaid-editor .cm-editor .cm-searchMatch-selected { background: color-mix(in srgb, var(--g2) 50%, transparent); }
+
+/* Colouring: one role per piece, from the shared categorical hues. */
+.archer-mermaid-editor .cm-mmd-header { color: var(--accent-quiet); font-weight: 600; }
+.archer-mermaid-editor .cm-mmd-keyword { color: var(--g3); }
+.archer-mermaid-editor .cm-mmd-arrow { color: var(--accent); font-weight: 600; }
+.archer-mermaid-editor .cm-mmd-label { color: var(--g1); }
+.archer-mermaid-editor .cm-mmd-comment { color: var(--text-faint); font-style: italic; }
+.archer-mermaid-editor .cm-mmd-directive { color: var(--text-dim); }
+.archer-mermaid-editor .cm-mmd-id { color: var(--text); }
+.archer-mermaid-editor .cm-mmd-edge-id { color: var(--text-dim); }
+.archer-mermaid-editor .cm-mmd-type { color: var(--g4); }
+.archer-mermaid-editor .cm-mmd-number { color: var(--g2); }
+.archer-mermaid-editor .cm-mmd-punctuation { color: var(--text-dim); }
+
+/* Problems: errors are a red wave, warnings a heavy dotted line in the dim text colour, notes a
+   faint dashed one, so the difference does not rest on colour alone. Never amber: that is the
+   agent's voice. */
+.archer-mermaid-editor .cm-editor .cm-lintRange { background-image: none; padding-bottom: 0; text-decoration-skip-ink: none; text-underline-offset: 3px; }
+.archer-mermaid-editor .cm-editor .cm-lintRange-error { text-decoration: underline wavy var(--danger-strong) 1.5px; }
+.archer-mermaid-editor .cm-editor .cm-lintRange-warning { text-decoration: underline dotted var(--text-dim) 2px; }
+.archer-mermaid-editor .cm-editor .cm-lintRange-info,
+.archer-mermaid-editor .cm-editor .cm-lintRange-hint { text-decoration: underline dashed var(--text-faint) 1px; }
+.archer-mermaid-editor .cm-editor .cm-gutter-lint { width: 1.2em; }
+.archer-mermaid-editor .cm-editor .cm-lint-marker { width: 0.9em; height: 0.9em; content: normal; border-radius: 50%; }
+.archer-mermaid-editor .cm-editor .cm-lint-marker-error { background: var(--danger-strong); }
+.archer-mermaid-editor .cm-editor .cm-lint-marker-warning { background: var(--text-dim); border-radius: var(--radius-mark); transform: rotate(45deg) scale(0.8); }
+.archer-mermaid-editor .cm-editor .cm-lint-marker-info { background: var(--text-faint); }
+
+/* Tooltips and the search and problems panels, which CodeMirror paints light by default. */
+.archer-mermaid-editor .cm-editor .cm-tooltip { background: var(--surface-2); color: var(--text); border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-control); box-shadow: var(--shadow-panel); }
+.archer-mermaid-editor .cm-editor .cm-tooltip-lint { padding: 0; }
+/* No side stripe (CodeMirror draws one): an error is tinted danger, a warning outlined; the gutter marks say which too. */
+.archer-mermaid-editor .cm-editor .cm-diagnostic { padding: 6px 10px; border-left: 0; max-width: 60ch; white-space: pre-wrap; }
+.archer-mermaid-editor .cm-editor .cm-diagnostic-error { background: var(--danger-bg); color: var(--danger-text); }
+.archer-mermaid-editor .cm-editor .cm-diagnostic-warning { box-shadow: inset 0 0 0 1px var(--text-dim); }
+.archer-mermaid-editor .cm-editor .cm-diagnosticSource { color: var(--text-faint); opacity: 1; }
+.archer-mermaid-editor .cm-editor .cm-diagnosticAction { font: inherit; font-size: var(--type-small); color: var(--accent-ink); background: var(--accent); border: 0; border-radius: var(--radius-mark); padding: 2px 8px; margin: 6px 0 0 0; cursor: pointer; }
+.archer-mermaid-editor .cm-editor .cm-diagnosticAction:focus-visible { outline: 2px solid var(--kbd-focus); outline-offset: 2px; }
+.archer-mermaid-editor .cm-editor .cm-panels { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+.archer-mermaid-editor .cm-editor .cm-panels-top { border-bottom: var(--line-chrome) solid var(--border); }
+.archer-mermaid-editor .cm-editor .cm-panels-bottom { border-top: var(--line-chrome) solid var(--border); }
+.archer-mermaid-editor .cm-editor .cm-panel.cm-search { padding: 6px 10px; font-size: var(--type-small); }
+.archer-mermaid-editor .cm-editor .cm-panel input,
+.archer-mermaid-editor .cm-editor .cm-panel button,
+.archer-mermaid-editor .cm-editor .cm-textfield,
+.archer-mermaid-editor .cm-editor .cm-button { font: inherit; font-size: var(--type-small); color: var(--text); background: var(--surface); background-image: none; border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-mark); }
+.archer-mermaid-editor .cm-editor .cm-panel input:focus-visible,
+.archer-mermaid-editor .cm-editor .cm-panel button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.archer-mermaid-editor .cm-editor .cm-panel button[name="close"] { border: 0; background: transparent; color: var(--text-dim); }
+.archer-mermaid-editor .cm-editor .cm-panel.cm-panel-lint ul [aria-selected] { background: var(--surface); }
+.archer-mermaid-editor .cm-editor .cm-panel.cm-panel-lint ul:focus [aria-selected] { background: var(--accent); color: var(--accent-ink); }

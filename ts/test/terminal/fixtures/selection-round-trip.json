@@ -1,0 +1,99 @@
+{
+  "type": "freeform-graph",
+  "direction": "tb",
+  "nodes": [
+    {
+      "id": "agent",
+      "label": "Coding agent",
+      "shape": "rectangle",
+      "classes": ["person"]
+    },
+    {
+      "id": "bridge",
+      "label": "Host bridge",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "canvas",
+      "label": "React Flow canvas",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "http",
+      "label": "POST /api/selection",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "mcpt",
+      "label": "set_selection tool",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "reducer",
+      "label": "Selection reducer",
+      "shape": "rectangle",
+      "classes": ["component"]
+    },
+    {
+      "id": "state",
+      "label": "BrowserSnapshotState",
+      "shape": "rectangle",
+      "classes": ["component"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "click",
+      "source": "canvas",
+      "target": "reducer",
+      "label": "click or marquee"
+    },
+    {
+      "id": "ctx",
+      "source": "state",
+      "target": "agent",
+      "label": "presentation context"
+    },
+    {
+      "id": "keep",
+      "source": "mcpt",
+      "target": "state",
+      "label": "same validation"
+    },
+    {
+      "id": "publish",
+      "source": "reducer",
+      "target": "bridge",
+      "label": "SelectionContext"
+    },
+    {
+      "id": "reply",
+      "source": "mcpt",
+      "target": "agent",
+      "label": "tool result"
+    },
+    {
+      "id": "store",
+      "source": "http",
+      "target": "state",
+      "label": "validate view and revision"
+    },
+    {
+      "id": "viahttp",
+      "source": "bridge",
+      "target": "http",
+      "label": "browser mode"
+    },
+    {
+      "id": "viamcp",
+      "source": "bridge",
+      "target": "mcpt",
+      "label": "MCP Apps mode"
+    }
+  ],
+  "groups": []
+}

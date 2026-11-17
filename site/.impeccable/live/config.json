@@ -1,0 +1,6 @@
+{
+  "files": ["index.md"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

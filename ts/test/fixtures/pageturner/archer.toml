@@ -1,0 +1,47 @@
+# Test corpus: Pageturner, a small online bookshop covering every diagram family.
+# Diagrams are in .archer/diagrams and notes about them in .archer/notes.
+version = 1
+name = "Pageturner"
+folder = ".archer"
+
+[[views]]
+id = "system-context"
+kind = "c4-context"
+title = "System Context"
+source = ".archer/diagrams/system-context.mmd"
+
+[[views]]
+id = "containers"
+kind = "c4"
+title = "Pageturner Containers"
+source = ".archer/diagrams/containers.mmd"
+
+[[views]]
+id = "checkout"
+kind = "sequence"
+title = "Checkout"
+source = ".archer/diagrams/checkout.mmd"
+
+[[views]]
+id = "order-lifecycle"
+kind = "state"
+title = "Order Lifecycle"
+source = ".archer/diagrams/order-lifecycle.mmd"
+
+[[views]]
+id = "data-model"
+kind = "entity-relationship"
+title = "Data Model"
+source = ".archer/diagrams/data-model.mmd"
+
+[[views]]
+id = "deployment"
+kind = "architecture"
+title = "Pageturner Deployment"
+source = ".archer/diagrams/deployment.mmd"
+
+[[views]]
+id = "buying-a-book"
+kind = "journey"
+title = "Buying a Book"
+source = ".archer/diagrams/buying-a-book.mmd"

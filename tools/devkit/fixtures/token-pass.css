@@ -1,0 +1,4 @@
+:root { --type-body: 14px; --icon-inline: 16px; --space-small: 8px; }
+.label { font-size: var(--type-body); }
+.icon { width: var(--icon-inline); height: var(--icon-inline); }
+.row { gap: var(--space-small); }

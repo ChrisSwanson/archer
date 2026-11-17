@@ -1,0 +1,275 @@
+.archer-filter-sections {
+  display: grid;
+  gap: 21px;
+}
+
+.archer-filter-section {
+  min-width: 0;
+}
+
+.archer-filter-section > h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 52px;
+  padding: 4px 2px;
+  border-bottom: var(--line-chrome) solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+  margin: 0;
+  font-size: var(--type-body);
+}
+
+.archer-filter-section-title {
+  min-width: 0;
+}
+
+.archer-filter-section-count {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-filter-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 23px;
+  min-width: 0;
+  padding: 12px 4px 28px;
+}
+
+.archer-filter-section-grid > * {
+  min-width: 0;
+}
+
+.archer-filter-sections > .archer-search-clear {
+  justify-self: start;
+  margin-top: 6px;
+}
+
+.archer-filter-sections select {
+  appearance: none;
+  padding-right: 36px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+    linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+  background-position:
+    calc(100% - 12px) calc(50% - 2px),
+    calc(100% - 8px) calc(50% - 2px);
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+}
+
+.archer-search-project-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--type-small);
+  cursor: pointer;
+}
+
+.archer-search-project-scope:hover {
+  color: var(--text);
+}
+
+.archer-search-project-scope:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.archer-search-project-scope svg {
+  flex: none;
+}
+
+.archer-browser-dialog-active-count {
+  margin-left: 8px;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.archer-search-date {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.archer-search-date > select,
+.archer-search-date input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.archer-search-date .archer-search-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.archer-search-date .archer-search-range > label {
+  flex: 1 1 150px;
+  min-width: 0;
+}
+
+.archer-search-range-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--type-small);
+}
+
+.archer-search-range-error {
+  margin: 0;
+  color: var(--danger-text);
+  font-size: var(--type-small);
+}
+
+@media (max-width: 640px) {
+  .archer-filter-section-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+.archer-filter-section[data-section="files"] > .archer-filter-section-grid {
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  align-items: start;
+  column-gap: 36px;
+}
+
+.archer-filter-files-primary,
+.archer-filter-discussions-status {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  width: min(100%, 280px);
+  min-width: 0;
+}
+
+.archer-filter-files-primary > fieldset,
+.archer-filter-discussions-status > fieldset {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 4px;
+  width: min(100%, 240px);
+}
+
+.archer-filter-files-primary select {
+  width: min(100%, 280px);
+  max-width: 280px;
+}
+
+.archer-filter-files-types,
+.archer-filter-discussions-counts {
+  min-width: 0;
+  padding-left: 28px;
+  border-left: var(--line-chrome) solid var(--border);
+}
+
+.archer-filter-files-types > fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 4px;
+  width: min(100%, 460px);
+}
+
+.archer-filter-files-primary > fieldset legend,
+.archer-filter-files-types > fieldset legend,
+.archer-filter-discussions-status > fieldset legend {
+  grid-column: 1 / -1;
+}
+
+.archer-filter-section[data-section="discussions"] > .archer-filter-section-grid {
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  align-items: start;
+  column-gap: 36px;
+}
+
+.archer-filter-discussions-counts {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+}
+
+.archer-filter-discussions-counts > fieldset {
+  width: min(100%, 340px);
+}
+
+.archer-filter-date-facets {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: start;
+  gap: 22px 24px;
+  min-width: 0;
+}
+
+.archer-filter-date-facets > fieldset {
+  width: min(100%, 280px);
+}
+
+.archer-filter-sections .archer-search-facet {
+  row-gap: 7px;
+  align-content: start;
+}
+
+.archer-filter-sections .archer-search-facet legend,
+.archer-filter-sections .archer-search-facet-label {
+  margin-bottom: 8px;
+}
+
+.archer-filter-sections .archer-search-choice {
+  min-height: 34px;
+}
+
+@media (max-width: 640px) {
+  .archer-filter-sections .archer-search-choice {
+    min-height: 44px;
+  }
+
+  .archer-filter-section[data-section="files"] > .archer-filter-section-grid,
+  .archer-filter-section[data-section="discussions"] > .archer-filter-section-grid,
+  .archer-filter-date-facets {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archer-filter-files-types,
+  .archer-filter-discussions-counts {
+    padding-top: 18px;
+    padding-left: 0;
+    border-top: var(--line-chrome) solid var(--border);
+    border-left: 0;
+  }
+
+  .archer-filter-files-types > fieldset {
+    width: min(100%, 280px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archer-filter-discussions-counts > fieldset {
+    width: min(100%, 280px);
+  }
+}
+
+/* On a project's own page, widening a search is a quiet text action, not a filter chip. */
+.archer-search-widen { padding: 2px 4px; border: 0; border-radius: var(--radius-mark); background: none; color: var(--accent-quiet); font: inherit; font-size: var(--type-small); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.archer-search-widen:hover { color: var(--accent); }
+.archer-search-widen:focus-visible { outline: 2px solid var(--kbd-focus); outline-offset: 2px; }
+
+/* Round 1, G7 [H]: the folder chip and the widen action are taps of their own on a phone. */
+@media (pointer: coarse) {
+  :is(.archer-search-project-scope, .archer-search-widen) { min-width: var(--icon-touch); min-height: var(--icon-touch); }
+}

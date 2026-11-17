@@ -1,0 +1,16 @@
+%% description: The revised checkout in order: the API answers at once and the worker charges once.
+sequenceDiagram
+  participant web as Web App
+  participant api as Orders API
+  participant db as Orders Database
+  participant queue as Job Queue
+  participant worker as Payment Worker
+  participant provider as Payment Provider
+  web->>api: POST /orders
+  api->>db: Save order
+  api->>queue: Capture job
+  api-->>web: 202 Accepted
+  queue->>worker: Next job
+  worker->>provider: Charge, with idempotency key
+  provider-->>worker: Captured
+  worker->>db: Record result

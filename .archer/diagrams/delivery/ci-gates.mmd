@@ -1,0 +1,29 @@
+flowchart LR
+  %% archer-key dotted: On failure
+  %% .github/workflows/ci.yml: on pull_request, push to main and workflow_dispatch
+  %% .github/workflows/release.yml: on a pushed v* tag, or by hand for an existing tag
+  trigger([Pull request, push to main or manual run]):::person
+  subgraph unit_job["Unit gates (Node 24, ubuntu-24.04)"]
+    audit["npm audit: shipped, all, signatures; reported, never blocking"]:::component
+    contracts["Contract tests of the docs-only classifier and pr-check"]:::component
+    unitGates["Typechecks, page build, bundle smoke test, ui and ts unit tests"]:::component
+  end
+  macos_job["Unit tests (macOS): page build, bundle, ui and ts unit tests"]:::component
+  subgraph browser_job["Browser tests, two shards in parallel"]
+    shard1["shard 1/2: ui build, Chromium, ts test:browser, ui test:browser:ts"]:::component
+    shard2["shard 2/2: ui build, Chromium, ui test:browser:ts"]:::component
+  end
+  traces[["Playwright traces and screenshots: an artifact for 14 days"]]:::external
+  tag([Annotated vX.Y.Z tag on main]):::person
+  release["Release: verify tag, CHANGELOG notes, package, smoke check, SHA256SUMS"]:::component
+  ghRelease[("GitHub Release: archer-X.Y.Z.tgz and SHA256SUMS")]:::database
+  trigger u@--> audit
+  audit c@--> contracts
+  contracts g@--> unitGates
+  trigger m@--> macos_job
+  trigger s1@--> shard1
+  trigger s2@--> shard2
+  shard1 f1@-.->|on failure| traces
+  shard2 f2@-.->|on failure| traces
+  tag r@--> release
+  release p@--> ghRelease

@@ -1,0 +1,178 @@
+{
+  "type": "sequence-trace",
+  "participants": [
+    {
+      "id": "actors",
+      "label": "Actor"
+    },
+    {
+      "id": "notes",
+      "label": "Note"
+    },
+    {
+      "id": "rects",
+      "label": "Rect",
+      "kind": "actor"
+    },
+    {
+      "id": "boxes",
+      "label": "Box"
+    }
+  ],
+  "events": [
+    {
+      "type": "message",
+      "id": "msg-0",
+      "from": "actors",
+      "to": "notes",
+      "label": "declared below",
+      "kind": "sync"
+    },
+    {
+      "type": "message",
+      "id": "msg-1",
+      "from": "notes",
+      "to": "boxes",
+      "label": "hello",
+      "kind": "sync"
+    },
+    {
+      "type": "activate",
+      "participant": "boxes"
+    },
+    {
+      "type": "activate",
+      "participant": "boxes"
+    },
+    {
+      "type": "message",
+      "id": "msg-2",
+      "from": "boxes",
+      "to": "rects",
+      "label": "stacked, and one left open",
+      "kind": "sync"
+    },
+    {
+      "type": "activate",
+      "participant": "rects"
+    },
+    {
+      "type": "message",
+      "id": "msg-3",
+      "from": "rects",
+      "to": "boxes",
+      "label": "the shorthand closes its own",
+      "kind": "reply"
+    },
+    {
+      "type": "deactivate",
+      "participant": "rects"
+    },
+    {
+      "type": "deactivate",
+      "participant": "boxes"
+    },
+    {
+      "type": "activate",
+      "participant": "rects"
+    },
+    {
+      "type": "message",
+      "id": "msg-4",
+      "from": "rects",
+      "to": "actors",
+      "label": "the shorthand closes an explicit activate",
+      "kind": "reply"
+    },
+    {
+      "type": "deactivate",
+      "participant": "rects"
+    },
+    {
+      "type": "fragment",
+      "id": "frag-0",
+      "kind": "alt",
+      "label": "outer",
+      "sections": [
+        {
+          "label": "outer",
+          "events": [
+            {
+              "type": "fragment",
+              "id": "frag-1",
+              "kind": "opt",
+              "label": "inner",
+              "sections": [
+                {
+                  "label": "inner",
+                  "events": [
+                    {
+                      "type": "fragment",
+                      "id": "frag-2",
+                      "kind": "par",
+                      "label": "first",
+                      "sections": [
+                        {
+                          "label": "first",
+                          "events": [
+                            {
+                              "type": "message",
+                              "id": "msg-5",
+                              "from": "actors",
+                              "to": "notes",
+                              "label": "one",
+                              "kind": "async"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "second",
+                          "events": [
+                            {
+                              "type": "message",
+                              "id": "msg-6",
+                              "from": "notes",
+                              "to": "actors",
+                              "label": "two",
+                              "kind": "async"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "otherwise",
+          "events": [
+            {
+              "type": "fragment",
+              "id": "frag-3",
+              "kind": "loop",
+              "label": "retry",
+              "sections": [
+                {
+                  "label": "retry",
+                  "events": [
+                    {
+                      "type": "message",
+                      "id": "msg-7",
+                      "from": "boxes",
+                      "to": "rects",
+                      "label": "again",
+                      "kind": "sync"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

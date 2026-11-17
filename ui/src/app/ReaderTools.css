@@ -1,0 +1,29 @@
+/* New in the header of diagram and note pages, on the right before the app's own actions, and Edit at the
+   drawing's top right. Loaded with the page, not with the editor, so a link that cannot edit gets the same
+   buttons in the same place. */
+.archer-reader-tools { display: inline-flex; align-items: center; gap: 6px; padding-right: 14px; margin-right: -6px; border-right: var(--line-chrome) solid var(--border); }
+:is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit) {
+  box-sizing: border-box; height: 32px; padding: 0 12px; display: inline-flex; align-items: center; gap: var(--icon-label-gap);
+  border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface-2); color: var(--text);
+  font: inherit; font-size: var(--type-small); font-weight: 500; line-height: 1; white-space: nowrap; cursor: pointer;
+}
+:is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit):hover { border-color: var(--border-hover); }
+:is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit)[aria-expanded="true"] { border-color: var(--accent); }
+:is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-diagram-edit .archer-reader-edit svg { width: var(--icon-inline); height: var(--icon-inline); flex: none; fill: none; stroke: currentColor; stroke-width: var(--icon-stroke); stroke-linecap: round; stroke-linejoin: round; }
+/* At the end of the diagram's header row (round 1, Cl-12): the top right of the diagram, never over the drawing
+   or its off-screen cue. Sized to the row; a coarse pointer gets the full 44px below. */
+.archer-diagram-edit { flex: none; margin-left: auto; display: flex; align-items: center; }
+.archer-diagram-edit .archer-reader-edit { height: 28px; margin-block: -6px; }
+/* Until the service says whether this link edits, the row keeps Edit's height, so the drawing under it does not move
+   down when Edit comes (PF-6). */
+.archer-diagram-edit:empty::before { content: ""; height: 28px; margin-block: -6px; }
+/* The phone header (WorkspaceNavigation.css) puts the tools on the title row, away from the actions: no divider. */
+@media (max-width: 599px) { .archer-reader-tools { padding-right: 0; margin-right: 0; border-right: 0; } }
+/* Editing is desktop only. */
+@media (max-width: 720px) { .archer-diagram-edit { display: none; } }
+@media (pointer: coarse) { :is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit) { height: 44px; min-width: 44px; }
+  .archer-diagram-edit:empty::before { height: 44px; } }
+/* Editing turned off (edit = false): greyed like any setting the page cannot change; the tooltip and the press say where. */
+:is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit)[data-off] { color: var(--text-faint); background: transparent; border-color: var(--border); border-style: dashed; cursor: help; }
+:is(.archer-reader-tools .archer-new-button, .archer-diagram-edit .archer-reader-edit)[data-off]:hover { border-color: var(--border-strong); color: var(--text-dim); }

@@ -1,0 +1,14 @@
+flowchart LR
+    subgraph sdk[Embeddable Rust SDK]
+        adapters[Provider Registry]
+        pricing[Pricing Library]
+        traces[Trace Library]
+    end
+    subgraph data[Data Sources]
+        localTraces[Local Trace Files]
+        rateCatalog[Versioned Rate Catalog]
+        upstream[Provider APIs And CLIs]
+    end
+    adapters e1@-->|Reads provider data| upstream
+    pricing e2@-->|Loads catalog| rateCatalog
+    traces e3@-->|Optionally reads| localTraces

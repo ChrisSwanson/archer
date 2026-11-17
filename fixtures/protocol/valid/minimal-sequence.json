@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 2,
+  "view": {
+    "id": "auth-flow",
+    "kind": "sequence",
+    "title": "Authentication flow"
+  },
+  "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+  "model": {
+    "type": "sequence-trace",
+    "participants": [
+      {
+        "id": "client",
+        "label": "Client"
+      },
+      {
+        "id": "server",
+        "label": "Server"
+      },
+      {
+        "id": "db",
+        "label": "Database"
+      }
+    ],
+    "events": [
+      {
+        "type": "message",
+        "id": "msg-0",
+        "from": "client",
+        "to": "server",
+        "label": "POST /login",
+        "kind": "sync"
+      },
+      {
+        "type": "activate",
+        "participant": "server"
+      },
+      {
+        "type": "message",
+        "id": "msg-1",
+        "from": "server",
+        "to": "db",
+        "label": "SELECT user",
+        "kind": "sync"
+      },
+      {
+        "type": "message",
+        "id": "msg-2",
+        "from": "db",
+        "to": "server",
+        "label": "user record",
+        "kind": "reply"
+      },
+      {
+        "type": "fragment",
+        "id": "frag-0",
+        "kind": "alt",
+        "label": "Credentials valid?",
+        "sections": [
+          {
+            "label": "Valid",
+            "events": [
+              {
+                "type": "message",
+                "id": "msg-3",
+                "from": "server",
+                "to": "client",
+                "label": "200 OK + token",
+                "kind": "reply"
+              }
+            ]
+          },
+          {
+            "label": "Invalid",
+            "events": [
+              {
+                "type": "message",
+                "id": "msg-4",
+                "from": "server",
+                "to": "client",
+                "label": "401 Unauthorized",
+                "kind": "reply"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "deactivate",
+        "participant": "server"
+      }
+    ]
+  }
+}

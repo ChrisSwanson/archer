@@ -1,0 +1,20 @@
+C4Container
+    title Pageturner containers (August)
+    Person(customer, "Customer", "Buys books online")
+    Person(staff, "Shop staff", "Packs orders and manages stock")
+    System_Boundary(pageturner, "Pageturner online bookshop") {
+        Container(web, "Storefront", "TypeScript, React", "Catalogue, basket and checkout pages")
+        Container(backoffice, "Back office", "TypeScript, React", "Stock and order screens for staff")
+        Container(api, "Shop API", "Node.js", "Orders, stock, payments and emails")
+        ContainerDb(db, "Shop database", "PostgreSQL", "Books, customers, orders and card tokens")
+        ContainerDb(tokens, "Card token store", "PostgreSQL", "Card tokens for refunds")
+    }
+    System_Ext(gateway, "Card gateway", "Charges cards")
+    System_Ext(email, "Email service", "Delivers order emails")
+    System_Ext(courier, "Courier", "Collects and delivers parcels")
+    Rel(customer, web, "Browses and buys from", "HTTPS")
+    Rel(web, gateway, "Sends card details to", "HTTPS")
+    Rel(api, gateway, "Charges cards through", "HTTPS")
+    Rel(api, tokens, "Stores card tokens in", "SQL")
+    Rel(api, email, "Sends receipts through", "HTTPS")
+    Rel(api, db, "Reads and writes", "SQL")

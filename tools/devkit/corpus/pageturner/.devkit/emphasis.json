@@ -1,0 +1,23 @@
+{
+  "id": "checkout-highlights",
+  "viewId": "containers",
+  "title": "Checkout and Follow-Up",
+  "groups": [
+    {
+      "id": "payment-path",
+      "style": "flow",
+      "label": "Payment path",
+      "description": "Checkout creates a hosted payment session and receives its outcome.",
+      "nodes": ["web", "api", "payments"],
+      "edges": ["web--api", "api--payments", "payments--api"]
+    },
+    {
+      "id": "follow-up",
+      "style": "highlight",
+      "label": "Order follow-up",
+      "description": "The queue and worker handle email and courier work after checkout.",
+      "nodes": ["jobs", "worker", "email", "courier"],
+      "edges": ["worker--jobs", "worker--email", "worker--courier"]
+    }
+  ]
+}

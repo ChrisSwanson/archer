@@ -1,0 +1,65 @@
+{
+  "$comment": "Caps for npm run release-check (tools/release-check/release-check.mjs). Raise a cap only with the measurement that justifies it; allow-list a duplicate or failed request only with a reason a reviewer can check. Warnings: allowed-warnings.json.",
+  "pageSize": {
+    "$comment": "Production page (ui vite build, one inline file). +372 KB raw for the source editor (CodeMirror 6), loaded lazily: ~3.92 MB raw / 1.14 MB gzip / 913 KB br on 2026-10-20 (before it: 3.52 MB / 1.01 MB / 807 KB). A speed pass after round 2 will try to bring this down again. 2026-10-23, walkthroughs slice 3 (panel, picker, steps, stepping, step rendering, entry points; ADR 0034 §6): 4,106,669 -> 4,139,721 raw (+33,052), 1,194,874 -> 1,202,406 gzip (+7,532 of the slice's 8,000 share), 952,223 -> 958,802 br (+6,579); each cap raised by its growth, rounded up to 100. 2026-10-23, walkthroughs slice 4 (steering, address, Presented-by, reader step, canvas button; 1,500 share): 4,139,721 -> 4,144,045 raw (+4,324), 1,202,406 -> 1,203,863 gzip (+1,457), 958,802 -> 959,911 br (+1,109); gzip cap raised by its growth, rounded up to 100 (raw and br stay inside their caps). Slice 6 (Sequence tab, compact SVG over the canvas's classes and chevrons): +6,834 raw and +2,088 gzip over a local base (a 1,500 share). Slice 5 (follow camera and nested rules): +7,577 raw, +2,482 gzip (a 2,500 share), +2,098 br. Slice 7b (out of date, archived, old version): about +3,100 gzip over the 3+4+6 base. Merged 3+4+5+6+7b, provisional caps from the sum of measured growth until the next release-check measurement; before slice 5: ~1,205,951 gzip, cap 1,206,000 until the next release-check measurement. Measured on the merged 1+2+3+4+5+6+7a+7b+9-server branch (vite build, gzip level 9): 4,167,030 raw / 1,211,417 gzip / 965,370 br, i.e. +16,543 gzip of the 16,550 approved. All walkthrough slices together: at most 16,550 gzip (ceiling 1,211,424; ADR 0034 §9). Slice 9 page half (comments on walkthroughs), merged with 5 and 7b: 4,174,239 raw, 1,213,679 gzip, 967,185 br (+2,262 gzip over 1,211,417); caps raised to it, rounded up to 100. Slice 10 (chat bubble, its own share outside the walkthrough total; ADR 0034 §10 answer: about 3,500 gzip): 4,174,239 -> 4,201,699 raw (+27,460), 1,213,679 -> 1,222,058 gzip (+8,379 by the release-check's own gzip level 9, well over the 3,500 share: owner to confirm or trim), 967,185 -> 973,564 br (+6,379); caps raised to it, rounded up to 100. Chat/comments review fixes (pins lifted above the focus fade, one conversation surface at a time, kept drafts, menu clamp): 4,201,699 -> 4,204,372 raw (+2,673), 1,222,058 -> 1,222,987 gzip (+929), 973,564 -> 974,330 br; lazy-loading the open chat measured 313 gzip larger in this one-file page, so it stays eager; caps set to the new measurement, rounded up to 100. Walkthrough page review fixes merged with the server and chat fixes (vite build, gzip level 9): 4,204,372 -> 4,206,205 raw, 1,222,987 -> 1,223,492 gzip (+505, after the byte savings), 974,330 -> 975,058 br; caps set to it, rounded up to 100. 2026-10-23, walkthrough polish (flow animation On by default, Space plays from anywhere in a walkthrough, off-path words dim): 4,206,205 -> 4,207,321 raw (+1,116), 1,223,492 -> 1,223,739 gzip (+247), br 975,058 -> 974,745 (under its cap); raw and gzip caps raised by their growth, rounded up to 100. 2026-10-24, performance plan slice 4 (zod's 51 unused locale files dropped by a vite pre-transform, plus the one-line archer:interactive mark): 4,207,321 -> 4,060,161 raw (-147,160), 1,223,739 -> 1,194,898 gzip (-28,841), 974,745 -> 951,615 br (-23,130; release-check's own gzip level 9 and default brotli); all three caps lowered to the new measurement, rounded up to 100. Wave 1 merged (slices 1-5; slice 5 adds per-project catalog degradation, the Not listed list and batched comment loading): 4,063,360 raw (+3,199), 1,195,692 gzip (+794), 952,655 br (+1,040); caps set to it, rounded up to 100. 2026-10-25, performance pass 2: the pages split (the ELK worker is its own asset), so these unchanged caps gate what ships, not index.html alone: the web distribution (index.html + every asset it names, each compressed on its own, summed) and the MCP single file, each against all three caps. 2026-11-03, 0.10.0 user-flows round (tab ownership, held offline saves, the copies list, true status after lost answers; owner: raise by the growth, rounded up to 100, and 0.11.0's performance round brings it back down): web distribution 1,195,868 gzip (+168 over the cap), 961,153 br (+8,453); gzip cap 1,195,700 -> 1,195,900, brotli cap 952,700 -> 961,200. Raw unchanged. 2026-11-15, 0.15.0 integration (feat/docs-site + work/layout-eval + work/curved-lines; owner-approved raise, recorded as debt O294 'trim the layout worker'): feat/docs-site alone already measured 4,336,971 raw / 1,350,479 gzip / 1,109,667 br for the web distribution, mostly the ~462 KB ELK worker asset now counted beside index.html; the integrated branch measures 4,359,277 raw / 1,358,505 gzip / 1,115,802 br (+22,306 / +8,026 / +6,135 for the order search and Curved lines). Caps raised to the integrated measurement plus about 0.5% headroom: raw 4,063,400 -> 4,380,000, gzip 1,195,900 -> 1,365,000, brotli 961,200 -> 1,121,000. Lower them again when the layout worker is trimmed.",
+    "maxRawBytes": 4380000,
+    "maxGzipBytes": 1365000,
+    "maxBrotliBytes": 1121000
+  },
+  "budgets": {
+    "$comment": "Per page view, from every archer-budget/1 block (harness runs and the page-load lab). The first view of a run downloads the debug page (~3.6 MB); later views get 304s.",
+    "maxDuplicateRequestsPerPage": 0,
+    "allowedDuplicates": [],
+    "maxApiRequestsPerPage": 40,
+    "$thumbnails": "Thumbnail images are counted apart from API requests: every page fetches ahead, once per browser session and at low priority, up to 24 thumbnails (THUMBNAIL_PREFETCH_LIMIT) for each listed project; the corpus has 3 projects (25 views).",
+    "maxThumbnailRequestsPerPage": 72,
+    "maxTransferBytesPerPage": 4718592,
+    "maxWarmTransferBytes": 1048576,
+    "$timing": "Lab timings (lcpMs, wallMs, longTaskMs) over their cap are WARN; timingFailFactor null never fails them. On a busy shared host they ran 2-4x the seed. On a quiet or dedicated host set e.g. 2 (fail above 2x the cap).",
+    "timingFailFactor": null
+  },
+  "allowedFailedRequests": [],
+  "journeys": {
+    "quick": [
+      "tools/devkit/journeys/flowchart-create.mjs",
+      "tools/devkit/journeys/sequence-edit.mjs",
+      "tools/devkit/journeys/source-panel.mjs",
+      "tools/devkit/journeys/helpers-tour.mjs",
+      "tools/devkit/journeys/editor-entry.mjs"
+    ],
+    "full": {
+      "dirs": ["tools/devkit/journeys/smoke-a", "tools/devkit/journeys/smoke-b", "tools/devkit/journeys/smoke-c"],
+      "$comment": "lib.mjs files are helpers; *probe* and *-dbg* files dump state for a person and assert nothing.",
+      "exclude": "(^lib\\.mjs$|probe|-dbg\\.mjs$)"
+    },
+    "monkey": [
+      { "type": "flowchart", "seed": 7, "source": "corpus", "ms": 45000 },
+      { "type": "sequence", "seed": 3, "source": "corpus", "ms": 45000 },
+      { "type": "c4", "seed": 11, "source": "alt", "ms": 45000 },
+      { "type": "er", "seed": 5, "source": "corpus", "ms": 45000 },
+      { "type": "state", "seed": 2, "source": "new", "ms": 45000 }
+    ]
+  },
+  "scale": {
+    "$comment": "tools/perf/scale-gates.mjs (performance plan slice 1): counts on the debug page over generated corpora, each size in a sandbox of its own. S = today's corpus, M = 250 views / 1k notes / 200 threads. Quick runs S only (M takes about 2 more minutes); the full run does S and M. L (1,000 views, a 257-view project) is opt-in: ARCHER_SCALE_L=1. Caps and the slices that should tighten them: tools/perf/scale-budgets.json.",
+    "sizes": ["S", "M"],
+    "quickSizes": ["S"],
+    "budgetFile": "tools/perf/scale-budgets.json"
+  },
+  "lab": {
+    "project": "pageturner",
+    "pages": [
+      "projects",
+      "project-folders",
+      "project-diagrams",
+      "project-notes",
+      "diagram",
+      "diagram-edit",
+      "new-diagram"
+    ],
+    "quickProfiles": ["default"],
+    "fullProfiles": ["default", "remote-link"],
+    "$comment": "lab-budgets.json is seeded from a sandbox of this corpus (tools/perf/history/budgets-2026-10-20.json, retired 2026-11-02 per the performance rubric §8: a long-running service, another corpus and machine, caps of 24–284 requests and 7 duplicates allowed). Re-seed: page-load.mjs --runs 3 --write-budget tools/release-check/lab-budgets.json against a fresh sandbox.",
+    "budgetFile": "tools/release-check/lab-budgets.json"
+  }
+}

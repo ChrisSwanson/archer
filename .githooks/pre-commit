@@ -1,0 +1,6 @@
+#!/bin/sh
+# Formats and lints what is being committed (Biome, biome.jsonc): the same check CI's "format and lint"
+# step and `npm run pr-check` run over the whole tree. Fix with `npm run format` (or
+# `npx biome check --write <files>`), then stage again. Installed by `npm run hooks:install`.
+# Emergencies: git commit --no-verify.
+exec npx --no-install biome check --staged --no-errors-on-unmatched --files-ignore-unknown=true

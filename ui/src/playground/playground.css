@@ -1,0 +1,72 @@
+.playground { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.playground-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
+  padding: 8px 16px; border-bottom: var(--line-chrome) solid var(--border);
+  background: var(--surface); color: var(--text); font: 400 var(--type-small)/1.5 var(--font-sans);
+}
+.playground-bar p { margin: 0; }
+.playground-provenance { flex: 1 1 360px; color: var(--text-dim); }
+.playground-project { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.playground-project select {
+  width: 190px; max-width: 100%; min-width: 0; min-height: 36px;
+  padding: 6px 28px 6px 10px; border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control); color: var(--text); background: var(--bg);
+  font: inherit; cursor: pointer;
+}
+.playground-project select:hover { border-color: var(--border-hover); }
+.playground-bar button {
+  min-height: 36px; padding: 6px 10px; border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-control); background: var(--surface); color: var(--text);
+  font: inherit; cursor: pointer;
+}
+.playground-bar button:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.playground-bar button:active { background: var(--accent-fill); }
+.playground-bar :is(select, button, summary):focus-visible { outline: var(--line-chrome-strong) solid var(--accent); outline-offset: 2px; }
+.playground-about { min-width: 0; }
+.playground-docs { display: inline-flex; align-items: center; min-height: 36px; color: var(--accent); font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.playground-docs:hover { color: var(--text); }
+.playground-docs:focus-visible { outline: var(--line-chrome-strong) solid var(--accent); outline-offset: 2px; }
+/* Border-box like the buttons beside it, so its minimum height is the touch target, not that plus padding. */
+.playground-about > summary { box-sizing: border-box; min-height: 36px; padding: 8px 0; cursor: pointer; color: var(--text-dim); }
+.playground-about > summary:hover { color: var(--text); }
+.playground-about[open] { flex-basis: 100%; }
+.playground-about > div {
+  max-height: 35dvh; max-width: 75ch; overflow: auto; padding: 12px 0;
+  border-top: var(--line-chrome) solid var(--border); font-size: var(--type-body);
+}
+.playground-about p + p { margin-top: 8px; }
+.playground-about h2 { font-size: var(--type-title); margin: 20px 0 8px; }
+.playground-about pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: var(--type-small); font-weight: 400; line-height: 1.5; --type-tracking: 0; }
+.playground-bar [role="status"] { color: var(--text-dim); }
+.playground-workspace { min-height: 0; position: relative; contain: layout; }
+.playground-workspace > .archer-web-shell { height: 100%; width: 100%; }
+.playground-unavailable { padding: 24px; font-size: var(--type-body); }
+.playground-unavailable h1 { font-size: var(--type-title); }
+/* What a phone shows elsewhere: the short provenance in the bar, the docs link and Reset inside About. */
+.playground-narrow { display: none; }
+.playground-about-actions { gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: var(--line-chrome) solid var(--border); }
+.playground-about-actions > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+/* A phone: one row (owner, 2026-11-15; it wrapped to three, ~126px). Example, the project and About keep the
+   drawing's room; About opens over the page below the bar rather than pushing the drawing down. */
+@media (max-width: 720px) {
+  .playground-bar { position: relative; z-index: 30; flex-wrap: nowrap; gap: 8px; padding: 2px 12px; }
+  .playground-bar .playground-wide { display: none; }
+  .playground-bar p.playground-narrow { display: block; flex: none; }
+  .playground-bar .playground-about-actions { display: grid; }
+  .playground-project { flex: 1 1 auto; min-width: 0; }
+  .playground-project-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .playground-project select { width: 100%; }
+  .playground-about { flex: none; }
+  .playground-about[open] { flex-basis: auto; }
+  .playground-about > summary { padding: 0 4px; line-height: 44px; white-space: nowrap; }
+  .playground-about > div {
+    position: absolute; top: 100%; left: 0; right: 0; max-width: none; max-height: min(70dvh, 560px);
+    padding: 12px; border-top: 0; border-bottom: var(--line-chrome) solid var(--border); background: var(--surface);
+  }
+  .playground-bar :is(select, button), .playground-about > summary { min-height: 44px; }
+}
+@media (pointer: coarse) {
+  .playground-bar :is(select, button), .playground-about > summary { min-height: 44px; }
+}

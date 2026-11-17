@@ -1,0 +1,76 @@
+/*!
+ * Fira Sans -- Copyright (c) 2012-2015, The Mozilla Foundation and Telefonica S.A.
+ * (https://github.com/mozilla/Fira). Licensed under the SIL Open Font License,
+ * Version 1.1: https://scripts.sil.org/OFL
+ */
+
+/*
+ * The page's typeface, carried inside the bundle.
+ *
+ * The page's policy admits fonts only as `data:` URIs (`font-src data:`), so a
+ * face that is only named renders in whatever the reader's system substitutes.
+ * Embedded: `vite-plugin-singlefile` inlines each file below as a `data:` URI,
+ * and the licence is `fonts/FiraSans-OFL.txt` beside them. Export (SVG and PNG)
+ * and PNG gallery thumbnails embed and draw these same files (`ts/src/export`);
+ * an SVG gallery thumbnail loads nothing, so it only names the face.
+ *
+ * One static face per weight the stylesheet sets -- 400, 500, 600 and 700 --
+ * and a 400 italic, so nothing is drawn in a neighbouring weight or a slant the
+ * browser synthesises (`tests/type-ramp.test.ts` checks every weight has its
+ * face). Each is the latin subset of Google Fonts' static TTF, unhinted, built
+ * by `ui/scripts/fira-fonts.py`, which also writes the advance tables the layout
+ * measures text with. Characters outside the subset -- the Command key in the
+ * cheat sheet -- fall through to the next family in the stack, which is what
+ * `unicode-range` is for.
+ *
+ * Source: https://github.com/google/fonts/tree/main/ofl/firasans
+ */
+@font-face {
+  font-family: "Fira Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/fira-sans-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fira Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/fira-sans-latin-500.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fira Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/fira-sans-latin-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fira Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/fira-sans-latin-700.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fira Sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/fira-sans-latin-400-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

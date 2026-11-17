@@ -1,0 +1,15 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": ["src/app/WorkspaceNavigation.css"],
+        "createdAt": "2026-10-13T23:38:19.542Z",
+        "reason": "Decision: retain sidebar hover widening. This existing width transition is intentional and unchanged by the navigation fix."
+      }
+    ]
+  }
+}

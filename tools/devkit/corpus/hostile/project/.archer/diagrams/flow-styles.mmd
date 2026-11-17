@@ -1,0 +1,8 @@
+flowchart LR
+  a[Start]
+  b[Finish]
+  a go@--> b
+  classDef evil fill:url(https://xss-canary.invalid/classdef),stroke:#333
+  class b evil
+  style a fill:url(javascript:alert('style'))
+  linkStyle 0 stroke:url(https://xss-canary.invalid/linkstyle)

@@ -1,0 +1,128 @@
+/* The chat bubble (ADR 0034 §10): a round launcher anywhere on the page, and the chat it opens. */
+.archer-chat-fab {
+  position: fixed; z-index: 40; width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--accent); color: var(--you-ink); display: grid; place-items: center;
+  box-shadow: var(--shadow-panel); cursor: grab; touch-action: none;
+}
+/* While a dock sheet is open on a phone the launcher waits just above the sheet's right-hand corner, beside the
+   canvas toolbar (stage-dock.css), rather than lie half under the sheet (round 1 pass 2, F5 d/e); it goes back to
+   its place when the sheet folds. */
+:root:has(.archer-dock-sheet) .archer-chat-fab:not([data-dragging]) {
+  left: auto !important; top: auto !important; right: 16px;
+  bottom: calc(var(--archer-dock-sheet-height, 0px) + 8px);
+}
+.archer-chat-fab[data-dragging] { cursor: grabbing; box-shadow: var(--shadow-modal); }
+.archer-chat-fab[data-glide] { transition: left 0.22s ease, top 0.22s ease; }
+.archer-chat-fab svg { width: var(--icon); height: var(--icon); fill: none; stroke: currentColor; stroke-width: var(--icon-stroke); stroke-linejoin: round; }
+.archer-chat-agent-dot { position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--agent); border: var(--line-chrome-strong) solid var(--surface); }
+.archer-chat-menu {
+  position: fixed; z-index: 60; padding: 4px; background: var(--surface); border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
+}
+.archer-chat-menu button {
+  display: flex; gap: 16px; justify-content: space-between; min-height: 32px; padding: 0 10px; border: 0; border-radius: var(--radius-control);
+  background: transparent; color: var(--text); font: inherit; font-size: var(--type-body); cursor: pointer;
+}
+.archer-chat-menu button:hover, .archer-chat-menu button:focus-visible { background: var(--surface-2); outline: none; }
+
+.archer-chat {
+  position: fixed; z-index: 41; box-sizing: border-box; display: flex; flex-direction: column; transform-origin: 0 0;
+  background: var(--surface); color: var(--text); border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-dialog);
+  box-shadow: var(--shadow-modal); font-size: var(--type-body);
+}
+.archer-chat[data-mode="side"] {
+  position: relative; flex: none; align-self: stretch; z-index: auto; border: 0; border-left: var(--line-chrome) solid var(--border);
+  border-radius: 0; box-shadow: none; min-height: 0;
+}
+.archer-chat[data-mode="sheet"] {
+  left: 0; right: 0; bottom: 0; top: auto; z-index: 45; height: min(70vh, 520px); border-bottom: 0; border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.archer-chat-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 12px 10px 6px 14px; }
+.archer-chat-title { min-width: 0; }
+.archer-chat-eyebrow { display: block; font-size: var(--type-floor); font-weight: 600; text-transform: uppercase; color: var(--text-faint); }
+.archer-chat-title h2 { margin: 4px 0 0; font-size: var(--type-body); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.archer-chat-acts { display: flex; align-items: center; gap: 2px; flex: none; }
+.archer-chat-acts button {
+  display: inline-grid; place-items: center; min-width: 32px; min-height: 32px; padding: 0 6px; border: 0; border-radius: var(--radius-card);
+  background: transparent; color: var(--text-dim); font: inherit; font-size: var(--type-small); cursor: pointer;
+}
+.archer-chat-acts button:hover { background: var(--surface-2); color: var(--text); }
+.archer-chat-acts svg { fill: none; }
+/* The frame, borders and focus ring are the shared segmented rule (styles.css, "SEGMENTED"). */
+.archer-chat-switch { align-self: flex-start; margin: 0 14px 6px; }
+.archer-chat-switch button { min-height: 30px; padding: 0 10px; background: transparent; color: var(--text-dim); font: inherit; font-size: var(--type-small); cursor: pointer; }
+.archer-chat-switch button[aria-pressed="true"] { background: var(--accent-fill); color: var(--accent-on-fill); }
+.archer-chat-log { flex: 1 1 auto; min-height: 72px; overflow: auto; padding: 8px 14px; display: flex; flex-direction: column; gap: 8px; }
+.archer-chat-bub { max-width: 84%; padding: 7px 11px; border-radius: var(--radius-dialog); line-height: 1.45; }
+.archer-chat-bub p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.archer-chat-bub[data-author="person"] { align-self: flex-end; background: var(--accent); color: var(--you-ink); border-bottom-right-radius: var(--radius-mark); }
+.archer-chat-bub[data-author="agent"] { align-self: flex-start; background: var(--agent-fill); color: var(--text); border-bottom-left-radius: var(--radius-mark); }
+.archer-chat-agent-who { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; font-size: var(--type-small); font-weight: 600; color: var(--agent-text); }
+.archer-chat-agent-who svg { width: 11px; height: 11px; fill: currentColor; }
+.archer-chat-tick { flex: none; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 0 6px; margin: 2px 14px 4px; font-size: var(--type-small); line-height: 1.35; text-align: right; color: var(--text-dim); }
+.archer-chat-tick > p { margin: 0; }
+.archer-chat-tick:has(> p:empty):not(:has(> button)) { margin: 0; }
+.archer-chat-tick button { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }
+.archer-chat-tick button:disabled { color: var(--text-dim); text-decoration: none; cursor: default; }
+.archer-chat-hint { display: block; }
+.archer-chat-tick .archer-chat-launch { flex-basis: 100%; margin-top: 2px; text-align: right; }
+/* The recipient (ADR 0035 §7): one row while the service has listeners; its list opens over the conversation. */
+.archer-chat-to { position: relative; display: flex; align-items: center; gap: 6px; min-height: 28px; margin: 0 14px 4px; font-size: var(--type-small); color: var(--text-dim); }
+.archer-chat-to-pick {
+  display: inline-flex; align-items: center; gap: 4px; min-width: 0; min-height: 28px; padding: 0 8px; border: var(--line-chrome) solid var(--border-strong);
+  border-radius: var(--radius-card); background: transparent; color: var(--text); font: inherit; cursor: pointer;
+}
+.archer-chat-to-pick > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archer-chat-to-pick svg { fill: none; stroke: currentColor; }
+.archer-chat-to-pick:disabled, .archer-chat-to-pick[data-readonly] { color: var(--text-dim); cursor: default; }
+.archer-chat-to-pick[data-readonly] { border-color: transparent; padding-left: 0; }
+.archer-chat-to-list {
+  position: absolute; z-index: 5; top: calc(100% + 2px); left: 0; right: 0; max-height: 240px; overflow: auto; padding: 4px;
+  background: var(--surface); border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
+}
+.archer-chat-to-head { padding: 6px 8px 2px; font-size: var(--type-floor); font-weight: 600; text-transform: uppercase; color: var(--text-faint); overflow-wrap: anywhere; }
+.archer-chat-to-option { display: flex; justify-content: space-between; gap: 8px; padding: 6px 8px; border-radius: var(--radius-control); color: var(--text); cursor: pointer; overflow-wrap: anywhere; }
+.archer-chat-to-option:hover { background: var(--surface-2); }
+.archer-chat-to-option:focus-visible { background: var(--surface-2); outline: 2px solid var(--accent); outline-offset: -2px; }
+.archer-chat-to-option[aria-selected="true"] { font-weight: 600; }
+.archer-chat-to-tag { flex: none; font-size: var(--type-small); font-weight: 400; color: var(--text-dim); }
+.archer-chat-to-empty { margin: 0; padding: 8px; color: var(--text-dim); }
+/* Other checkouts: information, not choices (decision 15). */
+.archer-chat-to-elsewhere { border-top: var(--line-chrome) solid var(--border); margin-top: 4px; }
+.archer-chat-to-elsewhere ul { margin: 0; padding: 0; list-style: none; }
+.archer-chat-to-info { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 8px; padding: 4px 8px; color: var(--text-dim); overflow-wrap: anywhere; }
+.archer-chat-to-detail { min-width: 0; font-size: var(--type-small); color: var(--text-dim); }
+.archer-chat-empty { margin: auto 0; text-align: center; color: var(--text-dim); font-size: var(--type-body); }
+.archer-chat-note { margin: 0; padding: 0 14px 4px; font-size: var(--type-small); color: var(--text-dim); }
+.archer-chat-note[role="alert"] { color: var(--text); }
+/* An example conversation (no service): this note stands where the composer would, in the composer's place. */
+.archer-chat-example { margin: 0; padding: 12px 14px 14px; border-top: var(--line-chrome) solid var(--border); color: var(--text-dim); font-size: var(--type-small); line-height: 1.5; }
+.archer-chat-form { display: flex; align-items: flex-end; gap: 6px; padding: 8px 10px 10px 14px; border-top: var(--line-chrome) solid var(--border); }
+.archer-chat-form textarea {
+  flex: 1 1 auto; box-sizing: border-box; min-height: 36px; resize: none; overflow-y: hidden; padding: 7px 10px;
+  font: inherit; line-height: 1.4; color: var(--text); background: var(--bg); border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-card);
+}
+.archer-chat-send { flex: none; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: var(--accent); color: var(--you-ink); display: grid; place-items: center; cursor: pointer; }
+.archer-chat-send:disabled { opacity: 0.45; cursor: default; }
+.archer-chat-send svg { fill: currentColor; }
+
+/* Resizing: the floating window from the corner away from its bubble, the sidebar from its left edge. */
+.archer-chat-grip { position: absolute; z-index: 3; width: 18px; height: 18px; color: var(--text-faint); touch-action: none; display: grid; place-items: center; cursor: nesw-resize; }
+.archer-chat-grip svg { fill: none; stroke: currentColor; }
+/* The glyph is drawn for the bottom right and is its own mirror across the diagonal, so a flip turns it to any corner. */
+.archer-chat[data-corner^="t"] .archer-chat-grip { top: 2px; scale: 1 -1; }
+.archer-chat[data-corner^="b"] .archer-chat-grip { bottom: 2px; }
+.archer-chat[data-corner$="l"] .archer-chat-grip { left: 2px; scale: -1 1; }
+.archer-chat[data-corner$="r"] .archer-chat-grip { right: 2px; }
+.archer-chat[data-corner="tl"] .archer-chat-grip { scale: -1 -1; }
+.archer-chat:is([data-corner="tl"], [data-corner="br"]) .archer-chat-grip { cursor: nwse-resize; }
+.archer-chat-grip:hover, .archer-chat-grip:focus-visible, .archer-chat-edge:hover::after, .archer-chat-edge:focus-visible::after { color: var(--accent); }
+.archer-chat-grip:focus-visible { outline: 2px solid var(--accent); }
+.archer-chat-edge { position: absolute; z-index: 3; left: -5px; top: 0; bottom: 0; width: 9px; cursor: col-resize; touch-action: none; }
+.archer-chat-edge::after { content: ""; position: absolute; left: 4px; top: 50%; width: 2px; height: 28px; margin-top: -14px; border-radius: var(--radius-mark); background: currentColor; color: var(--border-strong); }
+.archer-chat-edge:hover::after, .archer-chat-edge:focus-visible::after { background: var(--accent); }
+.archer-chat-edge:focus-visible { outline: none; }
+.archer-chat-host:empty { display: none; }
+.archer-chat-host { display: flex; flex: none; min-height: 0; }
+@media (prefers-reduced-motion: reduce) { .archer-chat-fab[data-glide] { transition: none; } }

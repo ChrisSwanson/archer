@@ -1,0 +1,2925 @@
+{
+  "schema": "archer-perf-manifest/1",
+  "$comment": "Proposed for 0.11.0 (2026-11-03), from the candidate's measured loads (archive performance-2026-11-03/round-final/production): one entry per request kind each surface × state makes, max = the most in any one load over both profiles and 3 runs. Reasons carry baseline B's where the entry existed; new ones are written here. Every entry is approved:false: the two reviewers judge them in the performance round and the maintainer approves. Replaces tools/perf/manifests.json when approved.",
+  "fixture": {
+    "corpus": "tools/devkit/corpus",
+    "project": "awkward",
+    "diagram": "fixture-seq-full",
+    "flow": "flow-styled",
+    "note": "notes/auth.md",
+    "presentation": "agent presentation of seq-awkward active (as in B)"
+  },
+  "exceptions": [],
+  "surfaces": {
+    "diagram": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/walkthroughs?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Walkthrough picker is closed on this route; fetch when opened.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/walkthroughs?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Walkthrough picker is closed on this route; fetch when opened.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "diagram-edit": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file?edit",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/open",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the authorized target open in editor bootstrap, retaining its grant, source-write policy and CAS checks.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/presentation op=read",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Read the selected target’s saved layout with editor bootstrap; op remains read.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/preview",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: No edit has occurred: reuse the opened model (or empty starter); preview after a change.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file?edit",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/open",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the authorized target open in editor bootstrap, retaining its grant, source-write policy and CAS checks.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/presentation op=read",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Read the selected target’s saved layout with editor bootstrap; op remains read.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/preview",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: No edit has occurred: reuse the opened model (or empty starter); preview after a change.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "diagram-folder-path": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 2,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts. | alias: one redirect (303) and then the canonical document; each alias costs one redirect and one document (G3, perf #3)",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/walkthroughs?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Walkthrough picker is closed on this route; fetch when opened.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 2,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts. | alias: one redirect (303) and then the canonical document; each alias costs one redirect and one document (G3, perf #3)",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/walkthroughs?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Walkthrough picker is closed on this route; fetch when opened.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "flow-diagram": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/walkthroughs?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Walkthrough picker is closed on this route; fetch when opened.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /-/page-assets/elk-layout-worker-:hash.js",
+          "target": "none",
+          "phase": "boot",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: Visible graph figures need the current layout worker; retain one immutable asset.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target’s compiled envelope belongs in route data with its identity/revision.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/emphasis/:view",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible target emphasis belongs with its initial model/revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments?target",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Full threads are hidden on first load; initial counts/markers can travel in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comments/pending",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Pending review detail is hidden until review/inbox opens; obtain any badge count in page data.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Related-note panel is closed; initial route does not need its detail.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/walkthroughs?viewId",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: Walkthrough picker is closed on this route; fetch when opened.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /-/page-assets/elk-layout-worker-:hash.js",
+          "target": "none",
+          "phase": "boot",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: Visible graph figures need the current layout worker; retain one immutable asset.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "new-diagram": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/preview",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: No edit has occurred: reuse the opened model (or empty starter); preview after a change.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "POST",
+          "pattern": "POST /p/:project/api/authoring/preview",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be deferred until used: No edit has occurred: reuse the opened model (or empty starter); preview after a change.",
+          "approved": false,
+          "decision": "could be deferred until used"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "note": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/content?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: The visible note body belongs in one authorized route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/note-emphases?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible note emphasis belongs with the same note revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/diagram?address",
+          "target": "route",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Include first-viewport embedded-figure envelopes with note content; defer lower figures.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /-/page-assets/elk-layout-worker-:hash.js",
+          "target": "none",
+          "phase": "boot",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: Visible graph figures need the current layout worker; retain one immutable asset.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/content?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: The visible note body belongs in one authorized route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/note-emphases?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible note emphasis belongs with the same note revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/diagram?address",
+          "target": "route",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Include first-viewport embedded-figure envelopes with note content; defer lower figures.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /-/page-assets/elk-layout-worker-:hash.js",
+          "target": "none",
+          "phase": "boot",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: Visible graph figures need the current layout worker; retain one immutable asset.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "note-alias": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 2,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts. | alias: one redirect (303) and then the canonical document; each alias costs one redirect and one document (G3, perf #3)",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/content?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: The visible note body belongs in one authorized route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/note-emphases?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible note emphasis belongs with the same note revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/diagram?address",
+          "target": "route",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Include first-viewport embedded-figure envelopes with note content; defer lower figures.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /-/page-assets/elk-layout-worker-:hash.js",
+          "target": "none",
+          "phase": "boot",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: Visible graph figures need the current layout worker; retain one immutable asset.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/:file",
+          "target": "none",
+          "phase": "document",
+          "max": 2,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts. | alias: one redirect (303) and then the canonical document; each alias costs one redirect and one document (G3, perf #3)",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/content?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: The visible note body belongs in one authorized route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/note-emphases?path",
+          "target": "route",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Visible note emphasis belongs with the same note revision in page data.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/diagram?address",
+          "target": "route",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Include first-viewport embedded-figure envelopes with note content; defer lower figures.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /-/page-assets/elk-layout-worker-:hash.js",
+          "target": "none",
+          "phase": "boot",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: Visible graph figures need the current layout worker; retain one immutable asset.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "project-diagrams": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/?tab=diagrams",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/thumbnails/:view?format&rev&theme&v",
+          "target": "route",
+          "phase": "prefetch",
+          "max": 26,
+          "reason": "B (2026-10-30) could be merged / could be deferred until used: Visible thumbnail: combine the eight first-viewport images in one revision-keyed atlas; preserve individual alt text. | This card is below the initial viewport; request on approach/scroll.",
+          "approved": false,
+          "decision": "could be merged / could be deferred until used",
+          "trigger": "B: fetched ahead on page load, not on visibility or intent",
+          "bytes": 290128
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/?tab=diagrams",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/thumbnails/:view?format&rev&theme&v",
+          "target": "route",
+          "phase": "prefetch",
+          "max": 26,
+          "reason": "B (2026-10-30) could be merged / could be deferred until used: Visible thumbnail: combine the eight first-viewport images in one revision-keyed atlas; preserve individual alt text. | This card is below the initial viewport; request on approach/scroll.",
+          "approved": false,
+          "decision": "could be merged / could be deferred until used",
+          "trigger": "B: fetched ahead on page load, not on visibility or intent",
+          "bytes": 0
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "project-folders": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "project-notes": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/?tab=notes",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/:project/?tab=notes",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/diagrams",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include the inventory fields this route uses, avoiding separate overlapping catalog reads.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/bootstrap",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/authoring",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Include capability status in route data; preserve the separate source-annotation permission boundary.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/notes/all",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Navigation needs note titles/addresses, not another complete inventory response; include minimal route inventory.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/events",
+          "target": "none",
+          "phase": "stream",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: One authenticated live-update channel; keep separate from finite bootstrap data.",
+          "approved": false,
+          "decision": "needed"
+        }
+      ]
+    },
+    "projects": {
+      "cold": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        }
+      ],
+      "warm": [
+        {
+          "method": "GET",
+          "pattern": "GET /projects/",
+          "target": "none",
+          "phase": "document",
+          "max": 1,
+          "reason": "B (2026-10-30) needed: HTML contains the shell, inline application, stylesheet and embedded fonts.",
+          "approved": false,
+          "decision": "needed"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /api/connection",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Connection/presentation metadata can share a single authorized bootstrap snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /api/browser-projects",
+          "target": "none",
+          "phase": "data",
+          "max": 1,
+          "reason": "B (2026-10-30) could be merged: Authorized project/navigation summary anchors the one route-data response.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/comment-activity",
+          "target": "none",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Only initial thread/bell counts are needed; include aggregates, defer activity detail until opened.",
+          "approved": false,
+          "decision": "could be merged"
+        },
+        {
+          "method": "GET",
+          "pattern": "GET /p/:project/api/compile",
+          "target": "none",
+          "phase": "data",
+          "max": 3,
+          "reason": "B (2026-10-30) could be merged: Compile-status badges can travel with the catalog/target snapshot.",
+          "approved": false,
+          "decision": "could be merged"
+        }
+      ]
+    }
+  }
+}

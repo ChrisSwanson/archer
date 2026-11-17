@@ -1,0 +1,207 @@
+/* The walkthrough panel, divider and transport bar (WalkthroughPanel.tsx; the approved prototype in
+   docs/prototypes/walkthroughs). Colour and opacity carry the state, as on the diagram. */
+
+/* ---------- divider ---------- */
+.archer-walk-divider {
+  position: relative; flex: none; width: 9px; cursor: col-resize; touch-action: none;
+  background: var(--surface); border-left: var(--line-chrome) solid var(--border); border-right: var(--line-chrome) solid var(--border);
+}
+.archer-walk-divider::after {
+  content: ""; position: absolute; left: 3px; top: 50%; width: 1px; height: 28px; margin-top: -14px;
+  background: var(--border-strong); box-shadow: 2px 0 0 var(--border-strong);
+}
+.archer-walk-divider:hover::after, .archer-walk-divider.drag::after { background: var(--node-border); box-shadow: 2px 0 0 var(--node-border); }
+
+/* ---------- panel ---------- */
+.archer-walk {
+  position: relative; display: flex; flex: none; flex-direction: column; width: 420px; min-width: 0; min-height: 0;
+  background: var(--surface); color: var(--text); font-size: var(--type-body);
+}
+/* On a phone the panel is the dock's sheet (stage-dock.tsx): the sheet is its frame. */
+.archer-dock-sheet-body > .archer-walk { width: auto; max-height: none; }
+
+/* One column the panel's width: sized to its content, the picker's one-line title made it 372px in a 340px panel
+   (round 1 pass 5, R4-claude-01). */
+.archer-walk-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 12px 12px 8px; border-bottom: var(--line-chrome) solid var(--border); }
+.archer-walk-meta { margin: 0; font-size: var(--type-small); color: var(--text-dim); }
+.archer-walk-related { margin: 0; font-size: var(--type-small); color: var(--text-dim); overflow-wrap: anywhere; }
+.archer-walk-related a { color: var(--accent-quiet); text-underline-offset: 2px; }
+.archer-walk-warn { color: var(--text); font-weight: 600; }
+.archer-walk-notice { display: block; margin: 0; font-size: var(--type-small); color: var(--text-dim); }
+.archer-walk-notice b { color: var(--text); font-weight: 600; }
+.archer-walk-presented { margin: 0; font-size: var(--type-small); color: var(--text-dim); }
+.archer-walk-agent { color: var(--agent-text); font-weight: 600; }
+.archer-walk-caption { color: var(--text); }
+.archer-walk-flag { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--text-faint); }
+
+.archer-walk-picker { position: relative; min-width: 0; }
+.archer-walk-pick {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; min-height: 36px; padding: 6px 12px;
+  border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-card); background: var(--surface-2); color: var(--text); cursor: pointer;
+}
+.archer-walk-pick:hover { border-color: var(--border-hover); }
+.archer-walk-pick-lead { flex: none; color: var(--text-dim); }
+/* A title wraps to a second line rather than being cut (a title is at most six words, 48 characters). */
+.archer-walk-pick-title {
+  display: -webkit-box; min-width: 0; overflow: hidden; font-weight: 600; text-align: left; overflow-wrap: anywhere;
+  -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+}
+.archer-walk-pick svg { margin-left: auto; fill: none; stroke: currentcolor; stroke-linecap: round; stroke-linejoin: round; }
+.archer-walk-menu {
+  position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; right: 0; max-height: 60vh; overflow: auto; padding: 6px;
+  border: var(--line-chrome) solid var(--border-strong); border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow-panel);
+}
+.archer-walk h2 { margin: 10px 8px 6px; font-size: var(--type-small); font-weight: 600; color: var(--text-dim); }
+.archer-walk-list { display: grid; padding: 6px 4px; }
+.archer-walk-item {
+  display: grid; gap: 1px; width: 100%; padding: 8px; border: 0; border-radius: var(--radius-card); background: transparent; color: var(--text);
+  font: inherit; text-align: left; cursor: pointer;
+}
+.archer-walk-item:hover { background: var(--surface-2); }
+.archer-walk-item[aria-current="true"] { background: var(--surface-2); }
+.archer-walk-item-title { font-weight: 600; }
+.archer-walk-item-sub { font-size: var(--type-small); color: var(--text-dim); }
+.archer-walk-item.archived .archer-walk-item-title, .archer-walk-item.archived .archer-walk-item-sub { color: var(--text-faint); font-weight: 500; }
+
+.archer-walk-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px 4px 14px; }
+.archer-walk-close { margin-left: auto; }
+/* The frame, borders and focus ring are the shared segmented rule (styles.css, "SEGMENTED"). */
+.archer-walk-tabs button { min-height: 30px; padding: 0 12px; background: transparent; color: var(--text-dim); cursor: pointer; }
+.archer-walk-tabs button[aria-selected="true"] { background: var(--accent-fill); color: var(--accent-on-fill); }
+.archer-walk-hint { margin: 0; padding: 0 2px; font-size: var(--type-small); color: var(--text-faint); }
+.archer-walk-bar + .archer-walk-hint, .archer-walk-transport + .archer-walk-hint { padding: 0 14px 8px; }
+.archer-walk-scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 8px 14px; overscroll-behavior: contain; }
+
+/* ---------- the steps as a document ---------- */
+.archer-walk-steps { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.archer-walk-step { border-radius: var(--radius-card); }
+.archer-walk-head {
+  all: unset; box-sizing: border-box; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 1px 10px; width: 100%;
+  padding: 8px; border-radius: var(--radius-card); cursor: pointer;
+}
+.archer-walk-head:hover { background: var(--surface-2); }
+.archer-walk-num {
+  display: grid; grid-row: span 2; place-items: center; width: 22px; height: 22px; margin-top: 1px; border: var(--line-mark) solid var(--border-strong);
+  border-radius: 50%; color: var(--text-faint); font-size: var(--type-floor); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.archer-walk-step-title { font-weight: 600; color: var(--text); }
+.archer-walk-route { font-size: var(--type-small); color: var(--text-dim); }
+.archer-walk-step[data-state="future"] .archer-walk-step-title { color: var(--text-dim); font-weight: 500; }
+.archer-walk-step[data-state="future"] .archer-walk-route { color: var(--text-faint); }
+.archer-walk-step[data-state="done"] .archer-walk-num { border-color: var(--walked); color: var(--walked); }
+.archer-walk-step[data-state="done"] .archer-walk-step-title { color: var(--text-dim); font-weight: 500; }
+.archer-walk-step[data-state="active"] { background: var(--surface-2); }
+.archer-walk-step[data-state="active"] .archer-walk-head:hover { background: transparent; }
+.archer-walk-step[data-state="active"] .archer-walk-num { border-color: var(--g1); background: var(--g1); color: var(--surface); }
+.archer-walk-step.stale .archer-walk-num { border-color: var(--text-faint); background: transparent; color: var(--text-faint); }
+.archer-walk-step.stale .archer-walk-step-title, .archer-walk-step.stale .archer-walk-route { color: var(--text-faint); font-weight: 500; }
+.archer-walk-ood { margin-left: 6px; font-size: var(--type-floor); font-weight: 500; color: var(--text-faint); }
+
+/* The current step's details open by height, so the list does not jump. */
+.archer-walk-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.2s ease; }
+.archer-walk-step[data-state="active"] .archer-walk-more { grid-template-rows: 1fr; }
+.archer-walk-clip { min-height: 0; overflow: hidden; visibility: hidden; transition: visibility 0s 0.2s; }
+.archer-walk-step[data-state="active"] .archer-walk-clip { visibility: visible; transition: visibility 0s; }
+/* The label column takes its longest label, so a label at 200% text does not run into its value (R4-claude-03). */
+.archer-walk-body { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 5px 8px; margin: 0; padding: 0 10px 11px 42px; font-size: var(--type-small); }
+.archer-walk-body dt { padding-top: 1px; color: var(--text-faint); }
+.archer-walk-body dd { min-width: 0; margin: 0; color: var(--text); }
+.archer-walk-body dd.why { color: var(--text-dim); }
+.archer-walk-body dd.archer-walk-noline { grid-column: 1 / -1; color: var(--text-dim); font-style: italic; }
+.archer-walk-body code { display: block; overflow-wrap: anywhere; color: var(--text-dim); font-size: var(--type-small); line-height: 1.4; font-family: var(--font-mono); --type-tracking: 0; }
+
+/* ---------- icon buttons, transport ---------- */
+.archer-walk-icon {
+  display: grid; place-items: center; width: 32px; height: 30px; border: var(--line-chrome) solid transparent; border-radius: var(--radius-control);
+  background: transparent; color: var(--text-dim); cursor: pointer;
+}
+.archer-walk-icon:hover:not([aria-disabled="true"]) { background: var(--surface-2); color: var(--text); }
+.archer-walk-icon[aria-disabled="true"] { opacity: 0.4; cursor: default; }
+.archer-walk-icon.play { border-color: var(--border-strong); color: var(--text); }
+.archer-walk-icon svg { fill: currentcolor; }
+.archer-walk-close svg { fill: none; stroke: currentcolor; }
+.archer-walk-transport {
+  box-sizing: border-box; height: 49px;
+  display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 9px 12px;
+  border-top: var(--line-chrome) solid var(--border); background: var(--surface); color: var(--text); font-size: var(--type-small);
+}
+.archer-walk-icons { display: inline-flex; gap: 2px; }
+.archer-walk-pos { flex: 1 1 200px; min-width: 0; overflow: hidden; color: var(--text-dim); font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+.archer-walk-pos b { color: var(--text); font-weight: 600; }
+.archer-walk-scrub { flex: 1 1 160px; max-width: 280px; accent-color: var(--g1); }
+
+/* An open sheet covers the bar under the graph and carries its own: one set of controls at a time. */
+.archer-stage:has(.archer-dock-sheet .archer-walk) > .archer-walk-transport { display: none; }
+.archer-dock-sheet .archer-walk-transport { position: sticky; top: 0; z-index: 1; border-top: 0; border-bottom: var(--line-chrome) solid var(--border); }
+
+/* The diagram key sits in the stage's corner: lift it over the bar. */
+.archer-stage:has(> .archer-walk-transport) { --stage-below: 49px; }
+
+@media (max-width: 599px) {
+  .archer-walk-transport { height: auto; }
+  .archer-dock-sheet:has(.archer-walk) { max-height: min(52vh, 440px); }
+  /* No keyboard, no wheel: the hint is for a desktop. */
+  .archer-walk-hint { display: none; }
+  .archer-walk-pos { flex-basis: 100%; order: -1; }
+  .archer-walk-scrub { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .archer-walk-more, .archer-walk-clip { transition: none; }
+}
+/* Round 1, G7 [H]: on a touch screen the transport, the Steps/Sequence tabs and the picker are 44px targets
+   (R4-04, R4-claude-02); a mouse keeps the quieter sizes above. */
+@media (pointer: coarse) {
+  .archer-walk-icon { width: var(--icon-touch); height: var(--icon-touch); }
+  .archer-walk-tabs button { min-height: var(--icon-touch); }
+  .archer-walk-pick { min-height: var(--icon-touch); }
+  /* The Step slider: its box is the target, the track stays drawn on its middle (R5-claude-04). */
+  .archer-walk-scrub { min-height: var(--icon-touch); margin-block: 0; }
+}
+/* A touch screen wider than a phone keeps the bar one row: it grows round the taller buttons, and the key over it. */
+@media (pointer: coarse) and (min-width: 600px) {
+  .archer-walk-transport { height: calc(var(--icon-touch) + 19px); }
+  .archer-stage:has(> .archer-walk-transport) { --stage-below: calc(var(--icon-touch) + 19px); }
+}
+
+/* ---------- the Sequence tab (SequenceTab.tsx) ---------- */
+/* Scrolls sideways when the drawing is wider than the panel; a vertical wheel over it steps, so it never scrolls that way by hand. */
+.archer-walk-seq-wrap { overflow: auto; max-height: 50vh; padding: 4px 4px 0; overscroll-behavior: contain; }
+.archer-walk-seq { display: block; width: 100%; height: auto; }
+.archer-walk-seq .archer-seq-message { cursor: pointer; outline: none; }
+.archer-walk-seq .archer-seq-message:focus-visible .archer-seq-hit { stroke: var(--accent); stroke-width: 2; }
+.archer-walk-seq .archer-seq-hit { fill: transparent; stroke: none; }
+.archer-walk-seq .archer-seq-message[data-state="future"] .archer-seq-message-stroke { opacity: 0.45; }
+.archer-walk-seq .archer-seq-message[data-state="stale"] .archer-seq-message-stroke { opacity: 0.4; }
+.archer-walk-seq .archer-seq-message[data-state="stale"] path, .archer-walk-seq .archer-seq-message[data-state="stale"] polygon { stroke-dasharray: 3 3; }
+.archer-walk-seq-num { fill: var(--text-faint); font-size: var(--type-floor); font-weight: 600; }
+.archer-walk-seq-num[data-state="active"] { fill: var(--g1); }
+.archer-walk-seq-num[data-state="done"] { fill: var(--walked); }
+.archer-walk-seq-card { margin: 10px 4px 0; }
+
+/* Out of date, archived, old version (slice 7b): grey, never the path's teal. */
+.archer-walk-link { all: unset; cursor: pointer; color: var(--accent); font-weight: 500; border-radius: var(--radius-mark); }
+.archer-walk-link:hover { text-decoration: underline; }
+.archer-walk-body dd.archer-walk-was { grid-column: 1 / -1; color: var(--text-dim); }
+.archer-walk-canvas-note { position: absolute; left: 12px; bottom: 12px; z-index: 7; max-width: min(440px, calc(100% - 24px)); margin: 0; padding: 7px 11px; border-radius: var(--radius-card); background: var(--surface-2); border: var(--line-chrome) solid var(--border); font-size: var(--type-small); color: var(--text-dim); pointer-events: none; }
+.archer-walk-canvas-note b { color: var(--text); font-weight: 600; }
+
+/* The old version: the same stage, tinted, read-only. */
+.archer-walk-old { position: absolute; inset: 0; z-index: 6; background: var(--old-bg); }
+.archer-walk-old .react-flow { --xy-background-color: var(--old-bg); }
+.archer-walk-old-mark { position: absolute; top: 48px; right: 12px; z-index: 5; padding: 6px 10px; border-radius: var(--radius-control); border: var(--line-chrome) solid var(--border-strong); background: var(--surface-2); font-size: var(--type-floor); font-weight: 600; text-transform: uppercase; color: var(--text-dim); pointer-events: none; }
+
+/* A step row's comment count: the person's blue pin (outlined draft, filled once sent), after the title. */
+.archer-walk-pin {
+  margin-left: 7px;
+  vertical-align: 1px;
+  box-shadow: none;
+}
+
+/* One focus ring for the panel's controls; the offset says where it sits. */
+.archer-walk-divider:focus-visible,
+.archer-walk-item:focus-visible,
+.archer-walk-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.archer-walk-pick:focus-visible,
+.archer-walk-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.archer-walk-icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+

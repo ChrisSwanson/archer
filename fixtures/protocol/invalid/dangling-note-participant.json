@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 2,
+  "view": {
+    "id": "auth-flow",
+    "kind": "sequence",
+    "title": "Authentication flow"
+  },
+  "revision": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+  "model": {
+    "type": "sequence-trace",
+    "participants": [
+      {
+        "id": "client",
+        "label": "Client"
+      },
+      {
+        "id": "server",
+        "label": "Server"
+      },
+      {
+        "id": "db",
+        "label": "Database"
+      }
+    ],
+    "events": [
+      {
+        "type": "note",
+        "id": "note-0",
+        "position": "over",
+        "participants": [
+          "client",
+          "ghost"
+        ],
+        "text": "No such lifeline"
+      }
+    ]
+  }
+}

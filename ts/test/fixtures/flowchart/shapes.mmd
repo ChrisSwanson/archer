@@ -1,0 +1,19 @@
+flowchart TB
+  %% Every shape, semantic class and link operator of the flowchart profile.
+  rect[Rectangle]:::system
+  round(Rounded):::person
+  stad([Stadium]):::container
+  circ((Circle)):::component
+  diam{Diamond}:::external
+  cyl[(Cylinder)]:::database
+  hex{{Hexagon}}
+  sub[[Subroutine]]
+  rect solid@--> round
+  round dotted@-.-> stad
+  stad thick@==> circ
+  circ long_solid@---> diam
+  diam long_dotted@-..-> cyl
+  cyl long_thick@===> hex
+  hex labelled@-->|"  reads: a, b (c)  "| sub
+  sub dotted_label@-.->|on cache miss| rect
+  rect thick_label@==>|every request| hex

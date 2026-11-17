@@ -1,0 +1,41 @@
+sequenceDiagram
+    %% present_diagram, set_emphasis, the reader's selection, get_presentation_context
+    %% ADR 0005 (emphasis), ADR 0011 (reader's view and selection)
+    actor agent as Coding agent
+    participant app as MCP server (application layer)
+    participant service as Background service
+    participant page as Archer page
+    actor person as Person
+    agent->>app: present_diagram viewId, annotation
+    app->>app: compile the source, else use the last good model
+    app->>service: attach root, then present viewId, annotation
+    service->>service: new presentationId, viewport fit-all, clear selection if the view changed
+    service-)page: SSE presentation (envelope, stamp, annotation) and inventory
+    service-->>app: page url, presentationId
+    app-->>agent: url to give the person, or the ui resource in an MCP Apps host
+    page-->>person: diagram drawn, annotation as caption
+    agent->>app: set_emphasis viewId, id, groups of node and edge ids
+    app->>service: setEmphasis
+    alt any id unknown or any field invalid
+        service-->>app: invalid_emphasis listing every problem, nothing published
+    else all groups resolve against the model
+        service-)page: SSE emphasis
+        page-->>person: flow or highlight groups with a legend
+    end
+    person->>page: click, shift-click or marquee
+    alt browser page
+        page->>service: POST api/selection with presentationId or reader:viewId, revision, ids
+    else MCP Apps host
+        page->>app: set_selection tool and updateModelContext
+        app->>service: setSelection
+    end
+    alt stamp or revision no longer current
+        service-->>page: 409 revision_conflict
+    else valid ids
+        service->>service: store ids only, labels re-derived from the model
+    end
+    person->>agent: what about these?
+    agent->>app: get_presentation_context
+    app->>service: getContext
+    service-->>app: presentation and selection with labels
+    app-->>agent: what the person is looking at and has selected

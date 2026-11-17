@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "viewId": "context",
+  "revision": "sha256:272869d69a414034eb5c783b44729ebeb6ee7403c7fe8b0d2f0cfb2e71b043ae",
+  "origin": "link",
+  "modelGeneration": 1,
+  "limits": {
+    "maxAddedSources": 5,
+    "maxAddedBoxes": 60,
+    "maxAddedWires": 120,
+    "maxMenuCandidates": 12,
+    "maxRelationshipsPerElement": 24,
+    "maxPieceBoxes": 40,
+    "maxResponseBytes": 65536,
+    "maxExpansions": 24,
+    "maxExpandParamChars": 4096
+  },
+  "expansions": {
+    "items": [
+      {
+        "element": "shop",
+        "source": "containers",
+        "status": "added",
+        "frame": 0,
+        "piece": {
+          "source": "containers",
+          "revision": "sha256:40ccd447c9b5a8ed99a680d51a829515bd8a64bcaf5d9e661e274e7374a643c0",
+          "family": "c4",
+          "touches": "shop",
+          "opens": true,
+          "kind": "c4",
+          "model": {
+            "type": "c4-model",
+            "level": "container",
+            "elements": [
+              {
+                "id": "web",
+                "kind": "container",
+                "label": "Web",
+                "boundaryId": null
+              },
+              {
+                "id": "api",
+                "kind": "container",
+                "label": "API",
+                "boundaryId": null
+              }
+            ],
+            "boundaries": [],
+            "relationships": [
+              {
+                "id": "web--api",
+                "source": "web",
+                "target": "api",
+                "label": "calls"
+              }
+            ]
+          },
+          "attach": [
+            {
+              "key": "user--web",
+              "from": "user",
+              "to": "web",
+              "direction": "forward",
+              "label": "uses"
+            }
+          ],
+          "boxes": 2,
+          "wires": 2,
+          "total": {
+            "boxes": 2,
+            "wires": 2
+          },
+          "truncated": false
+        }
+      },
+      {
+        "element": "shop",
+        "source": "nowhere",
+        "status": "dropped",
+        "reason": "source_unknown"
+      },
+      {
+        "element": "api",
+        "source": "deploy",
+        "status": "added",
+        "frame": 1,
+        "piece": {
+          "source": "deploy",
+          "revision": "sha256:e31d092205c07f868a0a7f81a2399e5e4dce9d7c472e3b4a21c7d672c05dc2f5",
+          "family": "flowchart",
+          "touches": "api",
+          "opens": false,
+          "kind": "freeform",
+          "model": {
+            "type": "freeform-graph",
+            "direction": "lr",
+            "nodes": [
+              {
+                "id": "queue",
+                "label": "Jobs",
+                "shape": "rectangle",
+                "classes": [
+                  "container"
+                ],
+                "groupId": null
+              }
+            ],
+            "edges": [],
+            "groups": []
+          },
+          "attach": [
+            {
+              "key": "e1",
+              "from": "api",
+              "to": "queue",
+              "direction": "forward"
+            }
+          ],
+          "boxes": 1,
+          "wires": 1,
+          "total": {
+            "boxes": 1,
+            "wires": 1
+          },
+          "truncated": false
+        }
+      }
+    ],
+    "total": 3,
+    "truncated": false
+  },
+  "frames": [
+    {
+      "source": "containers",
+      "sourceRevision": "sha256:40ccd447c9b5a8ed99a680d51a829515bd8a64bcaf5d9e661e274e7374a643c0",
+      "title": "Containers",
+      "family": "c4",
+      "touches": [
+        "shop"
+      ],
+      "boxes": 2,
+      "wires": 2,
+      "truncated": false,
+      "pins": []
+    },
+    {
+      "source": "deploy",
+      "sourceRevision": "sha256:e31d092205c07f868a0a7f81a2399e5e4dce9d7c472e3b4a21c7d672c05dc2f5",
+      "title": "deploy",
+      "family": "flowchart",
+      "touches": [
+        "api"
+      ],
+      "boxes": 1,
+      "wires": 1,
+      "truncated": false,
+      "pins": []
+    }
+  ],
+  "counts": {
+    "sources": 2,
+    "boxes": 3,
+    "wires": 3
+  }
+}

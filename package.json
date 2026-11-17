@@ -1,0 +1,40 @@
+{
+  "name": "archer-workspace",
+  "private": true,
+  "license": "Apache-2.0",
+  "workspaces": [
+    "ui",
+    "ts"
+  ],
+  "scripts": {
+    "docs:dev": "node --import tsx site/scripts/prepare.ts && vitepress dev site",
+    "docs:build": "node --import tsx site/scripts/prepare.ts && vitepress build site",
+    "docs:preview": "vitepress preview site",
+    "docs:film": "node --import tsx site/scripts/film-drawings.mts",
+    "docs:test:browser": "playwright test -c site/tests",
+    "bench:ui": "npm --workspace ui run bench",
+    "build": "npm --workspace ui run build",
+    "lint": "npm --workspace ui run lint",
+    "postinstall": "node scripts/patch-mermaid.mjs",
+    "hooks:install": "git config core.hooksPath .githooks && echo 'hooks on: pre-commit formats and lints staged files (Biome); pre-push needs the branch'\"'\"'s npm run pr-check stamp'",
+    "pr-check": "bash scripts/pr-check.sh",
+    "release-check": "node tools/release-check/release-check.mjs",
+    "release-check:quick": "node tools/release-check/release-check.mjs --quick",
+    "test": "npm --workspace ui test",
+    "typecheck": "npm --workspace ui run typecheck && npm run typecheck:site",
+    "typecheck:site": "vue-tsc -p site --noEmit",
+    "ship": "bash scripts/ship.sh",
+    "eval": "node ts/scripts/evals/v1/eval.mjs",
+    "biome:ci": "biome ci .",
+    "lint:shell": "bash scripts/shellcheck.sh",
+    "knip": "knip --no-progress",
+    "lint:py": "uv run --with fonttools --with brotli --with freetype-py --with pyyaml --with pyright pyright",
+    "format": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.4",
+    "knip": "^5.88.1",
+    "vitepress": "^1.6.4",
+    "vue-tsc": "^3.3.14"
+  }
+}

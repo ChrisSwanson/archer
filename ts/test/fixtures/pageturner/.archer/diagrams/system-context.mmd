@@ -1,0 +1,13 @@
+flowchart LR
+  %% Who uses Pageturner, and the outside services it depends on.
+  customer([Customer]):::person
+  staff([Shop Staff]):::person
+  shop[Pageturner Online Bookshop]:::system
+  payments[Payment Provider]:::external
+  courier[Courier]:::external
+  email[Email Service]:::external
+  customer browses@-->|browses and buys books| shop
+  staff manages@-->|manages stock and orders| shop
+  shop pays@-->|takes card payments through| payments
+  shop ships@-->|books parcel collections with| courier
+  shop notifies@-->|sends order emails through| email

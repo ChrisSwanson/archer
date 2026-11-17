@@ -1,0 +1,32 @@
+flowchart LR
+  %% archer-key dotted: Error or side path
+  %% From a received envelope to pixels: App.tsx handlePresent and the layout effect
+  env[["Envelope from presentation event, tab read or tool result"]]
+  project["projectEnvelope (diagrams/projection.ts): refuse unknown model types"]:::component
+  check["validateEnvelope: generated AJV schema check plus kind, id and reference checks"]:::component
+  models["project-models.ts: state, ER, C4 and architecture become graphs with figures"]:::component
+  which{"Projection kind"}
+  elk["computeBackgroundLayout: Archer metrics and captions, ELK layered in a web worker"]:::component
+  seq["computeSequenceLayout: synchronous"]:::component
+  journey["No layout: the browser flows the journey's text"]:::component
+  xflow["xflow-adapter: layout to React Flow nodes and edges"]:::component
+  graph_canvas["DiagramCanvas: React Flow, figure, frame and ELK edge renderers"]:::component
+  seq_canvas["SequenceCanvas: pannable SVG"]:::component
+  journey_canvas["JourneyCanvas: HTML columns with score pips"]:::component
+  error["Error state: keep the last valid drawing, say why"]:::external
+  painter["export/painter.ts: the same projection and layout to static SVG"]:::component
+  env in@--> project
+  project unknown@-.->|unknown model type| error
+  project validates@--> check
+  check bad@-.->|invalid| error
+  check figures@-->|state, ER, C4, architecture| models
+  models graphs@--> which
+  check direct@-->|other families| which
+  which g@-->|graph| elk
+  which s@-->|sequence| seq
+  which j@-->|journey| journey
+  elk cache@-->|cached layout| xflow
+  xflow draw_g@--> graph_canvas
+  seq draw_s@--> seq_canvas
+  journey draw_j@--> journey_canvas
+  check export@-.->|export_diagram on the service| painter

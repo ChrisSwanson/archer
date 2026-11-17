@@ -1,0 +1,38 @@
+%% Nested composites, choice/fork/join pseudo-states, notes and ignored styling.
+stateDiagram-v2
+    direction LR
+    classDef bad fill:#f00
+    state "Waiting for work" as Idle
+    Checking : Checking the queue #59; every 5 s
+    state Route <<choice>>
+    state Split <<fork>>
+    state Merge <<join>>
+    state Working {
+        Fetch : Fetch the job
+        state Run {
+            state Compile
+            state Execute
+            [*] --> Compile
+            Compile --> Execute : compiled
+            Execute --> [*]
+        }
+        [*] --> Fetch
+        Fetch --> Run : fetched
+        Run --> [*]
+    }
+    state Report
+    state Notify
+    [*] --> Idle
+    Idle --> Checking : poll
+    Checking --> Route
+    Route --> Idle : empty
+    Route --> Working : job found
+    Working --> Split : done
+    Split --> Report
+    Split --> Notify
+    Report --> Merge
+    Notify --> Merge
+    Merge --> Idle
+    Idle --> [*] : shutdown
+    note right of Route : branches on queue depth
+    class Idle bad

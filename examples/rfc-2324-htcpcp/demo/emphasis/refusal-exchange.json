@@ -1,0 +1,15 @@
+{
+  "viewId": "coffee-conversations",
+  "id": "refusal-exchange",
+  "title": "The Additions Exchange",
+  "groups": [
+    {
+      "id": "exchange",
+      "style": "highlight",
+      "label": "Request and Refusal",
+      "description": "Only the additions exchange; the teapot and WHEN are separate scenes.",
+      "nodes": ["client", "coffee_pot"],
+      "edges": ["msg-2", "msg-3"]
+    }
+  ]
+}

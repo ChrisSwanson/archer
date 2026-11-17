@@ -1,0 +1,23 @@
+%% description: The life of one comment thread between the person and the agent.
+stateDiagram-v2
+    direction LR
+    state Draft
+    state Sent
+    state Read
+    state Answered
+    state Resolved
+    state "Removed from the File" as Removed
+    [*] --> Draft : person writes
+    Draft --> Sent : person sends
+    Sent --> Read : agent get_comments
+    Read --> Answered : agent reply_comment
+    Read --> Resolved : agent resolve_comment
+    Answered --> Resolved : agent resolve_comment
+    Sent --> Draft : person edits
+    Read --> Draft : person edits or replies
+    Answered --> Draft : person replies
+    Resolved --> Draft : person replies
+    Resolved --> Removed : person dismisses
+    Draft --> Removed : person deletes
+    Removed --> [*]
+    note right of Draft : only the person sees a draft

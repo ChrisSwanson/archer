@@ -1,0 +1,74 @@
+{
+  "$comment": "Caps for tools/perf/scale-gates.mjs (performance plan slice 1; decision D5: counts gate, timings only warn). Seeded 2026-10-24 on main + slice 4 with --runs 3 (the highest count of 3 runs; S = tools/devkit/corpus, M = tools/devkit/corpus/scale.mjs M at seed 20261024; project = the one with most views; cold load, debug page, plain HTTP), then widened to max(v + 5, ceil(1.1 v)) because a late re-bootstrap of the page (bootstrap + compile + diagrams read twice) sometimes landed in the window (S tree 8 vs 11 requests); the gate also does one unmeasured load and waits 2.5 s first. React commits depend on timing (the M diagram committed 19, then 28 times), so their caps are 1.5x the highest seen and only catch a storm. The M caps are loose on purpose: they are today's values, not what is sensible, and the 'tighten' map names the slice that should lower each one (lower the cap in the same change; a cap may only go down). L has no caps: it is opt-in (--l or ARCHER_SCALE_L=1) and reported only. Re-seed with: node tools/perf/scale-gates.mjs --runs 3 --write-budget tools/perf/scale-budgets.json (it rewrites only 'sizes'; then restore commits as above). 2026-11-15, 0.15.0 (debt O295): S/diagram domNodes 380 -> 400, the count measured on feat/docs-site alone and on the integrated 0.15.0 branch (shell 101-102 + main 298-299); an exception to 'a cap may only go down', owner-approved as debt; lower it again when its cause is found.",
+  "sizes": {
+    "S": {
+      "project-folders": {
+        "apiRequests": 13,
+        "commentFetches": 5,
+        "catalogBytes": 40807,
+        "domNodes": 687,
+        "commits": 18
+      },
+      "project-notes": {
+        "apiRequests": 13,
+        "commentFetches": 5,
+        "catalogBytes": 40807,
+        "domNodes": 282,
+        "commits": 18
+      },
+      "diagram": {
+        "apiRequests": 19,
+        "commentFetches": 6,
+        "catalogBytes": 40807,
+        "domNodes": 400,
+        "commits": 36
+      }
+    },
+    "M": {
+      "project-folders": {
+        "apiRequests": 138,
+        "commentFetches": 124,
+        "catalogBytes": 1165984,
+        "domNodes": 21895,
+        "commits": 30
+      },
+      "project-notes": {
+        "apiRequests": 137,
+        "commentFetches": 124,
+        "catalogBytes": 1165984,
+        "domNodes": 19133,
+        "commits": 30
+      },
+      "diagram": {
+        "apiRequests": 145,
+        "commentFetches": 125,
+        "catalogBytes": 1165984,
+        "domNodes": 4011,
+        "commits": 42
+      }
+    }
+  },
+  "growth": {
+    "$comment": "Largest allowed ratio M/S per field on each page (S counts floored at 1). Today: apiRequests x15.4, catalogBytes x28.6, domNodes x32 on the tree and x68 on the notes view (S has 256 nodes there) (x1.0 would be a count that does not grow with the project).",
+    "apiRequests": 17,
+    "catalogBytes": 32,
+    "domNodes": 80
+  },
+  "timings": {
+    "$comment": "Warn-only limits in ms (never fail: shared hosts run 2-4x slow). interactiveMs = the canvas's archer:interactive mark; the others are Event Timing input-to-next-paint for a node click and an arrow key.",
+    "interactiveMs": 5000,
+    "clickToPaintMs": 200,
+    "keyToPaintMs": 200
+  },
+  "tighten": {
+    "$comment": "Key: <size>/<page>/<field>, <size>/<field>, or growth/<field>.",
+    "M/apiRequests": "slice 8 (comments read on demand, 4-wide queue; 112 of the 123 requests are per-target comment reads)",
+    "M/commentFetches": "slice 8 (current view and its notes first, others when the inbox opens)",
+    "M/catalogBytes": "slice 13 (catalog summary + paged inventory)",
+    "M/domNodes": "slice 8 (content-visibility) and slice 13 (windowed treegrid), slice 15 (paging)",
+    "M/commits": "slice 5 (batched comment loads)",
+    "growth/apiRequests": "slice 8",
+    "growth/catalogBytes": "slice 13",
+    "growth/domNodes": "slice 8 / 13 / 15"
+  }
+}

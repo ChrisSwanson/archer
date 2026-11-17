@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant D as Database
+    %% Authentication flow
+    C->>S: POST /login
+    activate S
+    S->>D: SELECT user
+    D-->>S: user record
+    alt Valid credentials
+        S-->>C: 200 OK
+    else Invalid credentials
+        S-->>C: 401 Unauthorized
+    end
+    deactivate S
+    opt Fetch profile
+        C->>S: GET /profile
+        S->>D: SELECT profile
+        D-->>S: profile data
+        S-->>C: 200 profile
+    end
+    par Notify services
+        S-)C: push notification
+    and Log event
+        S-)D: audit log
+    end
+    loop Heartbeat
+        C->>S: ping
+        S-->>C: pong
+    end

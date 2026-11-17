@@ -1,0 +1,4 @@
+C4Context
+  Person(a, "<img src=x onerror=window.__xss='cr1'>")
+  System(b, "B", $link="javascript:window.__xss='cr2'")
+  Rel(a, b, "<script>alert('cr3')</script>")

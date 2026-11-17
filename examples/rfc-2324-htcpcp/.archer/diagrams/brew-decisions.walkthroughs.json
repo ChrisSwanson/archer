@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "target": "view:brew-decisions",
+  "walkthroughs": [
+    {
+      "id": "request-not-promise",
+      "title": "A Request Is Not a Promise",
+      "description": "Separate the body command, vessel check and optional additions refusal without resolving the RFC’s media-type conflict.",
+      "revision": 2,
+      "modelRevision": "sha256:a5135eb2ee813deb6893dcf7ce2ef99c6e3f9f460b0659ddd0a25ce3af2c1fc4",
+      "author": "agent",
+      "writtenAt": "2026-11-13T03:01:38.027Z",
+      "note": "notes/reading-guide.md",
+      "steps": [
+        {
+          "id": "read-the-command",
+          "title": "Read the command, keep the conflict",
+          "kind": "does",
+          "what": "BREW and POST are equivalent (§2.1.1). Section 4 supplies start or stop, but gives a different Content-Type.",
+          "why": "The dotted line records an unresolved contradiction, not a fallback or a new response code.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "request",
+              "label": "BREW or POST"
+            },
+            {
+              "kind": "node",
+              "id": "body",
+              "label": "Start or Stop"
+            },
+            {
+              "kind": "node",
+              "id": "media",
+              "label": "Content-Type Conflict"
+            }
+          ],
+          "edges": [
+            {
+              "id": "media_conflict",
+              "source": "request",
+              "target": "media",
+              "label": "Two media types"
+            },
+            {
+              "id": "read_body",
+              "source": "request",
+              "target": "body",
+              "label": "Section 4 body"
+            }
+          ]
+        },
+        {
+          "id": "separate-the-vessel",
+          "title": "Separate a teapot from a coffee pot",
+          "kind": "does",
+          "what": "The start branch reaches the vessel question. A teapot should return 418 (§2.3.2); that is separate from unavailable additions.",
+          "why": "The diagram is arranged for reading. The RFC does not prescribe a validation order.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "vessel_check",
+              "label": "Vessel?"
+            },
+            {
+              "kind": "node",
+              "id": "error418",
+              "label": "418 I'm a Teapot"
+            },
+            {
+              "kind": "node",
+              "id": "additions",
+              "label": "Additions Available?"
+            }
+          ],
+          "edges": [
+            {
+              "id": "teapot_refusal",
+              "source": "vessel_check",
+              "target": "error418",
+              "label": "Teapot"
+            },
+            {
+              "id": "pot_additions",
+              "source": "vessel_check",
+              "target": "additions",
+              "label": "Coffee pot"
+            }
+          ]
+        },
+        {
+          "id": "may-refuse",
+          "title": "Read MAY as a choice",
+          "kind": "does",
+          "what": "If the operator cannot comply, a 406 MAY be returned (§2.3.1). For a 406 response to a non-HEAD request, the response SHOULD list available additions.",
+          "why": "The dashed branch permits 406. Other behaviour is unspecified; no successful fallback or response encoding is inferred.",
+          "nodes": [
+            {
+              "kind": "node",
+              "id": "unavailable",
+              "label": "Cannot Supply Additions"
+            },
+            {
+              "kind": "node",
+              "id": "error406",
+              "label": "406 Not Acceptable"
+            },
+            {
+              "kind": "node",
+              "id": "unspecified",
+              "label": "Other Behaviour Unspecified"
+            }
+          ],
+          "edges": [
+            {
+              "id": "additions_refusal",
+              "source": "unavailable",
+              "target": "error406",
+              "label": "MAY return"
+            },
+            {
+              "id": "other_behaviour",
+              "source": "unavailable",
+              "target": "unspecified",
+              "label": "Otherwise unspecified"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

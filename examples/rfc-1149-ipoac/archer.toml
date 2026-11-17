@@ -1,0 +1,43 @@
+version = 1
+name = "IP over Avian Carriers"
+folder = ".archer"
+
+# The README and the reading guide link to the notice; the browser lists it beside them, read-only.
+[discovery]
+roots = [".archer", "NOTICE.md"]
+
+[[views]]
+id = "datagram-flight"
+kind = "sequence"
+title = "One Datagram Takes Flight"
+source = ".archer/diagrams/datagram-flight.mmd"
+
+[[views]]
+id = "packet-day"
+kind = "journey"
+title = "A Packet Has a Flight"
+source = ".archer/diagrams/packet-day.mmd"
+
+[[views]]
+id = "qos-queues"
+kind = "freeform"
+title = "A Pecking Order With Queues"
+source = ".archer/diagrams/qos-queues.mmd"
+
+[[views]]
+id = "carrier-cautions"
+kind = "freeform"
+title = "Carrier Choices and Cautions"
+source = ".archer/diagrams/carrier-cautions.mmd"
+
+[[views]]
+id = "carrier-states"
+kind = "state"
+title = "Delivery Until the Carrier Drops"
+source = ".archer/diagrams/carrier-states.mmd"
+
+[[views]]
+id = "avian-link"
+kind = "architecture"
+title = "The Three-Dimensional Ether"
+source = ".archer/diagrams/avian-link.mmd"

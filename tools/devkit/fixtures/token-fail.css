@@ -1,0 +1,3 @@
+:root { --type-body: 14px; }
+/* Planted drift: this label must be found by the production audit. */
+.label { font-size: 13px; }
