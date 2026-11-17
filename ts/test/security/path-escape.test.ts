@@ -1228,14 +1228,22 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
       `read ${label} swapped to a link while reading`,
       async () => {
         writeFileSync(join(T, "proj-race-template.md"), NOTE("Race"));
-        const child =
+        const start = () =>
           mode === "file"
             ? swapper(join(PROJ, ".archer", path), CANARY_PATH, NOTE("Race"), RACE_MS)
             : swapper(join(PROJ, ".archer/notes/racedir"), join(OUT, "rdir"), "DIR", RACE_MS);
+        let child = start();
         const hits: Hit[] = [];
         let rounds = 0;
         try {
-          while (child.exitCode === null && rounds < 20_000 && !(stopAtHit && hits.length > 0)) {
+          while (rounds < 20_000 && !(stopAtHit && hits.length > 0)) {
+            if (child.exitCode !== null) {
+              // A slow host fits few rounds into one swapper's window: race again until enough have run.
+              if (rounds > 5) break;
+              await exited(child);
+              restoreRace(mode, path);
+              child = start();
+            }
             rounds++;
             for (const [name, read] of READS)
               if (which(name))

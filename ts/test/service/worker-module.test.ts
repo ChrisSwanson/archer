@@ -16,7 +16,8 @@ test("source compile and layout workers inherit an existing tsx loader", () => {
       `
       import { CompilePool } from ${JSON.stringify(compiler)};
       import { LayoutPool } from ${JSON.stringify(layout)};
-      const compiler = new CompilePool(), layout = new LayoutPool();
+      // The budget is not what this checks: a cold worker loading TypeScript through tsx overran 3 s on a slow runner.
+      const compiler = new CompilePool(), layout = new LayoutPool({ workerMs: 60_000, deadlineMs: 60_000 });
       const keepAlive = setInterval(() => {}, 1000);
       try {
         const source = "flowchart LR\\n a[Client] edge@--> b[API]\\n";
@@ -51,7 +52,8 @@ test("source workers return complete geometry when an eval parent inherits --inp
       `
       import { CompilePool } from ${JSON.stringify(compiler)};
       import { LayoutPool } from ${JSON.stringify(layout)};
-      const compiler = new CompilePool(), layout = new LayoutPool();
+      // The budget is not what this checks: a cold worker loading TypeScript through tsx overran 3 s on a slow runner.
+      const compiler = new CompilePool(), layout = new LayoutPool({ workerMs: 60_000, deadlineMs: 60_000 });
       const keepAlive = setInterval(() => {}, 1000);
       try {
         const source = "flowchart LR\\n a[Client] edge@--> b[API]\\n";
@@ -63,7 +65,7 @@ test("source workers return complete geometry when an eval parent inherits --inp
       } finally { clearInterval(keepAlive); compiler.close(); layout.close(); }
     `,
     ],
-    { encoding: "utf8", timeout: 10_000 },
+    { encoding: "utf8", timeout: 120_000 },
   );
   const outcome = JSON.parse(result);
   expect(outcome.measured).toMatchObject({ status: "ready", complete: true });
@@ -71,4 +73,4 @@ test("source workers return complete geometry when an eval parent inherits --inp
   expect(outcome.measured.geometry.states[0].bounds.width).toBeGreaterThan(0);
   expect(outcome.measured.geometry.states[0].bounds.height).toBeGreaterThan(0);
   expect(outcome).toMatchObject({ threaded: true, model: "freeform-graph" });
-});
+}, 130_000);

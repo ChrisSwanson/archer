@@ -27,6 +27,10 @@ test("MCP and local Application return identical geometry for the same exact sou
   const app = createApplication({ cwd: root });
   const args = { viewId: "flow", states: [{ mode: "full" }], viewport: { canvas: { width: 685, height: 696 } } };
   try {
+    // Each side's first layout starts a cold worker, which a slow runner can push past the layout budget;
+    // warm both before comparing, so the comparison is of geometry, not of start-up time.
+    await app.call("measure_diagram", args);
+    await call(client, "measure_diagram", args);
     const local = await app.call("measure_diagram", args);
     const mcp = structured(await call(client, "measure_diagram", args));
     expect(mcp).toEqual(local.structured);
