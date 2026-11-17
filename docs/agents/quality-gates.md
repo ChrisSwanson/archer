@@ -41,7 +41,9 @@ gates; CI does not run them yet (the public tree's Pages workflow runs `docs:bui
 Every runner holds off macOS idle sleep while it runs (`tools/keep-awake.mjs`); on a Mac a run that
 seems to hang for minutes was suspended (see [UI testing](ui-testing.md#where-the-test-time-goes)).
 CI (`.github/workflows/ci.yml`) runs the same list on every pull request and push to main: the unit
-gates in one job, the two browser suites in a second job split into two shards.
+gates in one job, the ts suite again on macOS, and the two browser suites split into three shards.
+A release tag publishes only a commit whose CI passed, after the package installs and runs on Linux
+(x64 and arm64) and macOS.
 
 Build before testing: both suites start services that serve the page build in `ui/dist`, and
 bundle it.
