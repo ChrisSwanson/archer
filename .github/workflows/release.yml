@@ -2,7 +2,8 @@
 # SHA256SUMS and the version's CHANGELOG section as notes (docs/install.md downloads from there).
 #
 # A tag is the release: an annotated vX.Y.Z on a commit of main whose ts/package.json says X.Y.Z
-# (scripts/release-verify-tag.sh refuses anything else). A manual run with `tag` releases an
+# (scripts/release-verify-tag.sh refuses anything else) and whose CI run passed. Nothing is published
+# until the package installs and runs on every platform in the `platforms` job. A manual run with `tag` releases an
 # existing tag again; re-running is safe: the release is reused and its assets replaced.
 name: Release
 
@@ -32,6 +33,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      actions: read
     env:
       TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     outputs:
@@ -57,6 +59,20 @@ jobs:
           scripts/release-notes.sh "$version" CHANGELOG.md > dist/release-notes.md
           echo "releasing $TAG as Archer $version ($(wc -l < dist/release-notes.md) lines of notes)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Tag after main's CI is green: a release never ships a commit its own tests did not pass.
+      - name: Check that CI passed on the tagged commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse "refs/tags/$TAG^{commit}")"
+          passed="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$sha&status=success" --jq .total_count)"
+          if [ "$passed" -eq 0 ]; then
+            echo "::error::CI has not passed on $sha ($TAG). Wait for main's CI to finish green, then re-run this workflow."
+            exit 1
+          fi
+          echo "CI passed on $sha"
 
       - run: npm ci --no-audit --fund=false
 
@@ -91,9 +107,49 @@ jobs:
   # gh uploads the assets to a draft and publishes it after the last one, so a failed run leaves
   # nothing half-downloadable. A release that exists already (a re-run) gets its assets replaced.
   # This job checks out nothing and installs nothing: it holds the write token and runs only gh.
+  # The one package is plain JavaScript for Node 22.18+: install and run it on each platform before
+  # publishing. Windows runs Archer inside WSL, which these runners do not provide.
+  platforms:
+    name: runs on ${{ matrix.os }}
+    needs: build
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15]
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.18
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Install, report the version, and lay out a diagram
+        run: |
+          set -euo pipefail
+          echo "$(uname -sm), Node $(node --version)"
+          scripts/release-smoke.sh "dist/archer-$VERSION.tgz" "$VERSION"
+          npm install --global --no-audit --no-fund --loglevel=error "dist/archer-$VERSION.tgz"
+          # Archer reads only inside a project's .archer folder: lay out a diagram in a throwaway one.
+          project="$(mktemp -d)"
+          mkdir "$project/.archer" && cp ts/test/fixtures/flowchart/minimal.mmd "$project/.archer/flow.mmd"
+          cd "$project"
+          archer validate .archer/flow.mmd
+          archer measure .archer/flow.mmd --json | node -e 'const m=JSON.parse(require("fs").readFileSync(0,"utf8")); if (m.status!=="ready") { console.error(m); process.exit(1) } console.log("measured:", m.status)'
+
   publish:
     name: publish the release
-    needs: build
+    needs: [build, platforms]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:

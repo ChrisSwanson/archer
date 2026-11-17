@@ -1,6 +1,7 @@
 # The gates of `npm run pr-check` on every pull request and push to main: the unit gates in one job,
-# the unit suites again on macOS, the two browser suites in two shards, and a reported (never
-# blocking) `npm audit`.
+# the ts suite again on macOS (its file, socket and watcher code differs there), the two browser
+# suites in three shards, and a reported (never blocking) `npm audit`. The page's own unit tests run
+# in jsdom, which behaves the same everywhere, so they run on Linux only.
 # docs/agents/quality-gates.md lists the gates; keep the two in step.
 name: CI
 
@@ -67,10 +68,10 @@ jobs:
       - name: ts tests
         run: npm --workspace ts test -- --maxWorkers=3
 
-  # macOS has no /proc: file confinement runs on the path anchor there.
-  # Linux passing says nothing about it, so the unit suites run on a Mac too.
+  # macOS has no /proc: file confinement runs on the path anchor there, and file watching runs on
+  # FSEvents. Linux passing says nothing about either, so the ts suite runs on a Mac too.
   macos:
-    name: Unit tests (macOS)
+    name: ts tests (macOS)
     runs-on: macos-15
     timeout-minutes: 40
     steps:
@@ -88,21 +89,19 @@ jobs:
         run: npm run build
       - name: ts bundle
         run: npm --workspace ts run bundle && node ts/dist/archer.js --version
-      - name: ui tests
-        run: npm test
       - name: ts tests
         run: npm --workspace ts test -- --maxWorkers=3
 
-  # Chromium against the page just built, served by the TypeScript service. Two halves in parallel
-  # (about 600 tests); the service's own three browser tests run once, on the first shard.
+  # Chromium against the page just built, served by the TypeScript service. Three shards in parallel
+  # (about 950 tests); the service's own three browser tests run once, on the first shard.
   browser:
-    name: Browser tests (${{ matrix.shard }}/2)
+    name: Browser tests (${{ matrix.shard }}/3)
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3]
     env:
       CI: 'true'
     steps:
@@ -138,7 +137,7 @@ jobs:
         run: npm --workspace ts run test:browser -- --forbid-only
       # --max-failures=3: a shard stops three failures in and reports at once.
       - name: ui test:browser:ts
-        run: npm --workspace ui run test:browser:ts -- --shard=${{ matrix.shard }}/2 --max-failures=3
+        run: npm --workspace ui run test:browser:ts -- --shard=${{ matrix.shard }}/3 --max-failures=3
       - name: Playwright traces and screenshots
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
