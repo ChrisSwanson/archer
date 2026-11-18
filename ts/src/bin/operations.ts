@@ -222,6 +222,11 @@ export async function runCall(args: readonly string[], io: OperationIo): Promise
       },
     }),
   );
+  const inline = [...positionals.slice(1), ...(values.file === undefined ? [] : [values.file])].some(looksLikeJson);
+  if (inline)
+    throw new UsageError(
+      'inline JSON is not accepted: send the arguments on standard input, e.g.  echo \'{"query":"orders"}\' | archer call <tool> --stdin  (or put them in a file and pass --file <path>)',
+    );
   if (positionals.length !== 1 || (values.file !== undefined && values.stdin === true))
     throw new UsageError("call needs <operation> and at most one of --file <json> or --stdin");
   const name = positionals[0]!;
@@ -294,4 +299,9 @@ export async function runTools(args: readonly string[], io: Io): Promise<number>
     );
   }
   return 0;
+}
+
+/** A value that is JSON text where a path or nothing was expected. */
+function looksLikeJson(value: string): boolean {
+  return /^\s*[{[]/.test(value);
 }

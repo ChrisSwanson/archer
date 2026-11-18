@@ -115,6 +115,17 @@ test.each([
   expect((await runner()(args)).code).toBe(2);
 });
 
+test.each([
+  ["call", "find_elements", "--file", '{"query":"orders"}'],
+  ["call", "find_elements", '{"query":"orders"}'],
+  ["call", "find_elements", "--json", '{"query":"orders"}'],
+])("inline JSON in a command is refused with the way to send it: %j", async (...args) => {
+  const result = await runner()(args);
+  expect(result.code).toBe(2);
+  expect(result.err).toMatch(/inline JSON is not accepted[^\n]*--stdin/);
+  expect(result.err).not.toMatch(/ENOENT/);
+});
+
 test.each(["null", "[]", "true", "{broken", '"a"'])("stdin refuses non-object or malformed JSON %j", async (input) => {
   expect((await runner(project(), input)(["call", "list_diagrams", "--stdin"])).code).toBe(2);
 });
