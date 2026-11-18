@@ -1011,11 +1011,17 @@ export class Application {
       );
     const compiled = await compileEmbedded(written);
     const status = compiled.envelope ? "compiled" : "failed";
-    const text = compiled.envelope
+    let text = compiled.envelope
       ? `Diagram '${written.name}' updated in ${written.notePath} (source revision ${short(written.sourceRevision)}); the rest of the note is unchanged.`
       : `Diagram '${written.name}' written to ${written.notePath} but it does not compile:\n${compiled.diagnostics.map(diagnosticLine).join("\n")}\n` +
         `Its body is now at source revision ${written.sourceRevision}: pass that as expectedRevision to write the fix.`;
     const moved = walkthroughChange(held, before, compiled.envelope);
+    // Two blocks under one archer-id: the later one is named as if it had none, which the person does not expect.
+    const clashes = embeddedFromText(read.notePath, next, written.noteRevision).problems.filter((p) =>
+      p.includes("already names the diagram"),
+    );
+    if (clashes.length > 0)
+      text += `\nWarning: ${clashes.join("; ")}. Give each block its own %% archer-id so each keeps a stable address.`;
     // Advice on the diagram written (A6): a renamed block replaces its old address; "new" is against the body it replaced.
     let advice: readonly Advice[] | null = null;
     if (compiled.envelope !== null) {
