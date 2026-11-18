@@ -91,8 +91,8 @@ export function lint(source: string, model: DiagramModel): LintFinding[] {
       diagnostic: warning(
         "edge_label_too_long",
         `edge '${link.id}' has a label of ${[...label].length} characters, which needs ${lines} lines at the ${LABEL_WRAP_CHARS}-character wrap: ` +
-          `a label that long hides its own line. Say it in ${LABEL_MAX_LINES} short lines (about ${LABEL_WRAP_CHARS * LABEL_MAX_LINES} characters, 4 words); ` +
-          "put the detail in the note or the node's description.",
+          `a label that long hides its own line. Say it in ${LABEL_MAX_LINES} short lines: a label is at most ${LABEL_MAX_LINES} lines of ${LABEL_WRAP_CHARS} characters, and a write that adds a longer one is refused. ` +
+          "Put the detail in the note or the node's description.",
         span(line, 1),
       ),
     });

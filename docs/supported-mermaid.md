@@ -156,12 +156,14 @@ statement that does not parse, checking resumes at the next line. The report has
   `critical`, `break` or `box` block, the `option` sections of a rejected `critical`, a second use
   of the same undeclared node or participant, and a `deactivate` after a rejected line that would
   have opened the activation are all left out.
-- A source with no diagram header (`expected_flowchart`) gets that one problem: there is nothing to
+- A source with no diagram header (`expected_flowchart`), or one whose header names a Mermaid type Archer
+  does not draw (`classDiagram`, `gantt`, `C4Code`: `unsupported_diagram_type`), gets that one problem: there is nothing to
   check the rest against. YAML frontmatter is one problem however many lines it holds, and the
   diagram below it is still checked.
 - At most 20 problems are listed. A longer report ends with one `too_many_diagnostics` entry that
   points at the first problem left out. It does not say how many there are: checking stops when the
-  report is full, so the rest of the source is not read and the number is not known. For the same
+  report is full, so the rest of the source is not read and the number is not known. `archer validate` counts
+  the errors listed (20) and says `20 errors shown, more remain`; the marker itself is not counted. For the same
   reason a full report never lists a block as unclosed (`unclosed_subgraph`, `unclosed_fragment`):
   that is only known at the end of the source.
 

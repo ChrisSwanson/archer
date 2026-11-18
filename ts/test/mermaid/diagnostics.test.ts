@@ -110,7 +110,12 @@ const flowchart: Refusal[] = [
     hint: "flowchart TB",
     fixedByHints: true,
   },
-  { name: "a source with no header", source: "classDiagram\n  class A\n", errors: ["expected_flowchart@1:1"] },
+  { name: "a source with no header", source: "  class A\n", errors: ["expected_flowchart@1:3"] },
+  {
+    name: "a diagram type Archer does not draw",
+    source: "classDiagram\n  class A\n",
+    errors: ["unsupported_diagram_type@1:1"],
+  },
   { name: "`&` chaining", source: F("  a[A] & b[B] e1@--> c[C]"), errors: ["unsupported_construct@2:8"] },
   {
     name: "a `;` separator",

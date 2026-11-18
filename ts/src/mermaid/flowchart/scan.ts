@@ -591,7 +591,7 @@ class Scanner {
       ...suggestion.finding.diagnostic,
       message:
         `every edge needs a stable ID, written after its source node: \`${suggestion.source} ${id}@${op} ${suggestion.target}\`. ` +
-        "The edit `add-edge-ids` writes one on every edge that has none.",
+        "`validate_diagram` (or `archer validate <diagram> --json`) returns the source with one on every edge that has none, as `fix.source`.",
       fix: { operation: "add-edge-ids" },
     };
     this.scan.missingIds.push({
