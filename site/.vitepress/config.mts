@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
@@ -25,6 +26,21 @@ export default defineConfig({
   srcExclude: ["README.md", "scripts/**"],
   vite: {
     server: { fs: { allow: [join(siteRoot, "..")] } },
+    // The nav's search button, named by what it shows (theme/SearchButton.vue wraps VitePress's own).
+    resolve: {
+      alias: [
+        {
+          find: /^\.\/VPNavBarSearchButton\.vue$/u,
+          replacement: join(siteRoot, ".vitepress/theme/SearchButton.vue"),
+        },
+        {
+          find: /^vitepress-search-button-original$/u,
+          replacement: createRequire(import.meta.url).resolve(
+            "vitepress/dist/client/theme-default/components/VPNavBarSearchButton.vue",
+          ),
+        },
+      ],
+    },
     // Dev matches GitHub Pages: /playground/app/ opens the public Playground document.
     plugins: [
       publicDirectoryIndex(join(siteRoot, "public"), siteBase),

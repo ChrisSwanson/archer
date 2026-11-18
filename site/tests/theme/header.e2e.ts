@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { type StaticServer, serveStatic } from "../serve-static.ts";
 
@@ -201,3 +202,17 @@ test("a keyboard focus ring in the bar shows at 3:1 against the blue", async ({ 
   );
   expect(ratio).toBeGreaterThanOrEqual(3);
 });
+
+for (const scheme of SCHEMES)
+  for (const size of SIZES)
+    test(`${size.width}px ${scheme}: docs pages under the bar have no axe violations, and search is named by what it shows`, async ({
+      page,
+    }) => {
+      await prepare(page, scheme, size);
+      for (const path of PAGES.filter(Boolean)) {
+        await visit(page, path);
+        const search = page.locator(".VPNavBarSearch button");
+        await expect(search).toHaveAccessibleName(size.width < 768 ? "Search" : /^Search\b.*K$/u);
+        expect((await new AxeBuilder({ page }).analyze()).violations, path).toEqual([]);
+      }
+    });
