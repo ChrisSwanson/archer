@@ -68,16 +68,14 @@ function vocabularies(): Record<string, string[]> {
 /**
  * The semantic classes. NOT in the schema, which types `classes` as free
  * strings: the closed list is the parser's, and the document that states it is
- * `docs/supported-mermaid.md` ("The supported semantic classes are ...").
+ * `ts/docs/supported-mermaid.md` ("The six built-in kinds are ...").
  * Read from there, so a class added to the profile with no drawing fails here.
  */
 function semanticClasses(): string[] {
-  const doc = readFileSync(resolve(process.cwd(), "../docs/supported-mermaid.md"), "utf8").replace(/\s+/g, " ");
-  const sentence = /The supported semantic classes are (.+?); unknown classes are diagnostics/.exec(doc);
+  const doc = readFileSync(resolve(process.cwd(), "../ts/docs/supported-mermaid.md"), "utf8").replace(/\s+/g, " ");
+  const sentence = /The six built-in kinds are (.+?)\. A node gets one/.exec(doc);
   if (sentence === null) {
-    throw new Error(
-      "docs/supported-mermaid.md no longer states the supported semantic classes in the sentence this test reads",
-    );
+    throw new Error("ts/docs/supported-mermaid.md no longer states the built-in kinds in the sentence this test reads");
   }
   return [...sentence[1].matchAll(/`([^`]+)`/g)].map((match) => match[1]);
 }

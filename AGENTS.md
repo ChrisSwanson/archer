@@ -24,7 +24,7 @@ Before changing code:
    plans and open questions live in issues, not in files.
 2. Read the contracts that bind the area: [frozen boundaries](docs/agents/frozen-boundaries.md),
    and for Mermaid [`ts/docs/supported-mermaid.md`](ts/docs/supported-mermaid.md) (accepted and
-   rejected syntax; `docs/supported-mermaid.md` is the older Rust 0.3 profile).
+   rejected syntax; the root `docs/supported-mermaid.md` only points there).
 3. Read the Archer folder's diagrams and notes for the part you change (below).
 4. Check [`docs/known-failures.md`](docs/known-failures.md) for open failures in what you will run.
 
