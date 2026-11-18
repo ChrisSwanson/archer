@@ -86,6 +86,20 @@ test("a diagram type Archer does not draw is named as unsupported", async () => 
   expect((await run(none, ["validate", ".archer/x.mmd"])).out).toMatch(/ expected_flowchart /);
 });
 
+test("every diagram type the unsupported-type refusal offers is one Archer accepts", async () => {
+  const dir = tempDir({ ".archer/x.mmd": "classDiagram\n  x\n" });
+  const { out } = await run(dir, ["validate", ".archer/x.mmd"]);
+  const offered = [...(out.split("Archer draws")[1] ?? "").matchAll(/`([^`]+)`/g)].map((m) => m[1]!);
+  expect(offered.length).toBeGreaterThan(5);
+  for (const header of offered) {
+    const each = tempDir({ ".archer/y.mmd": `${header}\n` });
+    const result = (await run(each, ["validate", ".archer/y.mmd"])).out;
+    expect(result, header).not.toMatch(
+      /:1:\d+ error (unsupported_diagram_type|unsupported_construct|expected_flowchart) /,
+    );
+  }
+});
+
 test("an over-long edge label's message states the real rule", async () => {
   const dir = tempDir({
     ".archer/x.mmd":

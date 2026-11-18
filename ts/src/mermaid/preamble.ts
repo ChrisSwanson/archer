@@ -152,7 +152,7 @@ export function readPreamble(source: string): Preamble {
         error(
           "unsupported_diagram_type",
           `\`${word}\` is a Mermaid diagram type Archer does not support. Archer draws \`flowchart\`, \`sequenceDiagram\`, ` +
-            "`stateDiagram-v2`, `erDiagram`, `C4Context` (or `C4Container`, `C4Component`, `C4Dynamic`), `architecture-beta` and `journey`: " +
+            "`stateDiagram-v2`, `erDiagram`, `C4Context` (or `C4Container`, `C4Component`), `architecture-beta` and `journey`: " +
             "say so, or draw the same facts in one of those",
           at,
         ),

@@ -66,7 +66,7 @@ init      make this directory an Archer project: archer.toml, the Archer folder
           (.archer/ by default) and a pointer to it in AGENTS.md, and in CLAUDE.md if it exists;
           --docs also turns docs mode on (mode = "docs"), with no stub files
 list      the diagrams and notes in the Archer folder, with compile status
-validate  check a diagram: file:line:col code message, with the fix as a hint;
+validate  check a diagram: file:line:col error|warning code message, with the fix as a hint;
           --json prints one JSON value (diagnostics, and lint as present has it);
           an existing view lists up to 5 ids other views already spell differently;
           --suggest lists them all, --no-suggest none
