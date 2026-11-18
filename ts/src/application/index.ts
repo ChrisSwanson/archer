@@ -2139,7 +2139,7 @@ export class Application {
     const { envelope, failing } = await this.model(project, view);
     if (envelope === null)
       throw toolError(
-        "diagram_not_found",
+        "diagram_not_compiled",
         `no compiled diagram is available for view '${view.id}': its source has never compiled (${failing?.length ?? 0} problem(s)). ` +
           "Call read_diagram to see why and to get its source.",
         { diagnostics: failing ?? [] },
@@ -2327,7 +2327,7 @@ export class Application {
     const { envelope, failing } = await this.model(project, view);
     if (envelope === null)
       throw toolError(
-        "diagram_not_found",
+        "diagram_not_compiled",
         `no compiled diagram is available for view '${view.id}': its source has never compiled (${failing?.length ?? 0} problem(s)). Call read_diagram to see why.`,
       );
     const resolved = emphasis.resolve(draft, emphasis.addressable(envelope.model));

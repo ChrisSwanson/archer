@@ -244,7 +244,8 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
     name: "find_elements",
     description:
       "Look up what this project's diagrams already draw, before drawing: by name, id or technology (query), or one element with its " +
-      "relationships (id). Reuse a hit's id; a new element needs a specific id. kind, parent and diagram filter exactly. Proposed designs and based-on copies are left out.",
+      "relationships (id). Reuse a hit's id; a new element needs a specific id. kind, parent and diagram filter exactly. Proposed designs and based-on copies are left out. " +
+      "Only elements with a kind are indexed: C4 and architecture elements, sequence participants, and flowchart nodes with a kind class (`a[Orders]:::system`; also person, container, component, database). A plain flowchart node without one is not found: add the class to make it visible.",
     annotations: { readOnlyHint: true },
     inputSchema: closed({
       query: {
@@ -434,7 +435,7 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
     description:
       "Replace a view's Mermaid source when the person wants it changed; a new subject goes in a new note or file, and pointing at parts is set_emphasis. Pass its current sourceRevision as expectedRevision; if the file changed since, nothing is " +
       "written and the error gives the revision to use. A compiled write returns a fresh modelRevision for present_diagram. Source that " +
-      `does not compile is still written, with status "failed" and every problem: fix it. For <note path>#<name> only that mermaid ` +
+      `does not compile is still written, with status "failed" and every problem: fix it. A source identical to the file is not rewritten: status "unchanged". For <note path>#<name> only that mermaid ` +
       "block's body is replaced; prose edits around it are no conflict. A block nested in a list or blockquote is refused: relocate: true " +
       "moves it to the top level, only in your own note (author: agent) or when the person asked (then also personRequested: true). " +
       "Optional layoutReview is non-blocking; pending advice can be inspected with measure_diagram and never changes write success. " +

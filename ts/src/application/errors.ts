@@ -45,6 +45,8 @@ export const ERROR_CODES = {
   unknown_tool: CALLER,
   invalid_request: CALLER,
   diagram_not_found: NOT_FOUND,
+  // The view exists, but its source has never compiled: read_diagram says why.
+  diagram_not_compiled: CALLER,
   resource_not_found: NOT_FOUND,
   revision_conflict: CALLER,
   invalid_source: CALLER,

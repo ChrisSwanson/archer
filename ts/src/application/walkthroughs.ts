@@ -247,7 +247,7 @@ export async function writeWalkthrough(
 
   if (envelope === null)
     throw toolError(
-      "diagram_not_found",
+      "diagram_not_compiled",
       `no compiled diagram is available for view '${view.id}': its source has never compiled. Call read_diagram to see why.`,
     );
   const modelRevision = args["modelRevision"];
