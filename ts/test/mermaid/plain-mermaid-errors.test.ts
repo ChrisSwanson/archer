@@ -53,6 +53,13 @@ describe("flowchart", () => {
     expect(found[0]?.message).toContain("`b[Label]`");
   });
 
+  test("another diagram's header pasted into a flowchart is named as a different diagram type", async () => {
+    const found = await errors(F("  a[A]\n  classDiagram"));
+    expect(located(found)).toEqual(["unsupported_construct@3:3"]);
+    expect(found[0]?.message).toContain("different diagram type");
+    expect(found[0]?.message).not.toContain("classDiagram[Label]");
+  });
+
   test("a reserved word Mermaid reads as an ID is not refused", async () => {
     expect(await errors(F("  a[A]\n  endpoint[End]\n  a e1@--> endpoint"))).toEqual([]);
   });
