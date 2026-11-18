@@ -271,11 +271,14 @@ flowchart BT
   subgraph backend["Backend services (core)"]
     subgraph data
       db[(Orders)]
+      cache[(Cache)]
     end
     api
     worker[Worker]
   end
-  worker e1@--> db
+  api e1@--> worker
+  worker e2@--> db
+  worker e3@--> cache
 ```
 
 Subgraphs may nest at most 24 levels deep (`subgraph_nesting_too_deep`, at the `subgraph` keyword
