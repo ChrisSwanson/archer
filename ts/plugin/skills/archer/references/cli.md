@@ -69,6 +69,11 @@ A restart keeps the listener; if Archer forgot it, `wait` and `inbox` register a
 themselves, never over another agent's live claim (then they exit 1 and say who listens).
 Every `archer` call from the listener counts as it reporting in.
 
+Without background tasks (a harness that cannot leave `archer wait` running): `archer listen --claim` once,
+then at the start of each turn `archer inbox --brief` (or `archer wait --timeout 50`, below the harness's
+command limit; it exits 0 on a message and at the timeout, so run it again). From a detached shell pass the
+agent id `listen --claim` printed as `--as <id>` to `wait` and `inbox`.
+
 In a docs-mode project (`archer init --docs` sets `mode = "docs"`), `archer docs docs-mode` is the
 pack reference and `archer docs index [--write] [--check] [question]` is the `docs_index` tool:
 the router, a question routed to at most three files, and pack health (`--check` exits 1 on a failure).

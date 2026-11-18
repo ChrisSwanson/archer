@@ -407,3 +407,24 @@ test("checkPage needs a 2xx from the link itself, on loopback and on this comput
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+test("doctor's no-skill failure for another agent names both generic steps and the guide", async () => {
+  const fake = await fakeService();
+  const home = skillHome(null);
+  const run = io(home, { HOME: home });
+  const code = await runDoctor([], run.io, {
+    connect: () => connectService(fake.socketPath),
+    checkPage: async () => ({ ok: true }),
+    detect: () => ({ host: "other" }),
+  });
+  expect(code).toBe(1);
+  const tell = /Tell the person: (.*)/.exec(
+    run
+      .out()
+      .split("\n")
+      .find((l) => l.includes("Tell the person")) ?? "",
+  );
+  expect(tell?.[1]).toMatch(/archer mcp/);
+  expect(tell?.[1]).toMatch(/archer skill --write <.*skills folder>\/archer/);
+  expect(tell?.[1]).toMatch(/other-agents/);
+});

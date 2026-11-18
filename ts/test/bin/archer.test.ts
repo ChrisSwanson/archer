@@ -175,3 +175,10 @@ test("the usage says which diagram types draw can draw", async () => {
   expect(out).toMatch(/^draw .*flowchart, state and entity-relationship diagrams/m);
   expect(out).toMatch(/Other kinds[\s\S]*browser page/);
 });
+
+test("the help says doctor starts the service and init updates an existing CLAUDE.md", async () => {
+  const { out } = await run(["--help"]);
+  const section = (name: string): string => new RegExp(`^${name} .*(?:\\n {10}.*)*`, "m").exec(out)?.[0] ?? "";
+  expect(section("doctor")).toMatch(/starts it|starts the service/);
+  expect(section("init")).toMatch(/CLAUDE\.md if it exists/);
+});

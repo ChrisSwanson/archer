@@ -63,7 +63,7 @@ const USAGE = `usage: archer init [dir] [--docs]
        archer --version
 
 init      make this directory an Archer project: archer.toml, the Archer folder
-          (.archer/ by default) and a pointer to it in AGENTS.md and CLAUDE.md;
+          (.archer/ by default) and a pointer to it in AGENTS.md, and in CLAUDE.md if it exists;
           --docs also turns docs mode on (mode = "docs"), with no stub files
 list      the diagrams and notes in the Archer folder, with compile status
 validate  check a diagram: file:line:col code message, with the fix as a hint;
@@ -97,7 +97,8 @@ inbox     the person's messages waiting in Archer; --hook is the turn-start hook
 skill     print the Archer skill this CLI ships (--references adds its references), or
           --write it as a folder
 doctor    check that this CLI runs, the service and its page are reachable from here and the
-          installed skill matches; each failure says what to tell the person
+          installed skill matches; it starts the service if none is running (archer stop ends
+          it); each failure says what to tell the person
 pair      issue a short single-use code to type at Archer's address on another device
           (a phone, another computer) instead of carrying a link; needs a running service
 network-access

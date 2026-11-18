@@ -419,6 +419,19 @@ const userServers = (dir: string) =>
     : {};
 
 describe("archer setup and uninstall", () => {
+  test("setup says a service starts on first use and archer stop ends it; with neither Claude Code nor Codex it gives the two generic steps", () => {
+    const pkg = fakePackage("neither");
+    const home = fresh("neither-home");
+    const env = { HOME: home, PATH: [dirname(process.execPath), "/usr/bin", "/bin"].join(":") };
+    const setup = archer(pkg, env, "setup");
+    expect(setup.status, setup.stderr + setup.stdout).toBe(0);
+    expect(setup.stdout).toMatch(/service starts on first use.*archer stop/i);
+    expect(setup.stdout).toContain("Still to do by hand");
+    expect(setup.stdout).toMatch(/Another agent.*archer mcp/s);
+    expect(setup.stdout).toMatch(/archer skill --write <.*skills folder>\/archer/);
+    expect(setup.stdout).toContain("other-agents");
+  });
+
   test("a new install links the skill and adds one turn-start hook per host, with no plugin and no MCP", () => {
     const pkg = fakePackage("new");
     const { env, p, claudeDir } = machine("new-home");
