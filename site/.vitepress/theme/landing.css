@@ -2,7 +2,8 @@
    film, then How it works, the uses, the install and the footer in the docs theme's own tokens. Inside the film,
    Archer is drawn in the app's own tokens (`ui/src/styles.css`), light or dark with the page. */
 :root {
-  --landing-stage: #34499e;
+  /* The stage continues the site's top bar (style.css), one blue in both themes. */
+  --landing-stage: var(--docs-bar);
   --landing-on-stage: #ffffff;
   --landing-on-stage-dim: rgb(255 255 255 / 88%);
   --landing-on-stage-quiet: rgb(255 255 255 / 80%);
@@ -16,33 +17,6 @@
   --landing-band-line: #273141;
 }
 
-/* ---------- the nav, on the stage until the reader scrolls past it ---------- */
-html.landing-on-stage .VPNavBar,
-html.landing-on-stage .VPNavBar .content-body,
-html.landing-on-stage .VPNavBar .title {
-  --vp-nav-bg-color: var(--landing-stage);
-  --vp-c-text-1: var(--landing-on-stage);
-  --vp-c-text-2: var(--landing-on-stage-dim);
-  --vp-c-brand-1: var(--landing-on-stage);
-  --vp-c-gutter: transparent;
-  --vp-c-divider: rgb(255 255 255 / 28%);
-  --vp-c-bg-alt: rgb(255 255 255 / 12%);
-  --vp-c-bg-soft: rgb(255 255 255 / 12%);
-  --vp-c-default-soft: rgb(255 255 255 / 16%);
-  --vp-c-border: rgb(255 255 255 / 35%);
-  --vp-switch-bg-color: rgb(0 0 0 / 22%);
-  --vp-c-brand-soft: rgb(255 255 255 / 20%);
-  background-color: var(--landing-stage);
-}
-html.landing-on-stage .VPNavBar .divider-line {
-  background-color: transparent;
-}
-html.landing-on-stage .VPNavBar :focus-visible {
-  outline-color: var(--landing-on-stage);
-}
-.VPNavBar {
-  transition: background-color 0.25s, color 0.25s;
-}
 /* ---------- page ---------- */
 .landing {
   overflow-x: clip;

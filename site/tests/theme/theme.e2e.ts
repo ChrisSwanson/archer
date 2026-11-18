@@ -519,22 +519,6 @@ test.describe("leaving and coming back", () => {
   });
 });
 
-test.describe("the nav on the stage", () => {
-  test("the nav sits on the stage at the top, and takes the docs bar once the reader scrolls on", async ({ page }) => {
-    await open(page);
-    const html = page.locator("html");
-    await expect(html).toHaveClass(/landing-on-stage/u);
-    await page.evaluate(() => window.scrollTo(0, 1200));
-    await expect(html).not.toHaveClass(/landing-on-stage/u);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await expect(html).toHaveClass(/landing-on-stage/u);
-    // Leaving the landing leaves no stage behind.
-    await page.locator(".VPNavBar").getByRole("link", { name: "Docs" }).click();
-    await expect(page).toHaveURL(new RegExp(`${base}install$`, "u"));
-    await expect(html).not.toHaveClass(/landing-on-stage/u);
-  });
-});
-
 test.describe("install", () => {
   test.use({ permissions: ["clipboard-read", "clipboard-write"] });
   test("arrow keys switch npx/curl, Copy copies the full command though the page draws it short", async ({ page }) => {

@@ -17,7 +17,7 @@ full; colour from DESIGN.md; light and dark; 390px without horizontal scroll; no
 THESIS: Same question, same answer, side by side: the chat alone (a long terminal reply) against Archer (the answer
 drawn, walked, pointed at and commented on). Refuses the headline-over-three-cards product page.
 
-OWN-WORLD: Fira Sans, the ink-blue stage (#2645a3 / #1f2b52) under the nav, a dark terminal and a browser window
+OWN-WORLD: Fira Sans, the ink-blue stage #34499e (the owner's R3-2 value, one colour in both themes) continuing the site's top bar, which is the same blue on every page and does not change on scroll, a dark terminal and a browser window
 with soft shadows (the sanctioned exception, DESIGN.md Components), the app's own light and dark tokens inside the
 browser window, reader blue for selection and the comment pin, agent amber for the agent's reply.
 

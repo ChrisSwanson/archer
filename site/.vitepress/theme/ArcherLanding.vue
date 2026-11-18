@@ -2,7 +2,6 @@
 // The docs landing, as the owner's R3-2 design lays it out: a coloured stage with the side-by-side film, how it
 // works, what you can do with it (real Archer Tour captures), the install, and the footer.
 import { withBase } from "vitepress";
-import { onMounted, onUnmounted } from "vue";
 import appDark from "./assets/landing/app-dark.webp";
 import appLight from "./assets/landing/app-light.webp";
 import pointDark from "./assets/landing/point-dark.webp";
@@ -12,7 +11,6 @@ import walkLight from "./assets/landing/walk-light.webp";
 import InstallBlock from "./InstallBlock.vue";
 import "./landing.css";
 import LandingFilm from "./LandingFilm.vue";
-import { navOnStage } from "./landing-nav.mts";
 
 const steps = [
   {
@@ -70,12 +68,6 @@ const uses = [
 
 const repo = "https://github.com/chrisswanson/archer";
 const script = withBase("/install.sh");
-
-let release: (() => void) | undefined;
-onMounted(() => {
-  release = navOnStage(window);
-});
-onUnmounted(() => release?.());
 </script>
 
 <template>

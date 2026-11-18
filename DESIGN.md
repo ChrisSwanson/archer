@@ -491,9 +491,20 @@ thread grouping, reader/agent rail, selected state, and destructive confirmation
 role colors and hierarchy. Collapsed threads align to a consistent rhythm; expanded threads continue
 the same conversation rail. Motion communicates state only when reduced motion is not requested.
 
+### Docs site top bar
+
+Every page of the documentation site, the landing and each docs page, in both themes, has one top bar: the stage
+blue `#34499e` (`--docs-bar`, the owner's R3-2 choice), with a white title, white nav links, a translucent white
+search field and the theme switch. The title, search, links and switch sit at the same place and size on every page
+at desktop and phone widths, so moving from the landing into the docs changes nothing at the top; on docs pages the
+bar spans the sidebar column rather than sizing a title cell to it. The bar never changes colour on scroll. The
+current section's link is underlined (2px) as well as named, since every link on the bar is white; focus rings on
+the bar are white (8:1). Menus that open from the bar (the "more" menu, the phone menu, the search dialog) use the
+page's own surface and colours.
+
 ### Docs landing: the film and the install terminal
 
-The docs landing is the one sanctioned exception to the no-window-chrome and no-resting-shadow rules. Under an ink-blue stage, a scripted film sets the same answer side by
+The docs landing is the one sanctioned exception to the no-window-chrome and no-resting-shadow rules. Under the stage, which continues the top bar's blue (`#34499e`) in both themes, a scripted film sets the same answer side by
 side: "Chat alone", the agent's long reply in a terminal window (macOS lights and a title, the answer as real,
 selectable text in a scrollable `role="log"`), and "With Archer", a browser window (lights and the Archer address)
 around the app's own chrome: crumbs, title, rail, canvas, side panel with the walkthrough and the Diagram Key. Both
