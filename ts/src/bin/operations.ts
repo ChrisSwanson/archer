@@ -3,7 +3,7 @@
 import { quoted } from "../application/errors.ts";
 import { TRUST_STEPS, type AskPerson } from "../application/network-access.ts";
 import { randomBytes } from "node:crypto";
-import { readFileSync, statSync, writeFileSync, renameSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, statSync, writeFileSync, renameSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { createApplication, OPERATIONS, OperationError } from "../application/index.ts";
@@ -223,7 +223,12 @@ export async function runCall(args: readonly string[], io: OperationIo): Promise
       },
     }),
   );
-  const inline = [...positionals.slice(1), ...(values.file === undefined ? [] : [values.file])].some(looksLikeJson);
+  // A --file value is a path first: only one that names no file and reads as JSON is inline JSON.
+  const fileIsInline =
+    values.file !== undefined &&
+    looksLikeJson(values.file) &&
+    !existsSync(resolve(io.cwd ?? process.cwd(), values.file));
+  const inline = positionals.slice(1).some(looksLikeJson) || fileIsInline;
   if (inline)
     throw new UsageError(
       'inline JSON is not accepted: send the arguments on standard input, e.g.  echo \'{"query":"orders"}\' | archer call <tool> --stdin  (or put them in a file and pass --file <path>)',

@@ -137,6 +137,13 @@ test.each([
   expect(result.err).not.toMatch(/ENOENT/);
 });
 
+test("a --file path that starts with a bracket is read as a file, not refused as inline JSON", async () => {
+  const root = project();
+  writeFileSync(join(root, "[draft].json"), '{"query":"orders"}');
+  const result = await runner(root)(["call", "find_elements", "--file", "[draft].json"]);
+  expect(result.err).not.toMatch(/inline JSON/);
+});
+
 test.each(["null", "[]", "true", "{broken", '"a"'])("stdin refuses non-object or malformed JSON %j", async (input) => {
   expect((await runner(project(), input)(["call", "list_diagrams", "--stdin"])).code).toBe(2);
 });
