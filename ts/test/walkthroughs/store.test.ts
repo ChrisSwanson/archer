@@ -367,7 +367,10 @@ describe("writes", () => {
         }),
       "invalid_walkthrough",
     );
-    refused(() => store.remove(place, "ask", 1), "walkthrough_changed");
+    expect(refused(() => store.remove(place, "ask", 1), "walkthrough_changed").message).toMatch(
+      /then delete it again with expectedRevision 2/,
+    );
+    expect(stale.message).toMatch(/then write it again with expectedRevision 2/);
     refused(() => store.remove(place, "nope", 1), "invalid_walkthrough");
     store.remove(place, "ask", 2);
     expect(existsSync(file)).toBe(false);
