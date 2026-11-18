@@ -7,25 +7,18 @@
 Your coding agent draws its answer as Mermaid diagrams and Markdown notes in your repo.<br>
 Archer shows them in your browser, where you walk through them, point at the part you mean and comment.
 
-[![CI](https://github.com/chrisswanson/archer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chrisswanson/archer/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/chrisswanson/archer?sort=semver)](https://github.com/chrisswanson/archer/releases/latest)
-[![License](https://img.shields.io/github/license/chrisswanson/archer)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A522.18-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Docs](https://img.shields.io/badge/docs-chrisswanson.github.io%2Farcher-5468ff)](https://chrisswanson.github.io/archer/)
+[![CI](https://github.com/chrisswanson/archer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chrisswanson/archer/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/chrisswanson/archer?sort=semver)](https://github.com/chrisswanson/archer/releases/latest) [![License](https://img.shields.io/github/license/chrisswanson/archer)](LICENSE) [![Node](https://img.shields.io/badge/node-%E2%89%A522.18-339933?logo=node.js&logoColor=white)](https://nodejs.org/) [![Docs](https://img.shields.io/badge/docs-chrisswanson.github.io%2Farcher-5468ff)](https://chrisswanson.github.io/archer/)
 
-[**Docs**](https://chrisswanson.github.io/archer/install) ·
-[**Try the playground**](https://chrisswanson.github.io/archer/playground/app/index.html) ·
-[**Why Archer**](https://chrisswanson.github.io/archer/why) ·
-[**Releases**](https://github.com/chrisswanson/archer/releases)
+[**Docs**](https://chrisswanson.github.io/archer/install) · [**Try the playground**](https://chrisswanson.github.io/archer/playground/app/index.html) · [**Why Archer**](https://chrisswanson.github.io/archer/why) · [**Releases**](https://github.com/chrisswanson/archer/releases)
 
 <br>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/media/archer-film-dark.webp">
-  <img src="docs/media/archer-film-light.webp" width="900" alt="A coding agent's long answer in a terminal, beside the same answer in Archer: a walkthrough lights each step of the payment flow, a comment on a connection gets the agent's reply, and the revised drawing and its sequence diagram follow.">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/archer-demo-dark.webp">
+  <img src="docs/media/archer-demo-light.webp" width="900" alt="Archer in the browser: a saved walkthrough steps through a payment flowchart; a comment on the Charge connection gets the agent's reply as the diagram redraws with a dead-letter queue; then a sequence diagram shows the agent's highlights.">
 </picture>
 
-<sub>A 30-second scripted example. <a href="docs/media/archer-film-light.mp4">Watch it as video</a>.</sub>
+<sub>Recorded from the real app: a walkthrough, a comment, the agent's reply and revision, then a sequence diagram with its highlights. <a href="docs/media/archer-demo-light.mp4">Watch it as video</a>.</sub>
 
 </div>
 
