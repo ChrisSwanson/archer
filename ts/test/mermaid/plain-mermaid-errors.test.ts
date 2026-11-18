@@ -110,3 +110,20 @@ describe("sequence diagram", () => {
     expect(await errors(applyHints(source, found))).toEqual([]);
   });
 });
+
+describe("ER diagram", () => {
+  const E = (body: string) => `erDiagram\n  A {\n    int id\n  }\n  B {\n    int id\n  }\n${body}\n`;
+
+  test('a relationship with no label shows `: ""` as the form for none', async () => {
+    const found = await errors(E("  A ||--o{ B"));
+    expect(located(found)).toEqual(["unsupported_construct@8:3"]);
+    expect(found[0]?.message).toContain('`A ||--o{ B : ""`');
+  });
+
+  test("an attribute with a key but no type is named, as a bare name is", async () => {
+    const found = await errors("erDiagram\n  A {\n    id PK\n  }\n");
+    expect(located(found)).toEqual(["unsupported_construct@3:5"]);
+    expect(found[0]?.message).toContain("no type");
+    expect(found[0]?.message).toContain("`int id PK`");
+  });
+});

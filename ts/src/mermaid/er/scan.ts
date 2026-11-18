@@ -248,6 +248,17 @@ class Scanner {
   #attribute(line: SourceLine, start: number, trimmed: string): void {
     const match = ATTRIBUTE.exec(trimmed);
     const entity = this.#block?.entity;
+    const [, first = "", second = ""] = match ?? [];
+    if (match && KEYS.has(second.replace(/,.*$/, ""))) {
+      // `id PK`: Mermaid reads the name as the type and refuses the key.
+      return this.report.error(
+        line,
+        "unsupported_construct",
+        `attribute '${first}' has a key but no type: write the type first, then the name and its keys, ` +
+          `as in \`int ${first} ${trimmed.slice(first.length).trim()}\``,
+        line.statementSpan(),
+      );
+    }
     if (!match) {
       return this.report.unsupported(
         line,
@@ -278,6 +289,13 @@ class Scanner {
 
   #relationship(line: SourceLine, start: number, trimmed: string): void {
     const match = RELATIONSHIP.exec(trimmed);
+    if (!match && !trimmed.includes(":") && RELATIONSHIP.test(`${trimmed} : x`)) {
+      return this.report.unsupported(
+        line,
+        "a relationship with no label",
+        `write its label after a colon, ${EXAMPLE}, or \`${trimmed} : ""\` for none`,
+      );
+    }
     if (!match) {
       const words = /\b(one|zero|many|only)\b/i.test(trimmed);
       return this.report.unsupported(
