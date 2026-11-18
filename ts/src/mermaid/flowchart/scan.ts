@@ -89,6 +89,18 @@ export interface FlowchartScan {
 const DIRECTIONS: Record<string, Direction> = { LR: "lr", RL: "rl", TB: "tb", TD: "tb", BT: "bt" };
 const SUPPORTED_SHAPES = new Set(["(", "((", "([", "[", "[[", "[(", "{", "{{"]);
 const STYLING = ["style", "linkStyle", "click"] as const;
+/** Words Mermaid's flowchart grammar keeps for itself, so it refuses a node with one as its ID. */
+const RESERVED_IDS = new Set([
+  "end",
+  "subgraph",
+  "graph",
+  "flowchart",
+  "style",
+  "class",
+  "classDef",
+  "linkStyle",
+  "interpolate",
+]);
 
 interface PendingSuggestion {
   finding: Finding;
@@ -377,6 +389,19 @@ class Scanner {
     if (idToken?.kind !== "id") return undefined;
     let next = index + 1;
     const id = idToken.text;
+    if (RESERVED_IDS.has(id)) {
+      // Reported only when Mermaid refuses the source: its own complaint does not say why.
+      this.report(
+        line,
+        error(
+          "invalid_id",
+          `\`${id}\` is a reserved word in Mermaid and cannot be a node ID: give the node another ID, such as \`${id}_node\``,
+          line.span(idToken.start, idToken.end),
+        ),
+        [],
+        true,
+      );
+    }
     const shape = tokens[next]?.kind === "shape" ? (tokens[next] as ShapeToken) : undefined;
     if (shape) {
       next += 1;
