@@ -110,7 +110,7 @@ test("validate prints validate_diagram's reading-rule warnings and advice, not a
   const { code, out, err } = await run(dir, ["validate", "shop"]);
   expect(err).toBe("");
   expect(code).toBe(0);
-  expect(out).toMatch(/^\.archer\/diagrams\/shop\.mmd:7:\d+ edge_label_too_long /m);
+  expect(out).toMatch(/^\.archer\/diagrams\/shop\.mmd:7:\d+ warning edge_label_too_long /m);
   expect(out).toMatch(/^\.archer\/diagrams\/shop\.mmd: ok, 1 warning$/m);
   expect(out).toMatch(/^Advice \(fix each, or say in one line why not\):\n- .*\[technology_is_path\]$/m);
   expect(out).not.toMatch(UNSAFE);
@@ -122,19 +122,19 @@ test("validate reads an embedded diagram's warnings at its lines in the note", a
   const { code, out } = await run(dir, ["validate", "notes/shop.md#shop"]);
   expect(code).toBe(0);
   // Line 7 of the source is line 16 of the note (the fence opens on 8, the pin is 9).
-  expect(out).toMatch(/^\.archer\/notes\/shop\.md:16:\d+ edge_label_too_long /m);
+  expect(out).toMatch(/^\.archer\/notes\/shop\.md:16:\d+ warning edge_label_too_long /m);
   expect(out).toMatch(/notes\/shop\.md#shop: ok, 1 warning$/m);
   expect(out).toMatch(/\[technology_is_path\]/);
 });
 
-test("validate prints file:line:col code message, then the hint, and exits 1", async () => {
+test("validate prints file:line:col severity code message, then the hint, and exits 1", async () => {
   const dir = tempDir({ ".archer/old.mmd": FLOW_OLD });
   const { code, out } = await run(join(dir, ".archer"), ["validate", "old.mmd"]);
   expect(code).toBe(1);
   expect(out.split("\n")).toEqual([
-    "old.mmd:2:5 legacy_syntax Mermaid needs this label quoted: it holds parentheses, brackets, braces or quotes",
+    "old.mmd:2:5 error legacy_syntax Mermaid needs this label quoted: it holds parentheses, brackets, braces or quotes",
     '  hint:   a["A (x)"]',
-    "old.mmd:4:11 legacy_syntax Mermaid needs this label quoted: it holds parentheses, brackets, braces or quotes",
+    "old.mmd:4:11 error legacy_syntax Mermaid needs this label quoted: it holds parentheses, brackets, braces or quotes",
     '  hint:   a e@-->|"reads (c)"| b',
     "old.mmd: 2 errors",
     "",
@@ -263,7 +263,7 @@ test("compile of a broken diagram prints its diagnostics and exits 1", async () 
   const { code, out, err } = await run(dir, ["compile", "bad"]);
   expect(code).toBe(1);
   expect(out).toBe("");
-  expect(err).toMatch(/^\.archer\/bad\.mmd:2:8 unsupported_construct /m);
+  expect(err).toMatch(/^\.archer\/bad\.mmd:2:8 error unsupported_construct /m);
 });
 
 // ------------------------------------------------------------------ draw

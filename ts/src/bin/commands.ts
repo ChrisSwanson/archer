@@ -1,5 +1,6 @@
 // The commands that work on a project's Archer folder: init, list, validate,
 // compile, and draw by name. Loaded only when one of them runs.
+import { readFileSync } from "node:fs";
 import { relative, resolve, sep, isAbsolute, basename } from "node:path";
 import { parseArgs } from "node:util";
 import type { Diagnostic } from "../mermaid/index.ts";
@@ -29,17 +30,26 @@ function shown(project: Project, path: string, io: Io): string {
 }
 
 const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? "" : "s"}`;
+/** The marker `finishReport` adds after the cap; it says more remain, and is not itself a problem in the source. */
+const CAP_MARKER = "too_many_diagnostics";
 const errorsIn = (diagnostics: readonly Diagnostic[]): number =>
-  diagnostics.filter((d) => d.severity === "error").length;
+  diagnostics.filter((d) => d.severity === "error" && d.code !== CAP_MARKER).length;
+const capped = (diagnostics: readonly Diagnostic[]): boolean => diagnostics.some((d) => d.code === CAP_MARKER);
+/** `2 errors`; past the report's cap, `20 errors shown, more remain` (the true count is not known). */
+const errorStatus = (diagnostics: readonly Diagnostic[]): string =>
+  capped(diagnostics) ? `${errorsIn(diagnostics)} errors shown, more remain` : plural(errorsIn(diagnostics), "error");
 
-/** `file:line:col code message`, then the hint on its own line. */
+/** `file:line:col severity code message`, then the hint under it: on its own indented lines when it has several. */
 function diagnosticLines(file: string, diagnostics: readonly Diagnostic[]): string {
   return diagnostics
     .map((d) => {
       const head = safe(
-        `${file}:${d.span.start.line}:${d.span.start.column} ${d.code} ${d.message}`.replace(/\n/g, " "),
+        `${file}:${d.span.start.line}:${d.span.start.column} ${d.severity} ${d.code} ${d.message}`.replace(/\n/g, " "),
       );
-      return d.hint === undefined ? `${head}\n` : `${head}\n${safe(`  hint: ${d.hint}`.replace(/\n/g, " "))}\n`;
+      if (d.hint === undefined) return `${head}\n`;
+      const lines = d.hint.replace(/\n+$/, "").split("\n");
+      if (lines.length === 1) return `${head}\n${safe(`  hint: ${d.hint}`)}\n`;
+      return `${head}\n  hint:\n${lines.map((l) => safe(`    ${l}`)).join("\n")}\n`;
     })
     .join("");
 }
@@ -111,15 +121,20 @@ async function list(args: readonly string[], io: Io): Promise<number> {
       const { diagnostics } = await compileDiagram(project, entry);
       const errors = errorsIn(diagnostics);
       results.push({
-        status: errors === 0 ? "ok" : plural(errors, "error"),
+        status: errors === 0 ? "ok" : capped(diagnostics) ? `${errors}+ errors` : plural(errors, "error"),
         path: entry.path,
         view: entry.view ? `view ${entry.view.id}` : "",
       });
     }
     // Diagrams embedded in notes, under the addresses the agent's tools use (ADR 0012).
     for (const read of embedded) {
-      const errors = errorsIn((await compileEmbedded(read)).diagnostics);
-      results.push({ status: errors === 0 ? "ok" : plural(errors, "error"), path: read.address, view: "" });
+      const { diagnostics } = await compileEmbedded(read);
+      const errors = errorsIn(diagnostics);
+      results.push({
+        status: errors === 0 ? "ok" : capped(diagnostics) ? `${errors}+ errors` : plural(errors, "error"),
+        path: read.address,
+        view: "",
+      });
     }
     const width = Math.max(0, ...results.map((r) => r.status.length));
     const pathWidth = Math.max(0, ...results.map((r) => r.path.length));
@@ -164,6 +179,8 @@ interface Named {
   readonly title: string;
   /** Its id for the operations (validate_diagram): the view's, or the embedded diagram's address. */
   readonly viewId: string | undefined;
+  /** The diagram's own source text, as validate_diagram takes it. */
+  readonly source: string;
 }
 
 async function named(name: string, io: Io): Promise<Named> {
@@ -178,13 +195,15 @@ async function named(name: string, io: Io): Promise<Named> {
       label: `${file}#${target.name}`,
       title: target.name,
       viewId: target.address,
+      source: target.source,
     };
   }
   const compiled = await compileDiagram(project, target);
   const file = shown(project, target.path, io);
   const { inventory } = await import("../application/diagrams.ts");
   const viewId = inventory(project).views.find((v) => v.registration !== "embedded" && v.source === target.path)?.id;
-  return { project, compiled, file, label: file, title: basename(compiled.path), viewId };
+  const source = readFileSync(resolveInFolder(project, compiled.path), "utf8");
+  return { project, compiled, file, label: file, title: basename(compiled.path), viewId, source };
 }
 
 /**
@@ -252,7 +271,7 @@ async function check(command: "validate" | "compile", args: readonly string[], i
     throw new UsageError("--suggest and --no-suggest are for validate");
   if (values.suggest === true && values["no-suggest"] === true)
     throw new UsageError("--suggest lists every suggestion and --no-suggest none: give one");
-  const { compiled, file, label, viewId } = await named(positionals[0]!, io);
+  const { compiled, file, label, viewId, source } = await named(positionals[0]!, io);
   const errors = errorsIn(compiled.diagnostics);
   if (command === "validate") {
     // Suggestions compare a view with the project's other views (P44): a file outside them has none to compare.
@@ -279,8 +298,10 @@ async function check(command: "validate" | "compile", args: readonly string[], i
     );
     const all = [...compiled.diagnostics, ...more];
     const failed = errorsIn(all);
+    // Mermaid pasted from elsewhere: the whole fixed source, as validate_diagram returns it.
+    const fix = application.fixFor(source, all);
     const warnings = all.filter((d) => d.severity === "warning").length;
-    const status = failed > 0 ? plural(failed, "error") : warnings > 0 ? `ok, ${plural(warnings, "warning")}` : "ok";
+    const status = failed > 0 ? errorStatus(all) : warnings > 0 ? `ok, ${plural(warnings, "warning")}` : "ok";
     if (values.json === true) {
       // What the text form prints, as one value; `lint` as `archer present --json` carries it, when there is some.
       const linted =
@@ -293,8 +314,10 @@ async function check(command: "validate" | "compile", args: readonly string[], i
             ...(viewId === undefined ? {} : { viewId }),
             status,
             errors: failed,
+            ...(capped(all) ? { moreErrors: true } : {}),
             warnings,
             ...(suggested ?? {}),
+            ...(fix === undefined ? {} : { fix }),
             diagnostics: all,
             ...(layoutReview === undefined ? {} : { layoutReview }),
             ...(linted

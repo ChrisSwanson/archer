@@ -142,7 +142,7 @@ test("pasted `a --> b` becomes valid in one click: each node only ever named is 
     "add-edge-ids",
     "add-edge-ids",
   ]);
-  expect(before.find((d) => d.code === "undeclared_node")?.message).toContain("`add-edge-ids`");
+  expect(before.find((d) => d.code === "undeclared_node")?.message).toContain("`fix.source`");
   const result = addMissingEdgeIds(pasted);
   expect(result.source).toBe("flowchart LR\r\n    a[a] a_b@--> b[b]\r\n    b b_c@-->c\r\n    c[Cache] c_a@--> a\r\n");
   expect(result.declared).toEqual([

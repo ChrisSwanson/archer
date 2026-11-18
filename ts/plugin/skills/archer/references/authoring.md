@@ -37,7 +37,7 @@ Give a line a pattern only when it means something the other lines do not, and s
 `%% archer-key dashed: Person to system` (a meaning is 4 words and 32 characters at most). In a flowchart use Mermaid's syntax (`-.->`, `==>`, or
 `class e1 dashed` with `classDef dashed stroke-dasharray: 6 4`); in C4, architecture and state use
 `%% archer-line dashed: a--b`. Prefer dotted, then dashed; dash-dot is a last resort. Keep edge labels to
-two short lines (about 28 characters, 4 words); detail belongs in the note. `write_diagram` refuses a
+two short lines (2 lines of 24 characters); detail belongs in the note. `write_diagram` refuses a
 write that introduces a long label or an unexplained pattern, and says how to fix it.
 
 ## Review the reading layout

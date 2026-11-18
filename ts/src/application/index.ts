@@ -134,6 +134,23 @@ import {
   type ViewSuggestions,
 } from "./suggest.ts";
 export { suggestionFields, suggestionText } from "./suggest.ts";
+
+/** The `fix` of a validation answer: what `addMissingEdgeIds` wrote, with the whole fixed source. */
+function fixFields(fixed: ReturnType<typeof addMissingEdgeIds>): Record<string, unknown> {
+  return {
+    operation: "add-edge-ids",
+    source: fixed.source,
+    added: fixed.added,
+    ...(fixed.declared.length > 0 ? { declared: fixed.declared } : {}),
+  };
+}
+
+/** The `fix` for a source whose diagnostics ask for `add-edge-ids`; none when there is nothing to add. */
+export function fixFor(source: string, diagnostics: readonly { fix?: { operation: string } }[]) {
+  if (!diagnostics.some((d) => d.fix?.operation === "add-edge-ids")) return undefined;
+  const fixed = addMissingEdgeIds(source);
+  return fixed.added.length > 0 || fixed.declared.length > 0 ? fixFields(fixed) : undefined;
+}
 import { draftAdvice, drawnIds, projectReport, type Advice } from "../project-model/advice.ts";
 import {
   expansionOf,
@@ -1398,12 +1415,7 @@ export class Application {
     if (diagnostics.some((d) => d.fix?.operation === "add-edge-ids")) {
       const fixed = addMissingEdgeIds(source);
       if (fixed.added.length > 0 || fixed.declared.length > 0) {
-        structured["fix"] = {
-          operation: "add-edge-ids",
-          source: fixed.source,
-          added: fixed.added,
-          ...(fixed.declared.length > 0 ? { declared: fixed.declared } : {}),
-        };
+        structured["fix"] = fixFields(fixed);
         const said = [
           ...(fixed.added.length > 0
             ? [

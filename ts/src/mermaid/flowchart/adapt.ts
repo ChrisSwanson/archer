@@ -45,7 +45,7 @@ export interface Adapted {
 function invalidId(what: string, id: string, at: Span): Diagnostic {
   return error(
     "invalid_id",
-    `${what} ID '${id}' is not a stable ID: use 1 to 128 letters, digits, \`_\` and \`-\`, starting with a letter or digit`,
+    `${what} ID '${id}' is not a stable ID: use 1 to 128 letters, digits, \`_\` and \`-\`, and start with a letter or digit (not \`_\` or \`-\`)`,
     at,
   );
 }
@@ -125,7 +125,7 @@ class Adapter {
                 ...error(
                   "undeclared_node",
                   `node '${vertex.id}' is never given a label: declare it once, as in \`${vertex.id}[Label]\`, or fix the ID if it is a typo. ` +
-                    `The edit \`add-edge-ids\` declares every such node with its ID as its label (\`${vertex.id}[${vertex.id}]\`).`,
+                    `\`fix.source\` from \`validate_diagram\` (or \`archer validate <diagram> --json\`) declares every such node with its ID as its label (\`${vertex.id}[${vertex.id}]\`).`,
                   at,
                 ),
                 fix: { operation: "add-edge-ids" as const },

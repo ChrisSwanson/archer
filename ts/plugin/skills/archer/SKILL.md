@@ -43,8 +43,9 @@ that holds the answer, emphasised; prose in chat is the fallback. Keep the knowl
   and a shape is a claim (do not draw an unnamed component as a database).
 - Before writing Mermaid, read its family's syntax: `archer docs supported-mermaid <family>`
   (flowchart, sequence, state, er, c4, architecture, journey).
-  It is stricter than upstream: flowchart edges need ids (`a sends@-->|Sends data| b`). Labels over
-  about 28 characters are refused. Titles and element names are Title Case ("Back Office"); arrow
+  It is stricter than upstream: flowchart edges need ids, written after the source node: plain Mermaid
+  `a -->|Sends data| b` becomes `a a_b@-->|Sends data| b` (name it `source_target`, or in words as
+  `a sends@-->|Sends data| b`). An edge label is at most 2 lines of 24 characters; a write that adds a longer one is refused. Titles and element names are Title Case ("Back Office"); arrow
   and message labels stay sentence case.
   `classDiagram`, `C4Code` and `C4Deployment` are unsupported: say so, never substitute.
   [Authoring](references/authoring.md) has family details. Never hand-draw diagrams in chat.
