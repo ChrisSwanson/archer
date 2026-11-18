@@ -1,5 +1,6 @@
 // CLI is an adapter of the same operations used by MCP. Discover names first,
 // then request one schema: invoking a tool never needs the rest of the catalog.
+import { quoted } from "../application/errors.ts";
 import { TRUST_STEPS, type AskPerson } from "../application/network-access.ts";
 import { randomBytes } from "node:crypto";
 import { readFileSync, statSync, writeFileSync, renameSync, rmSync } from "node:fs";
@@ -283,7 +284,13 @@ export async function runTools(args: readonly string[], io: Io): Promise<number>
   const name = positionals[0];
   if (name !== undefined) {
     const operation = OPERATIONS.find((item) => item.name === name);
-    if (operation === undefined) throw new UsageError(`unknown operation ${name}; use archer tools to discover names`);
+    if (operation === undefined) {
+      // The same sentence and exit code as `archer call` gives for a name that is not a tool.
+      io.stderr(
+        `archer: Archer has no tool named ${quoted(name)}. Its tools are: ${OPERATIONS.map((item) => item.name).join(", ")}.\n`,
+      );
+      return 1;
+    }
     const detail = { name: operation.name, description: operation.description, inputSchema: operation.inputSchema };
     io.stdout(
       values.json === true

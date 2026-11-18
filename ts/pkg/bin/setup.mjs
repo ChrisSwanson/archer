@@ -108,10 +108,15 @@ function record(data, name) {
 }
 const recordedBin = (data) => record(data, BIN_RECORD);
 
+const OTHER_AGENTS_GUIDE = "https://chrisswanson.github.io/archer/other-agents";
 const USAGE = "usage: archer setup [--mcp] [--no-claude] [--no-codex] | archer uninstall [--no-claude] [--no-codex]";
 
 export async function main(command, args) {
   const flags = new Set(args);
+  if (flags.has("--help") || flags.has("-h")) {
+    console.log(USAGE);
+    return 0;
+  }
   const allowed = command === "setup" ? ["--mcp", "--no-claude", "--no-codex"] : ["--no-claude", "--no-codex"];
   for (const flag of flags) {
     if (!allowed.includes(flag)) {
@@ -230,6 +235,17 @@ function setup(p, flags, todo) {
       todo.push("Codex: not found on PATH, so ~/.codex was left alone. After installing it, run  archer setup  again");
     else setupCodex(p, flags, id, todo);
   }
+  if (
+    !flags.has("--no-claude") &&
+    !flags.has("--no-codex") &&
+    !which("claude") &&
+    !existsSync(p.claude) &&
+    !which("codex")
+  )
+    todo.push(
+      `Another agent: neither Claude Code nor Codex was found. Register  archer mcp  with your agent as an MCP server, and run  archer skill --write <its skills folder>/archer  (guide: ${OTHER_AGENTS_GUIDE})`,
+    );
+  console.log("Archer's service starts on first use (by an agent or archer serve); archer stop stops it.");
   tlsHint(p);
 }
 

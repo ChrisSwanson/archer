@@ -87,7 +87,8 @@ const notes = (row: Row): string =>
 
 export async function status(args: readonly string[], io: CliIo): Promise<number> {
   const json = args.length === 1 && args[0] === "--json";
-  if (args.length > 0 && !json) throw new CliUsageError("status takes only --json");
+  if (args.length > 0 && !json)
+    throw new CliUsageError(`status takes only --json (got ${args.find((a) => a !== "--json") ?? args[0]})`);
   const found = rows(io.env);
   const now = Date.now();
   if (json) {

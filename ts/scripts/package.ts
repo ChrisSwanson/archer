@@ -36,7 +36,7 @@ export function packageManifest(version: string): Record<string, unknown> {
     version,
     private: true,
     license: "Apache-2.0",
-    description: "Archer: agent-authored Mermaid diagrams shared between a person and their agents (private build)",
+    description: "Archer: agent-authored Mermaid diagrams shared between a person and their agents",
     type: "module",
     engines: { node: ">=22.18" },
     bin: { archer: "bin/archer.mjs" },

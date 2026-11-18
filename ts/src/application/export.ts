@@ -83,7 +83,7 @@ export async function runExportOperation(
     const rendered = await exportDiagram(read["envelope"], options);
     const { bytes, ...metadata } = rendered;
     return {
-      text: `${rendered.mimeType === "image/png" ? "PNG" : "SVG"} ${rendered.width} × ${rendered.height}; ${bytes.length} bytes; ${options.mode}, ${options.theme}; revision ${rendered.revision}${rendered.lastGood ? "; explicitly accepted last-good drawing" : ""}. Full bytes: outputFormat=json, or CLI --output <path>.`,
+      text: `${rendered.mimeType === "image/png" ? "PNG" : "SVG"} ${rendered.width} × ${rendered.height}; ${bytes.length} bytes; ${options.mode}, ${options.theme}; revision ${rendered.revision}${rendered.lastGood ? "; explicitly accepted last-good drawing" : ""}.${options.mode === "diagram" ? ' Highlights are drawn only with mode "presentation".' : ""} Full bytes: outputFormat=json, or CLI --output <path>.`,
       structured: {
         ...metadata,
         format: options.format,

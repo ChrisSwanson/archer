@@ -1107,15 +1107,20 @@ html.landing-on-stage .VPNavBar :focus-visible {
   height: 100%;
   object-fit: cover;
 }
-/* The walkthrough panel is tall and narrow: drawn at its own size (the capture is 2x), centred, the frame shows its
-   step 5, the one it is open at. */
+/* The walkthrough panel is tall and narrow: drawn at its own size (the capture is 2x), centred. The frame is cut to
+   the image's own proportions, not the 16:10 of the other shots, so its edges fall between rows: the top between
+   steps 3 and 4, the bottom under step 5 (the one the panel is open at), whole, with its Does and Why lines.
+   The window is source rows 806 to 1296 of 1420. */
 .landing-shot--walk {
   display: flex;
   justify-content: center;
+  aspect-ratio: auto;
 }
 .landing-shot--walk img {
   width: min(100%, 340px);
-  object-position: 50% 66%;
+  height: auto;
+  aspect-ratio: 680 / 490;
+  object-position: 50% 86.67%;
 }
 .landing-use-figure figcaption {
   color: var(--vp-c-text-3);

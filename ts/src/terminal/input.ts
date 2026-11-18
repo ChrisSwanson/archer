@@ -75,8 +75,10 @@ const absent = (v: unknown): boolean => v === undefined || v === null;
  */
 const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 
-export function readGraphInput(json: unknown): GraphInput {
-  if (!isRecord(json)) throw new Error("the model must be a JSON object");
+export function readGraphInput(input: unknown): GraphInput {
+  if (!isRecord(input)) throw new Error("the model must be a JSON object");
+  // `archer compile` prints an envelope ({schemaVersion, view, model}); its model is what draws.
+  const json = absent(input["type"]) && isRecord(input["model"]) ? input["model"] : input;
   const type = json["type"];
   if (type === "sequence-trace")
     throw new Error("sequence diagrams cannot be drawn in the terminal yet; only graphs can");

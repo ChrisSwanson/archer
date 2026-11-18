@@ -41,7 +41,8 @@ export default defineConfig({
       {
         text: "Docs",
         link: "/install",
-        activeMatch: "^/(why|how-it-works|usage|install|using-the-playground|generated/cli|supported-mermaid|security)",
+        activeMatch:
+          "^/(why|how-it-works|usage|install|other-agents|using-the-playground|generated/cli|supported-mermaid|security)",
       },
       { text: "Playground", link: "/playground/app/index.html" },
       { text: "Install", link: "/#install" },
@@ -54,6 +55,7 @@ export default defineConfig({
           { text: "Why Archer", link: "/why" },
           { text: "How It Works", link: "/how-it-works" },
           { text: "Usage", link: "/usage" },
+          { text: "Another agent", link: "/other-agents" },
         ],
       },
       {

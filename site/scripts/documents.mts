@@ -25,6 +25,13 @@ export const guideDocuments = [
     summary: "Start a project, present diagrams, highlight answers and exchange feedback.",
   },
   {
+    source: "docs/other-agents.md",
+    path: "other-agents",
+    title: "Use Archer with another agent",
+    summary:
+      "Register archer mcp, install the skill and poll for messages when your agent is not Claude Code or Codex.",
+  },
+  {
     source: "docs/tls.md",
     path: "security/network-access",
     title: "HTTPS & Browser Trust",

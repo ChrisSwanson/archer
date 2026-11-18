@@ -375,7 +375,7 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
   {
     name: "export_diagram",
     description:
-      "Export a diagram (or the current presentation) as self-contained SVG or PNG, light or dark, optionally with an emphasis. Returns base64 bytes; CLI --output writes a file instead. A last-good drawing needs allowLastGood.",
+      "Export a diagram (or the current presentation) as self-contained SVG or PNG, light or dark, optionally with an emphasis. Returns base64 bytes; CLI --output writes a file instead. A last-good drawing needs allowLastGood. Highlights (emphasis) are drawn only with mode 'presentation'. A drawing over 16,000 px a side or 32 million pixels is refused: pass a smaller scale.",
     inputSchema: closed(
       {
         viewId,
@@ -389,7 +389,8 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
           type: ["string", "null"],
           minLength: 1,
           maxLength: 200,
-          description: "Stored emphasis id, null to omit emphasis, or omitted to select the newest stored emphasis.",
+          description:
+            'With mode "presentation" only (a diagram-mode export draws no emphasis): a stored emphasis id, null to omit emphasis, or omitted to select the newest stored emphasis.',
         },
         annotation: { type: "string", maxLength: MAX_ANNOTATION_CHARS },
         diagramKey: { type: "boolean" },
