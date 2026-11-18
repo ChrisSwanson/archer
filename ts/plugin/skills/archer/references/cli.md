@@ -276,6 +276,8 @@ Discover `archer tools export_diagram --json`, then provide `viewId`, `format` (
 `mode` (diagram/presentation), and `theme` (light/dark). `expectedRevision` pins the model;
 `allowLastGood:true` explicitly accepts a last-good drawing when current source is broken or missing.
 The result preserves both revisions and current diagnostics. Export never repairs owner source.
+Highlights (`activeEmphasisId`) are drawn only with `mode: "presentation"`. A drawing over 16,000 px a side
+or 32 million pixels is refused with the size and a `scale` that fits.
 
 ```sh
 archer call export_diagram --file export-args.json --output diagram.svg --json
