@@ -76,7 +76,6 @@ test.each([
   [["draw", "--model", MINIMAL, "--width", "wide"], /--width/],
   [["draw", "--model", MINIMAL, "--width", "0"], /--width/],
   [["draw", "--model", MINIMAL, "--shout"], /--shout/],
-  [[], /usage/],
 ])("misuse %j is a usage error, exit 2", async (args, message) => {
   const { code, err } = await run(args);
   expect(code).toBe(2);
@@ -121,4 +120,28 @@ test("an unknown command is echoed without its control characters", async () => 
   const { code, err } = await run(["\u001b]0;pwned\u0007\u009b31m‮"]);
   expect(code).toBe(2);
   expect(err).not.toMatch(UNSAFE);
+});
+
+test("no command prints the usage as help and exits 0", async () => {
+  const { code, out, err } = await run([]);
+  expect(code).toBe(0);
+  expect(err).toBe("");
+  expect(out).toContain("usage: archer init");
+});
+
+test("setup --help prints setup's usage and exits 0, even from a development install", async () => {
+  const { code, out, err } = await run(["setup", "--help"]);
+  expect(code).toBe(0);
+  expect(err).toBe("");
+  expect(out).toContain("archer setup [--mcp] [--no-claude] [--no-codex]");
+});
+
+test("a command that takes no arguments says so, and an unknown flag to status is named", async () => {
+  const list = await run(["list", "bogus"]);
+  expect(list.code).toBe(2);
+  expect(list.err).toContain("list takes no arguments");
+  expect(list.err).not.toContain("at most 0");
+  const status = await run(["status", "--help"]);
+  expect(status.code).toBe(2);
+  expect(status.err).toContain("status takes only --json (got --help)");
 });

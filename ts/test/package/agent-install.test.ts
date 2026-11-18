@@ -19,11 +19,12 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { HOOK_COMMAND as CONTRACT_HOOK } from "../../src/agents/contract.ts";
 import {
   HOOK_COMMAND,
   MIN_NODE,
+  main as setupMain,
   SKILL_MODES,
   addTurnHook,
   isOwnShim,
@@ -725,4 +726,15 @@ describe("archer upgrade", () => {
     expect(result.stderr).toContain("The running Archer was not swapped");
     expect(result.stderr).not.toContain("unchanged");
   }, 300_000);
+});
+
+test("setup --help prints its usage and exits 0 instead of calling --help an unknown option", async () => {
+  const lines: string[] = [];
+  const log = vi.spyOn(console, "log").mockImplementation((line: string) => void lines.push(line));
+  try {
+    expect(await setupMain("setup", ["--help"])).toBe(0);
+  } finally {
+    log.mockRestore();
+  }
+  expect(lines.join("\n")).toContain("archer setup [--mcp]");
 });

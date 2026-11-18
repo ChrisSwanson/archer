@@ -144,11 +144,10 @@ async function runCommand(argv: readonly string[], io: Io): Promise<number> {
       io.stdout(`${version()}\n`);
       return 0;
     }
-    if (command === "--help" || command === "-h" || command === "help") {
+    if (command === "--help" || command === "-h" || command === "help" || command === undefined) {
       io.stdout(USAGE);
       return 0;
     }
-    if (command === undefined) throw new UsageError("no command given");
     if (command === "call") return await (await import("./operations.ts")).runCall(rest, io);
     if (command === "pair") {
       const { values } = usage(() =>
@@ -236,6 +235,10 @@ async function runCommand(argv: readonly string[], io: Io): Promise<number> {
       return await commands.run(command, rest, io);
     }
     if (PACKAGE_COMMANDS.has(command)) {
+      if (command === "setup" && (rest.includes("--help") || rest.includes("-h"))) {
+        io.stdout(`${SETUP_USAGE}\n`);
+        return 0;
+      }
       // The package's own launcher (ts/pkg/bin/archer.mjs) handles these before this CLI runs.
       io.stderr(notAPackageInstall(command));
       return 1;
@@ -256,6 +259,7 @@ async function runCommand(argv: readonly string[], io: Io): Promise<number> {
 }
 
 const PROJECT_COMMANDS = new Set(["init", "list", "validate", "compile"]);
+const SETUP_USAGE = "usage: archer setup [--mcp] [--no-claude] [--no-codex]";
 const PACKAGE_COMMANDS = new Set(["setup", "upgrade", "uninstall"]);
 
 /** For setup, upgrade and uninstall run from a development or source install, not the package. */

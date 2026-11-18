@@ -66,7 +66,9 @@ function positionalsOnly(command: string, args: readonly string[], most: number,
     throw new UsageError(
       least === 1 && most === 1
         ? `${command} needs one diagram name or file`
-        : `${command} takes at most ${most} argument`,
+        : most === 0
+          ? `${command} takes no arguments`
+          : `${command} takes at most ${most} argument${most === 1 ? "" : "s"}`,
     );
   return positionals;
 }

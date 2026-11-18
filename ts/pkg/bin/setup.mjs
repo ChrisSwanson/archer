@@ -112,6 +112,10 @@ const USAGE = "usage: archer setup [--mcp] [--no-claude] [--no-codex] | archer u
 
 export async function main(command, args) {
   const flags = new Set(args);
+  if (flags.has("--help") || flags.has("-h")) {
+    console.log(USAGE);
+    return 0;
+  }
   const allowed = command === "setup" ? ["--mcp", "--no-claude", "--no-codex"] : ["--no-claude", "--no-codex"];
   for (const flag of flags) {
     if (!allowed.includes(flag)) {
