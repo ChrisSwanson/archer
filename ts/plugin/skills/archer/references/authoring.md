@@ -20,6 +20,27 @@ those threads read or establish complete coverage. Emphasis inspection is not a 
 After a compiled edit, use the write's fresh `modelRevision` for an optional presentation guard,
 or omit the guard; never carry forward the model revision from before the edit.
 
+## Colour: say what each box is
+
+A drawing with every box the same grey makes the reader work out what each one is. Give every node a
+kind or a category; colour comes from what a node is, so it stays meaningful across diagrams.
+
+- A kind for the usual parts: `:::person`, `:::system`, `:::container`, `:::database`, `:::component`,
+  `:::external` (or `class a,b database`). Person, system, container and database each have a colour;
+  component and external stay neutral and say their kind in words.
+- A category for anything the kinds do not name, with its meaning in the Key:
+  `classDef proposed stroke-dasharray: 6 4` + `%% archer-key proposed: Not built yet` + `class mfa proposed`
+  (a dashed outline), or `classDef risk fill:#f96,stroke:#c33` + `%% archer-key risk: Fails under load`.
+  Good categories are states the conversation is about: proposed, deprecated, at risk, third party,
+  the part being changed. Use a few (2 to 4), each meaning one thing.
+- Pick the `classDef` colour for its meaning: an orange or red is drawn strong and reads as
+  consequential (at risk, failing); a grey with a light grey stroke recedes (dropped, out of scope).
+  Blue and amber are taken (the reader's selection, your highlights) and are moved to another family.
+- Never colour to point at something in this conversation: that is emphasis, below, and needs no edit.
+
+The full rules (families, how a hex picks one, subgraph panels) are in `archer docs supported-mermaid`
+under "Kinds and categories".
+
 ## Emphasis, line patterns and labels
 
 `set_emphasis` points at what you are talking about; `present_diagram` takes the same payload as
