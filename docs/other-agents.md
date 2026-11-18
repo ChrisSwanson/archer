@@ -24,7 +24,9 @@ archer skill --write <your harness's skills folder>/archer
 
 If the harness has no skills, put the output of `archer skill --references` where it keeps standing
 instructions (an `AGENTS.md`, rules file or system prompt). Run `archer doctor` afterwards: it
-checks the command, the service, its page and that the installed skill matches this version.
+checks the command, the service and its page. Its skill check looks only in Claude Code's and Codex's
+folders, so for another agent it reports the skill as missing even when you wrote it; the other checks
+still apply. After upgrading Archer, run the same `archer skill --write` again so the copy matches.
 
 ## Hearing you back without background tasks
 
