@@ -18,6 +18,7 @@ import { CANONICAL_DASH } from "../line-key.ts";
 import { restoreEntities } from "../entities.ts";
 import { readLabel } from "../labels.ts";
 import type { FlowData, FlowEdge, FlowVertex } from "./db.ts";
+import { MARKDOWN_LABEL_MESSAGE } from "./rewrites.ts";
 import type { FlowchartScan } from "./scan.ts";
 
 const SHAPES: Record<string, NodeShape> = {
@@ -91,13 +92,7 @@ class Adapter {
 
   #label(raw: string, labelType: string, at: Span): string | undefined {
     if (labelType === "markdown") {
-      this.diagnostics.push(
-        error(
-          "unsupported_construct",
-          "markdown string labels are not supported: write a plain label, as in `id[Label]`",
-          at,
-        ),
-      );
+      this.diagnostics.push(error("unsupported_construct", MARKDOWN_LABEL_MESSAGE, at));
       return undefined;
     }
     const { label, problems } = readLabel(restoreEntities(raw), at);
