@@ -31,6 +31,8 @@ export interface Family<D, M> {
   adapt: (data: D) => Reconciled<M>;
   /** Mermaid's complaint as a diagnostic, when the family's parser is not jison's. */
   diagnose?: (failure: MermaidFailure) => Diagnostic;
+  /** A complaint the family knows the cause of, named with its fix; undefined for any other. */
+  explain?: (failure: MermaidFailure) => Diagnostic | undefined;
 }
 
 export async function reconcile<D, M>(
@@ -49,9 +51,12 @@ export async function reconcile<D, M>(
     return family.read(diagram.db);
   });
   if (!outcome.ok) {
-    const diagnostics = family.diagnose
-      ? addComplaint(scanned, family.diagnose(outcome.failure))
-      : addMermaidFailure(scanned, outcome.failure, header, preamble.lines);
+    const explained = family.explain?.(outcome.failure);
+    const diagnostics = explained
+      ? addComplaint(scanned, explained)
+      : family.diagnose
+        ? addComplaint(scanned, family.diagnose(outcome.failure))
+        : addMermaidFailure(scanned, outcome.failure, header, preamble.lines);
     return { model: undefined, diagnostics: [...diagnostics, ...notes] };
   }
   const refused = scanned.some(isError);

@@ -64,3 +64,25 @@ describe("flowchart", () => {
     expect(await errors(F("  a[A]\n  endpoint[End]\n  a e1@--> endpoint"))).toEqual([]);
   });
 });
+
+describe("state diagram", () => {
+  test("`state B` beside a composite with transitions both ways names the declaration to write", async () => {
+    const source =
+      "stateDiagram-v2\n  state B\n  state Comp {\n    state X\n    [*] --> X\n  }\n  Comp --> B\n  B --> Comp\n";
+    const found = await errors(source);
+    expect(located(found)).toEqual(["unexpected_token@2:3"]);
+    expect(found[0]?.message).toContain('`state "B" as B`');
+    expect(found[0]?.message).toContain("`B : Label`");
+    expect(found[0]?.message).not.toContain("State name must be a single word");
+    expect(found[0]?.hint).toBe('  state "B" as B');
+    expect(await errors(applyHints(source, found))).toEqual([]);
+  });
+
+  test("a fork used before its declaration says to declare it first", async () => {
+    const found = await errors(
+      "stateDiagram-v2\n  state A\n  state B\n  [*] --> F\n  state F <<fork>>\n  F --> A\n  F --> B\n",
+    );
+    expect(found).toHaveLength(1);
+    expect(found[0]?.message).toContain("declare `state F <<fork>>` before its first use");
+  });
+});

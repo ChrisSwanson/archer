@@ -8,7 +8,7 @@ import { error, isError, type Diagnostic, type Span } from "../diagnostics.ts";
 import { restoreEntities } from "../entities.ts";
 import { readLabel } from "../labels.ts";
 import type { StateData, StateDbNode } from "./db.ts";
-import type { StateScan } from "./scan.ts";
+import type { ScannedState, StateScan } from "./scan.ts";
 
 const KINDS: Record<string, StateKind> = {
   rect: "state",
@@ -51,6 +51,12 @@ class Adapter {
   }
 }
 
+/** A state first named, by a transition, above the line that declares its kind. */
+function usedBeforeDeclared(state: ScannedState): boolean {
+  const declared = state.declaredAt;
+  return declared !== undefined && state.span.start.line < declared.start.line;
+}
+
 export function adaptState(data: StateData, scan: StateScan, fallback: Span): Adapted {
   const adapter = new Adapter(fallback);
   const nodes = new Map(data.nodes.map((node) => [node.id, node]));
@@ -72,7 +78,18 @@ export function adaptState(data: StateData, scan: StateScan, fallback: Span): Ad
       adapter.disagree(`state '${state.id}' as something other than a state`, state.span);
       continue;
     }
-    if (kind !== state.kind) adapter.disagree(`state '${state.id}' as a ${kind}, not a ${state.kind}`, state.span);
+    if (kind !== state.kind && kind === "state" && usedBeforeDeclared(state)) {
+      // Mermaid makes a state of a name at its first mention; a later `<<fork>>` does not change it.
+      adapter.diagnostics.push(
+        error(
+          "parser_disagreement",
+          `state '${state.id}' is used before \`state ${state.id} <<${state.kind}>>\` declares it, so Mermaid reads it as a plain state: ` +
+            `declare \`state ${state.id} <<${state.kind}>>\` before its first use`,
+          state.span,
+        ),
+      );
+    } else if (kind !== state.kind)
+      adapter.disagree(`state '${state.id}' as a ${kind}, not a ${state.kind}`, state.span);
     if ((node.parentId ?? undefined) !== state.scope) {
       adapter.disagree(
         `state '${state.id}' inside '${node.parentId ?? "the top level"}', not where it is written`,
