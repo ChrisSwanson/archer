@@ -434,6 +434,14 @@ describe("status transitions", () => {
     expect(store.edit(thread.id, first, "older page").value).toMatchObject({ revision: seen + 3 });
   });
 
+  test("a revision the agent sends that is ahead of the thread says what it sent and where the thread is", () => {
+    const { store, thread, sendAndRead } = draft();
+    const at = sendAndRead();
+    const ahead = refused(() => store.resolve(thread.id, "agent", at + 1), "thread_changed");
+    expect(ahead.message).toContain(`you sent ${at + 1}; the thread is at ${at}`);
+    expect(ahead.message).not.toContain("changed since you read it");
+  });
+
   test("only the person's comments are editable or deletable from the page", () => {
     const { store, thread, status, sendAndRead } = draft();
     const reply = store.reply(thread.id, "agent text", "agent", sendAndRead()).value.comments[1]?.id ?? "";

@@ -262,6 +262,19 @@ describe("registerAgent", () => {
     );
   });
 
+  test("an agent id the service did not hand out is refused in words a caller can act on", () => {
+    const { registry } = setup();
+    let message = "";
+    try {
+      registry.registerAgent({ root: MAIN.root, cwd: MAIN.root, host: "codex", label: "x", agentId: "claude-review" });
+    } catch (error) {
+      message = (error as Error).message;
+    }
+    expect(message).not.toContain("registerAgent");
+    expect(message).toContain("--as");
+    expect(message).toMatch(/leave --as off/);
+  });
+
   test("a label the registry accepts always reads back: one length rule, by code points (decision 26)", () => {
     // Emoji (astral, two UTF-16 units), a ZWJ family, CJK, combining marks and ASCII, seeded so a failure repeats.
     const pool = ["😀", "👩‍👩‍👧", "🇫🇷", "漢", "字", "한", "e\u0301", "\u0308", "a", " ", "·", "𝔸"];

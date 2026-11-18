@@ -72,7 +72,11 @@ export function readNoteSource(
   if (catalog.diagnostics.some((diagnostic) => diagnostic.path === path && diagnostic.code === "source_too_large"))
     throw new NoteReadError("source_too_large", "note exceeds the source byte limit", details);
   if (!catalog.documents.some((document) => document.kind === "markdown" && document.source.path === path)) {
-    if (!catalog.complete)
+    // A symlink the catalog refused elsewhere hides no note at this path: absence is still plain absence.
+    const onlyOtherSymlinks = catalog.diagnostics.every(
+      (diagnostic) => diagnostic.code === "symlink_refused" && diagnostic.path !== path,
+    );
+    if (!catalog.complete && !onlyOtherSymlinks)
       throw new NoteReadError("io_failure", "note admission coverage is incomplete", {
         ...details,
         reason: "coverage_incomplete",

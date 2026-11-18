@@ -714,7 +714,7 @@ export class WalkthroughsStore {
             fix: "Use an id list_walkthroughs shows.",
           },
         ]);
-      if (held.revision !== expectedRevision) throw changed(held, expectedRevision);
+      if (held.revision !== expectedRevision) throw changed(held, expectedRevision, "delete");
       return { list: list.filter((w) => w.id !== id), value: undefined };
     });
   }
@@ -874,11 +874,15 @@ function refuseConflict(place: WalkthroughsPlace): void {
   if (place.conflict !== undefined) throw new WalkthroughsError("walkthroughs_file_conflict", place.conflict);
 }
 
-function changed(held: Walkthrough, expected: number | undefined): WalkthroughsError {
+function changed(
+  held: Walkthrough,
+  expected: number | undefined,
+  again: "write" | "delete" = "write",
+): WalkthroughsError {
   const read = expected === undefined ? "named no expectedRevision" : `read revision ${expected}`;
   return new WalkthroughsError(
     "walkthrough_changed",
-    `walkthrough ${held.id} is at revision ${held.revision} and you ${read}, so nothing was written. Read it as it is now (below), then write it again with expectedRevision ${held.revision}.`,
+    `walkthrough ${held.id} is at revision ${held.revision} and you ${read}, so nothing was written. Read it as it is now (below), then ${again} it again with expectedRevision ${held.revision}.`,
     { walkthrough: held },
   );
 }

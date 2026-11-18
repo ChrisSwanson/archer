@@ -153,7 +153,7 @@ export class ListenerRegistry {
       if (typeof agentId !== "string" || !AGENT_ID.test(agentId))
         throw new ListenerRefusal(
           "invalid_params",
-          "registerAgent's agentId is one this service handed out: ag- and 12 hex digits",
+          "--as takes an agent id this service handed out (ag- and 12 hex digits); leave --as off to be given one",
         );
       // The relay and the CLI of one session share its id from different folders of one checkout: only
       // another checkout counts as elsewhere (review N1).

@@ -211,10 +211,10 @@ test("present_diagram refuses a stale model revision and an unknown view, and pr
   await close();
 });
 
-test("present_diagram of a view that never compiled is diagram_not_found with the diagnostics", async () => {
+test("present_diagram of a view that never compiled is diagram_not_compiled with the diagnostics", async () => {
   const { client, close } = await withService({ ".archer/arch.mmd": BROKEN });
   const error = await refusal(client, "present_diagram", { viewId: "arch" });
-  expect(error.data.code).toBe("diagram_not_found");
+  expect(error.data.code).toBe("diagram_not_compiled");
   expect((error.data.diagnostics as unknown[]).length).toBeGreaterThan(0);
   await close();
 });

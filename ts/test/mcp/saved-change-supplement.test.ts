@@ -97,6 +97,24 @@ test("real MCP appends a separate bounded project-scoped hint and leaves the exa
   }
 });
 
+test("in a project that is not attached the feed note says to attach it, not to use list_changes", async () => {
+  const { svc } = await service();
+  const root = project();
+  const mcp = await connect({ cwd: root, findService: () => connectService(svc.socketPath) });
+  try {
+    const result = await mcp.client.callTool({ name: "list_diagrams", arguments: {} });
+    const content = result.content as { text: string }[];
+    const note = content
+      .slice(1)
+      .map((block) => block.text)
+      .join("\n");
+    expect(note).not.toContain("Use list_changes");
+    if (note !== "") expect(note).toMatch(/attach_project/);
+  } finally {
+    await mcp.close();
+  }
+});
+
 test("hint store failure cannot mask a completed primary result or retry its mutation", async () => {
   const { svc, state } = await service();
   const admin = await connectService(svc.socketPath);

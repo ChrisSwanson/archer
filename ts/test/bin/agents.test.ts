@@ -145,6 +145,15 @@ test("listen --claim registers, then claims, and prints exactly what it claimed 
   expect(recogniseAgent({ env, cwd: root, detected: { host: "claude-code", hostPid: 7 } })).toBeNull();
 });
 
+test("listen --claim from a shell with no host process says why --as is needed on later calls", async () => {
+  const fake = await fakeService();
+  claiming(fake);
+  const { io, deps, output } = setup(fake);
+  expect(await runListen(["--claim"], io, { ...deps, detect: () => ({ host: "other" }) }), output().err).toBe(0);
+  expect(output().out).toMatch(/Pass --as agt_1 to archer wait and archer inbox/);
+  expect(output().out).toMatch(/cannot tell later calls come from this session without it/);
+});
+
 test("a second claim from the same session reuses its id; a forgotten id registers again under the same id", async () => {
   const fake = await fakeService();
   claiming(fake);

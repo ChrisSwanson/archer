@@ -76,7 +76,7 @@ test("write from a file, list and show --json, and show --markdown; no service i
       "### Asking the API",
       "A request and its write.",
       "",
-      `revision: ${shown.walkthrough.modelRevision.slice(7, 14)}`,
+      `diagram revision: ${shown.walkthrough.modelRevision.slice(7, 14)}; walkthrough revision: ${shown.walkthrough.revision}`,
       "",
       "1. **Ask** — `a -> b: Calls`, message `a -> b: GET /x`",
       "   Sends: A request. Why: The client never touches the store.",
@@ -128,6 +128,13 @@ test("a refusal prints the problems, and the file is untouched", async () => {
   expect(bad.code).toBe(1);
   expect(bad.err).toContain('Did you mean "e1"');
   expect(existsSync(join(root, ".archer/flow.walkthroughs.json"))).toBe(false);
+});
+
+test("--expected 0 says to leave it off to create a new walkthrough", async () => {
+  const { run } = setup();
+  const result = await run(["write", "flow", "--stdin", "--expected", "0"]);
+  expect(result.code).toBe(2);
+  expect(result.err).toMatch(/leave --expected off to create a new walkthrough/);
 });
 
 test.each(
