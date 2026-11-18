@@ -191,6 +191,13 @@ export function hitsAny(boxes: readonly Box[], rect: Box): boolean {
   return boxes.some((box) => intersects(box, rect));
 }
 
+/** The left edge of the leftmost of `boxes` that shares a pixel with `rect`, or `null` when none does. */
+export function leftmostUnder(boxes: readonly Box[], rect: Box): number | null {
+  let left: number | null = null;
+  for (const box of boxes) if (intersects(box, rect) && (left === null || box.x < left)) left = box.x;
+  return left;
+}
+
 /**
  * Where a piece of the canvas's chrome is, as a box on the canvas: measured,
  * because its size is the stylesheet's and differs between designs.
@@ -357,13 +364,19 @@ export function frameClearOfChrome<F>(options: {
   /** Whether anything drawn under `frame` shares a pixel with `rect`. */
   readonly hits: (frame: F, rect: Box) => boolean;
   /**
+   * The left edge of the leftmost thing drawn under `frame` that shares a pixel with `rect`. A drawing wider than the
+   * room is anchored by its first boxes, and a wire looping out to their left stays under a rail the room already
+   * cleared; this says how far, so the room grows by that much.
+   */
+  readonly leftmostUnder?: (frame: F, rect: Box) => number | null;
+  /**
    * Whether the cue will be up over `frame` for a reason other than overflow:
    * an explicit fit that shows everything too small to read says so there.
    * It needs the same band, or it sits on the drawing it is describing.
    */
   readonly cueFor?: (frame: F) => boolean;
 }): ClearFraming<F> {
-  const { base, controls, notice, frameWith, overflowOf, hits, cueFor, canvas } = options;
+  const { base, controls, notice, frameWith, overflowOf, hits, leftmostUnder, cueFor, canvas } = options;
   const pieces = [
     ...(controls !== null && controls.width > 0 && controls.height > 0 ? [{ box: controls, cluster: true }] : []),
     ...(options.floating ?? []).map((box) => ({ box, cluster: false })),
@@ -400,7 +413,18 @@ export function frameClearOfChrome<F>(options: {
                   (option.side === "left" || option.side === "right" ? canvas.width : canvas.height),
             );
       const open = options.filter((option) => next[option.side] < option.need);
-      if (open.length === 0) continue;
+      if (open.length === 0) {
+        // The room beside the cluster is already kept and the drawing still runs under it: grow the room by what
+        // runs under, within the share of the canvas a reservation may take.
+        const side = options[0];
+        if (cluster && canvas !== undefined && side?.side === "left" && leftmostUnder !== undefined) {
+          const under = leftmostUnder(frame, box);
+          const grown = under === null ? 0 : side.need - under;
+          const room = Math.min(next.left + grown, CHROME_RESERVE_MAX_SHARE * canvas.width);
+          if (grown > 0 && room > next.left) next = { ...next, left: room };
+        }
+        continue;
+      }
       const clears = open.find((option) => !hits(frameWith({ ...next, [option.side]: option.need }), box));
       // The cluster keeps its room even where no side clears it: a pan from there reaches what is under it.
       const taken = clears ?? (cluster ? open[0] : undefined);
