@@ -68,6 +68,18 @@ test("generic calls preserve shared validation codes and omit stdout on failure"
   expect(JSON.parse(unknown.err)).toMatchObject({ code: "unknown_tool" });
 });
 
+test("tools and call name an unknown tool the same way and exit the same", async () => {
+  const run = runner();
+  const tools = await run(["tools", "nosuchtool"]);
+  const call = await run(["call", "nosuchtool"]);
+  expect(tools.code).toBe(1);
+  expect(tools.code).toBe(call.code);
+  expect(tools.err).toContain('Archer has no tool named "nosuchtool"');
+  expect(tools.err).not.toContain("unknown operation");
+  expect(tools.err).toBe(call.err);
+  expect(tools.out).toBe("");
+});
+
 test("human output uses operation text while machine output stays structured", async () => {
   const run = runner();
   const human = await run(["call", "list_diagrams"]);
@@ -109,7 +121,6 @@ test.each([
   ["call"],
   ["call", "list_diagrams", "extra"],
   ["call", "list_diagrams", "--stdin", "--file", "args.json"],
-  ["tools", "unknown"],
   ["tools", "read_diagram", "extra"],
 ])("malformed command is a usage error: %j", async (...args) => {
   expect((await runner()(args)).code).toBe(2);
