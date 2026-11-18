@@ -1204,6 +1204,9 @@ export class Application {
       text = `View '${view.title}' ${modelRevision === null ? "has not compiled" : "does not compile"} (${compiled.diagnostics.length} problem(s)):\n${lines.join("\n")}\n${model}`;
     }
     text += ` ${aboutSource}`;
+    text += compiled.envelope
+      ? ` Pass outputFormat: text for the element ids${view.kind === "sequence" ? ", message and fragment ids" : ""}.`
+      : "";
     if (sourceRevision !== null)
       text += ` To change it, pass sourceRevision ${sourceRevision} to write_diagram as expectedRevision.`;
 
@@ -2275,7 +2278,13 @@ export class Application {
                 });
               })();
         const count = snapshot.views.reduce((n, view) => n + view.emphases.length, 0);
-        return result(`${count} active emphasis(es) across ${snapshot.views.length} view(s).`, snapshot);
+        const lines = snapshot.views.flatMap((view) =>
+          view.emphases.map((emphasis) => `- ${view.viewId}: ${(emphasis as { id?: string }).id ?? "(no id)"}`),
+        );
+        return result(
+          `${count} active emphasis(es) across ${snapshot.views.length} view(s).${lines.length === 0 ? "" : `\n${lines.join("\n")}`}\nPass outputFormat: text for the full listing.`,
+          snapshot,
+        );
       } catch (error) {
         if (error instanceof OperationError) throw error;
         if (error instanceof ServiceCallError && error.error.code === "service_stopping" && attempt === 0) {
