@@ -216,3 +216,15 @@ describe("C8 review regressions", () => {
     ]);
   });
 });
+
+describe("a pattern with no stated meaning points at its edge", () => {
+  test("each `line_meaning_missing` is at the line that draws the edge, not 1:1", async () => {
+    const source = "flowchart LR\n  a[A]\n  b[B]\n  a e1@-.-> b\n  a e2@==> b\n  b e3@--> a\n";
+    const { model } = await compile(source);
+    const missing = lint(source, model!).filter((f) => f.diagnostic.code === "line_meaning_missing");
+    expect(missing.map((f) => [f.identity, f.diagnostic.span.start.line])).toEqual([
+      ["line_meaning_missing:dotted:e1", 4],
+      ["line_meaning_missing:thick:e2", 5],
+    ]);
+  });
+});
