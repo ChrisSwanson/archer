@@ -426,8 +426,12 @@ export class Application {
           ? tool.inputSchema
           : {
               ...tool.inputSchema,
+              // The name stays (accepting any value) so a refusal lists it among the accepted names.
               properties: Object.fromEntries(
-                Object.entries(tool.inputSchema.properties ?? {}).filter(([key]) => !own.includes(key)),
+                Object.entries(tool.inputSchema.properties ?? {}).map(([key, value]) => [
+                  key,
+                  own.includes(key) ? {} : value,
+                ]),
               ),
               ...(tool.inputSchema.required === undefined
                 ? {}
