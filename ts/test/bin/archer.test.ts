@@ -1,4 +1,6 @@
 // The `archer` command line, run in-process against a fake terminal.
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
 import { main, type Io } from "../../src/bin/main.ts";
@@ -144,4 +146,32 @@ test("a command that takes no arguments says so, and an unknown flag to status i
   const status = await run(["status", "--help"]);
   expect(status.code).toBe(2);
   expect(status.err).toContain("status takes only --json (got --help)");
+});
+
+test("draw --model accepts the envelope archer compile prints, drawing its model", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "archer-draw-envelope-"));
+  try {
+    const file = join(dir, "compiled.json");
+    writeFileSync(
+      file,
+      JSON.stringify({
+        schemaVersion: 2,
+        revision: `sha256:${"a".repeat(64)}`,
+        view: { id: "minimal" },
+        model: JSON.parse(readFileSync(MINIMAL, "utf8")),
+      }),
+    );
+    const { code, out, err } = await run(["draw", "--model", file, "--width", "100"]);
+    expect(err).toBe("");
+    expect(code).toBe(0);
+    expect(out).toContain("Web App");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the usage says which diagram types draw can draw", async () => {
+  const { out } = await run(["--help"]);
+  expect(out).toMatch(/^draw .*flowchart, state and entity-relationship diagrams/m);
+  expect(out).toMatch(/Other kinds[\s\S]*browser page/);
 });

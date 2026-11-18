@@ -73,7 +73,9 @@ validate  check a diagram: file:line:col code message, with the fix as a hint;
 measure   inspect source layout, reading-screen spans and non-blocking suggestions;
           --project explicitly measures admitted inventory; never starts the service
 compile   print a diagram's envelope (its view and model) as JSON
-draw      draw a diagram, or a compiled graph model, as a box drawing
+draw      draw flowchart, state and entity-relationship diagrams (or a compiled graph model,
+          or the envelope archer compile prints) as a box drawing. Other kinds (sequence, C4,
+          architecture, journey) are drawn on the browser page: archer serve prints its address
 emphasis  discover, replace or clear named highlights using the MCP payload;
           list prints JSON and never starts the service
 walkthrough  list, show, write or delete a diagram's numbered step-by-step walkthroughs;
