@@ -159,6 +159,7 @@ export function renderOperation(name: string, result: OperationResult, verbose =
     case "create_comment":
     case "reply_comment":
       return `${result.text}\nthread ${compact(data)}`;
+    case "list_projects":
     case "resolve_comment":
     case "get_ui_url":
     case "docs_index":
