@@ -218,9 +218,17 @@ class Scanner {
       if (word === "option" && this.#frames.at(-1)?.keyword === "refused") return;
       this.report(
         line,
-        error("unsupported_construct", `\`${word}\` is not supported in the sequence profile`, keywordSpan),
+        error(
+          "unsupported_construct",
+          word === "option"
+            ? "`option` is a section of `critical`, which is not supported in the sequence profile: for a block that may not happen, write `opt label` ... `end`"
+            : `\`${word}\` is not supported in the sequence profile`,
+          keywordSpan,
+        ),
       );
-      if (REFUSED_BLOCKS.has(word)) this.#frames.push({ keyword: "refused", line, at: keywordSpan });
+      // An `option` outside any block is written as a block of its own, closed by an `end`.
+      if (REFUSED_BLOCKS.has(word) || (word === "option" && this.#frames.length === 0))
+        this.#frames.push({ keyword: "refused", line, at: keywordSpan });
       return;
     }
     if (/^(acctitle|accdescr)/.test(word)) {
@@ -421,10 +429,30 @@ class Scanner {
       this.report(line, error("unexpected_token", "`end` with no open block to close", at));
   }
 
+  /** `a--b: text`, a flowchart's open line written as a message: refused with the reply arrow written in. */
+  #dashedLine(line: SourceLine, start: number): void {
+    const dashed = /^([^\s:-][^\s:]*?)(\s*)--(\s*)([^\s:-][^\s:]*)\s*:/.exec(line.text.slice(start));
+    if (!dashed) return;
+    const [, from = "", before = "", , to = ""] = dashed;
+    const at = start + from.length + before.length;
+    this.#use(line, from, start);
+    this.#use(line, to, line.text.indexOf(to, at + 2));
+    this.report(
+      line,
+      error(
+        "unsupported_construct",
+        "`--` is not a message arrow: messages use `->>` (sync), `-->>` (reply) or `-)` (async), " +
+          "or `<<->>` and `<<-->>` for an arrowhead at each end",
+        line.span(at, at + 2),
+      ),
+      [{ start: at, end: at + 2, replacement: "-->>" }],
+    );
+  }
+
   message(line: SourceLine, start: number): void {
     const text = line.text;
     const arrow = ARROW.exec(text.slice(start));
-    if (!arrow) return;
+    if (!arrow) return this.#dashedLine(line, start);
     const arrowStart = start + arrow.index;
     const arrowEnd = arrowStart + arrow[0].length;
     const from = text.slice(start, arrowStart).trim();

@@ -18,6 +18,7 @@ import { CANONICAL_DASH } from "../line-key.ts";
 import { restoreEntities } from "../entities.ts";
 import { readLabel } from "../labels.ts";
 import type { FlowData, FlowEdge, FlowVertex } from "./db.ts";
+import { MARKDOWN_LABEL_MESSAGE } from "./rewrites.ts";
 import type { FlowchartScan } from "./scan.ts";
 
 const SHAPES: Record<string, NodeShape> = {
@@ -72,6 +73,35 @@ function opaqueHex(written: string): string | null | undefined {
   return `#${full.slice(0, 6)}`;
 }
 
+/** Headers of Mermaid's other diagram types, which Mermaid reads as a bare node inside a flowchart. */
+const OTHER_DIAGRAM_HEADERS = new Set([
+  "classDiagram",
+  "classDiagram-v2",
+  "sequenceDiagram",
+  "stateDiagram",
+  "stateDiagram-v2",
+  "erDiagram",
+  "journey",
+  "gantt",
+  "pie",
+  "gitGraph",
+  "mindmap",
+  "timeline",
+  "quadrantChart",
+  "requirementDiagram",
+  "C4Context",
+  "C4Container",
+  "C4Component",
+  "C4Dynamic",
+  "C4Deployment",
+  "architecture-beta",
+  "block-beta",
+  "packet-beta",
+  "sankey-beta",
+  "xychart-beta",
+  "kanban",
+]);
+
 class Adapter {
   readonly diagnostics: Diagnostic[] = [];
 
@@ -91,13 +121,7 @@ class Adapter {
 
   #label(raw: string, labelType: string, at: Span): string | undefined {
     if (labelType === "markdown") {
-      this.diagnostics.push(
-        error(
-          "unsupported_construct",
-          "markdown string labels are not supported: write a plain label, as in `id[Label]`",
-          at,
-        ),
-      );
+      this.diagnostics.push(error("unsupported_construct", MARKDOWN_LABEL_MESSAGE, at));
       return undefined;
     }
     const { label, problems } = readLabel(restoreEntities(raw), at);
@@ -112,6 +136,21 @@ class Adapter {
     anyEdges: boolean,
   ): GraphNode | undefined {
     const at = this.#nodeSpan(vertex.id);
+    if (
+      vertex.type === undefined &&
+      OTHER_DIAGRAM_HEADERS.has(vertex.id) &&
+      this.scan.missingDeclarations.has(vertex.id)
+    ) {
+      this.diagnostics.push(
+        error(
+          "unsupported_construct",
+          `\`${vertex.id}\` starts a different diagram type, so it cannot be a line of a flowchart: ` +
+            "a source holds one diagram; remove the line, or put that diagram in a source of its own",
+          at,
+        ),
+      );
+      return undefined;
+    }
     if (vertex.type === undefined) {
       this.diagnostics.push(
         this.scan.groups.has(vertex.id)

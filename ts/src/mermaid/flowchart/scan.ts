@@ -9,7 +9,7 @@ import type { Edit, Finding } from "../findings.ts";
 import { MAX_NESTING_DEPTH } from "../limits.ts";
 import { isBlank, isCommentLine, type SourceLine } from "../source.ts";
 import { lexStatement, readId, readShape, type ShapeToken, type Token } from "./lexer.ts";
-import { legacyQuote, linkFindings, trailingComment } from "./rewrites.ts";
+import { legacyQuote, linkFindings, MARKDOWN_LABEL_MESSAGE, trailingComment } from "./rewrites.ts";
 
 export interface NodeMention {
   id: string;
@@ -56,6 +56,11 @@ export interface MissingEdgeId {
   fixable: boolean;
 }
 
+/** A chained edge moved to a line of its own: its line's text from `start` to `end` (UTF-16) becomes `replacement`. */
+export interface ChainSplit extends Edit {
+  line: SourceLine;
+}
+
 export interface FlowchartScan {
   direction: Direction | undefined;
   findings: Finding[];
@@ -75,6 +80,8 @@ export interface FlowchartScan {
   missingIds: MissingEdgeId[];
   /** Nodes never given a label, with the declaration to write at their first mention, in source order. */
   missingDeclarations: Map<string, MissingDeclaration>;
+  /** Each chained edge's move to a line of its own: the text from `start` to `end` of its line becomes `replacement`. */
+  chainSplits: ChainSplit[];
   /** Checking stopped at a subgraph nested too deep; nothing after it was read. */
   stopped: boolean;
 }
@@ -82,6 +89,18 @@ export interface FlowchartScan {
 const DIRECTIONS: Record<string, Direction> = { LR: "lr", RL: "rl", TB: "tb", TD: "tb", BT: "bt" };
 const SUPPORTED_SHAPES = new Set(["(", "((", "([", "[", "[[", "[(", "{", "{{"]);
 const STYLING = ["style", "linkStyle", "click"] as const;
+/** Words Mermaid's flowchart grammar keeps for itself, so it refuses a node with one as its ID. */
+const RESERVED_IDS = new Set([
+  "end",
+  "subgraph",
+  "graph",
+  "flowchart",
+  "style",
+  "class",
+  "classDef",
+  "linkStyle",
+  "interpolate",
+]);
 
 interface PendingSuggestion {
   finding: Finding;
@@ -107,6 +126,7 @@ class Scanner {
     anonymousLinks: 0,
     missingIds: [],
     missingDeclarations: new Map(),
+    chainSplits: [],
     stopped: false,
   };
   readonly #open: { id: string; line: SourceLine; keyword: Span }[] = [];
@@ -363,12 +383,50 @@ class Scanner {
     else this.#styling.set(keyword, { count: 1, first: at });
   }
 
+  /**
+   * `c[/slash]`: `[/` and `[\` open Mermaid's slanted shapes, so a label starting with a slash is read as one
+   * and never closed. Reported only when Mermaid refuses the source, with the label quoted.
+   */
+  #slantedLabel(line: SourceLine, tokens: readonly Token[], at: number): void {
+    const text = line.text;
+    const previous = tokens.at(-1);
+    if (previous?.kind !== "id" || previous.end !== at || !(text.startsWith("[/", at) || text.startsWith("[\\", at)))
+      return;
+    const close = text.indexOf("]", at);
+    const label = close === -1 ? "" : text.slice(at + 1, close);
+    const fix = label.includes('"') || label.trim() === "" ? undefined : `["${label}"]`;
+    this.report(
+      line,
+      error(
+        "unexpected_token",
+        `a label that starts with \`${text[at + 1]}\` opens a slanted shape in Mermaid, which this one never closes: ` +
+          `quote the label, as in \`${previous.text}${fix ?? '["/label"]'}\``,
+        line.span(at, at + 2),
+      ),
+      fix === undefined ? [] : [{ start: at, end: close + 1, replacement: fix }],
+      true,
+    );
+  }
+
   /** A node reference at `tokens[index]`: ID, then optional shape, metadata and class. */
   #nodeRef(line: SourceLine, tokens: readonly Token[], index: number): { id: string; next: number } | undefined {
     const idToken = tokens[index];
     if (idToken?.kind !== "id") return undefined;
     let next = index + 1;
     const id = idToken.text;
+    if (RESERVED_IDS.has(id)) {
+      // Reported only when Mermaid refuses the source: its own complaint does not say why.
+      this.report(
+        line,
+        error(
+          "invalid_id",
+          `\`${id}\` is a reserved word in Mermaid and cannot be a node ID: give the node another ID, such as \`${id}_node\``,
+          line.span(idToken.start, idToken.end),
+        ),
+        [],
+        true,
+      );
+    }
     const shape = tokens[next]?.kind === "shape" ? (tokens[next] as ShapeToken) : undefined;
     if (shape) {
       next += 1;
@@ -382,7 +440,7 @@ class Scanner {
           ),
         );
       } else {
-        this.#add(legacyQuote(line, shape));
+        this.#add(legacyQuote(line, shape), labelFinding(line, idToken, shape));
       }
     }
     const metadata = tokens[next];
@@ -434,12 +492,15 @@ class Scanner {
   statement(line: SourceLine): void {
     const lexed = lexStatement(line.text);
     const tokens = lexed.tokens;
+    if (lexed.opaque) this.#slantedLabel(line, tokens, lexed.at);
     const ref = this.#nodeRef(line, tokens, 0);
     if (!ref) return;
     let source: string = ref.id;
     let index = ref.next;
     let edgeId: Extract<Token, { kind: "edge-id" }> | undefined;
     let edges = 0;
+    // Where the last target node's text ends: a chained edge moves from here to a line of its own.
+    let sourceEnd = tokens[ref.next - 1]?.end ?? 0;
     while (index < tokens.length) {
       const token = tokens[index] as Token;
       if (token.kind === "amp") {
@@ -507,16 +568,8 @@ class Scanner {
       edges += 1;
       const linkProblems = linkFindings(line, token, pipe);
       this.#add(...linkProblems);
-      if (edges > 1) {
-        this.report(
-          line,
-          error(
-            "unsupported_construct",
-            "chained edges are not supported: write one edge per line, each with its own ID",
-            line.span(token.start, token.end),
-          ),
-        );
-      }
+      const chained = edges > 1;
+      // The ID goes in before the split is recorded: at one offset, the edit recorded first lands last.
       this.#edgeId(
         line,
         edgeId,
@@ -524,7 +577,23 @@ class Scanner {
         source,
         target.id,
         !linkProblems.some((finding) => !finding.legacy && finding.diagnostic.code === "unsupported_construct"),
+        chained,
       );
+      if (chained) {
+        // The edge moves to a line of its own, from its source by its bare ID: `a --> b --> c` → `a --> b` and `b --> c`.
+        const split = { start: sourceEnd, end: (edgeId ?? token).start, replacement: `\n${line.indent}${source} ` };
+        this.report(
+          line,
+          error(
+            "unsupported_construct",
+            "chained edges are not supported: write one edge per line, each with its own ID",
+            line.span(token.start, token.end),
+          ),
+          [split],
+        );
+        this.scan.chainSplits.push({ line, ...split });
+      }
+      sourceEnd = tokens[target.next - 1]?.end ?? sourceEnd;
       source = target.id;
       edgeId = undefined;
     }
@@ -537,14 +606,16 @@ class Scanner {
     source: string,
     target: string,
     fixable: boolean,
+    chained: boolean,
   ): void {
     if (edgeId === undefined) {
       this.scan.anonymousLinks += 1;
       const before = line.text[link.start - 1];
+      // A chained edge's split ends in a space after its source.
       const edit = {
         start: link.start,
         end: link.start,
-        replacement: before === undefined || /\s/.test(before) ? "" : " ",
+        replacement: chained || before === undefined || /\s/.test(before) ? "" : " ",
       };
       const finding = this.report(
         line,
@@ -602,6 +673,36 @@ class Scanner {
       fixable: suggestion.fixable,
     });
   }
+}
+
+/**
+ * What Mermaid refuses in a node's label that its own complaint does not name: an empty label
+ * (`b[]`), and a markdown string followed by more text (``b["`code` span"]``), which gets the refusal
+ * a whole markdown label gets. Reported only when Mermaid refuses the source.
+ */
+function labelFinding(line: SourceLine, id: Extract<Token, { kind: "id" }>, shape: ShapeToken): Finding | undefined {
+  const raw = shape.raw.trim();
+  if (!shape.quoted && raw === "") {
+    return {
+      line,
+      diagnostic: error(
+        "expected_label",
+        `node '${id.text}' has an empty label: write its label between the brackets, as in \`${id.text}${shape.opener}Label${shape.closer}\``,
+        line.span(shape.start, shape.end),
+      ),
+      edits: [],
+      legacy: true,
+    };
+  }
+  if (shape.quoted && raw.startsWith('"`') && !raw.endsWith('`"')) {
+    return {
+      line,
+      diagnostic: error("unsupported_construct", MARKDOWN_LABEL_MESSAGE, line.span(id.start, id.end)),
+      edits: [],
+      legacy: true,
+    };
+  }
+  return undefined;
 }
 
 /** Read the statements of a flowchart whose header is `header`. */

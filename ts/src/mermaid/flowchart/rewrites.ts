@@ -10,6 +10,10 @@ import type { ShapeToken, Token } from "./lexer.ts";
 /** Characters Mermaid does not take in an unquoted label. */
 const NEEDS_QUOTES = /[()[\]{}"]/;
 
+/** The refusal of a markdown string label, whole or followed by more text. */
+export const MARKDOWN_LABEL_MESSAGE =
+  "markdown string labels are not supported: write a plain label, as in `id[Label]`";
+
 const QUOTE_MESSAGE = "Mermaid needs this label quoted: it holds parentheses, brackets, braces or quotes";
 
 function quoted(label: string): string {

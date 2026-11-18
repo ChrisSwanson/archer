@@ -11,6 +11,7 @@ import type { DiagramModel } from "../model/index.ts";
 import { elementsOf } from "../model/index.ts";
 import { span, warning, type Diagnostic } from "./diagnostics.ts";
 import { lintLinePatterns } from "./line-key.ts";
+import { edgeLineOf } from "./source.ts";
 
 /** An edge caption wraps at about this many characters on the page (`EDGE_LABEL_WRAP_CHARS`), on at most this many lines. */
 export const LABEL_WRAP_CHARS = 24;
@@ -56,25 +57,6 @@ export function captionLines(text: string): number {
   return total;
 }
 
-/** The 1-based line of the source that most likely declares this edge, for the diagnostic's span. */
-function lineOf(source: string, id: string, label: string, ends: readonly [string, string]): number {
-  const lines = source.split(/\r\n?|\n/);
-  const code = (line: string) => !/^\s*%%/.test(line);
-  // A flowchart edge names its id: `a e1@--> b`.
-  const byId = lines.findIndex(
-    (line) => code(line) && new RegExp(`(^|[\\s;])${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}@`).test(line),
-  );
-  if (byId >= 0) return byId + 1;
-  // Elsewhere the id is derived from the two ends; the line naming both and the label is the declaration.
-  const first = label.split(/\n|<br\s*\/?>/i)[0] ?? label;
-  const byEnds = lines.findIndex(
-    (line) => code(line) && line.includes(ends[0]) && line.includes(ends[1]) && line.includes(first),
-  );
-  if (byEnds >= 0) return byEnds + 1;
-  const byLabel = lines.findIndex((line) => code(line) && line.includes(first));
-  return byLabel >= 0 ? byLabel + 1 : 1;
-}
-
 /** Every reading-rule finding for a model that compiled. Sequence and journey views have no edge captions to check. */
 export function lint(source: string, model: DiagramModel): LintFinding[] {
   if (model.type === "sequence-trace" || model.type === "user-journey") return [];
@@ -84,7 +66,7 @@ export function lint(source: string, model: DiagramModel): LintFinding[] {
     if (label === undefined || label === null || label === "") continue;
     const lines = captionLines(label);
     if (lines <= LABEL_MAX_LINES) continue;
-    const line = lineOf(source, link.id, label, [link.source, link.target]);
+    const line = edgeLineOf(source, link.id, label, [link.source, link.target]);
     findings.push({
       identity: `edge_label_too_long:${link.id}`,
       text: label,

@@ -191,8 +191,10 @@ Mermaid pasted from elsewhere has no IDs, so each such diagnostic names its fix,
 (`fix.operation`): it writes an ID on every edge that has none, `source_target` (`web_api`), numbered
 `_2`, `_3` where that is taken. The same fix declares every node the source only names (an
 `undeclared_node` error names it too), at its first mention with its ID as its label (`a` becomes
-`a[a]`), so pasted `a --> b` is valid in one step. It only inserts: no other byte of the source
-changes, and applying it again changes nothing. `validate_diagram` returns the fixed source as
+`a[a]`), so pasted `a --> b` is valid in one step. It also splits a chain into one edge per line,
+each from its source's bare ID (`a --> b --> c` becomes `a[a] a_b@--> b[b]` and `b b_c@--> c[c]`);
+a chain's diagnostic shows the same split as its hint. Apart from those IDs, declarations and line
+splits, no byte of the source changes, and applying it again changes nothing. `validate_diagram` returns the fixed source as
 `fix.source` (with `fix.added` and `fix.declared`), as does `archer validate <diagram> --json` as `fix`, and the editor
 applies it as the `add-edge-ids` edit.
 

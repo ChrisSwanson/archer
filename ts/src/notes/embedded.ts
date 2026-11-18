@@ -214,11 +214,17 @@ export function readEmbedded(project: Project, address: string): EmbeddedRead | 
 /** Shifts a diagnostic from lines of the fence body to lines of the note file. */
 export function inNote(read: Pick<EmbeddedRead, "bodyLine">, d: Diagnostic): Diagnostic {
   const by = read.bodyLine - 1;
+  return movedLines(d, (line) => line + by);
+}
+
+/** `d` with each line it names, in its span and as "line N" in its message, moved by `move`. */
+function movedLines(d: Diagnostic, move: (line: number) => number): Diagnostic {
   return {
     ...d,
+    message: d.message.replace(/\bline (\d+)\b/g, (_m, n: string) => `line ${move(Number(n))}`),
     span: {
-      start: { ...d.span.start, line: d.span.start.line + by },
-      end: { ...d.span.end, line: d.span.end.line + by },
+      start: { ...d.span.start, line: move(d.span.start.line) },
+      end: { ...d.span.end, line: move(d.span.end.line) },
     },
   };
 }
@@ -255,13 +261,7 @@ export async function compileEmbedded(read: EmbeddedRead, source: string = read.
     Buffer.from(text, "utf8"),
   );
   const back = (line: number): number => (removed !== null && line >= removed ? line + 1 : line);
-  const restored = compiled.diagnostics.map((d) => ({
-    ...d,
-    span: {
-      start: { ...d.span.start, line: back(d.span.start.line) },
-      end: { ...d.span.end, line: back(d.span.end.line) },
-    },
-  }));
+  const restored = compiled.diagnostics.map((d) => movedLines(d, back));
   return { ...compiled, diagnostics: restored.map((d) => inNote(read, d)) };
 }
 
