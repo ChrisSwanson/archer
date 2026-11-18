@@ -202,3 +202,15 @@ test("same source with different compilation metadata cannot reuse stale compile
   expect(changed.compiled!.envelope!.view.title).toBe("Renamed");
   expect(pool.stats.cached).toBe(2);
 });
+
+test("a worker's cold start does not count against the layout budget, only against the caller's deadline", async () => {
+  // Loading the worker takes 1.5 s, longer than the 1 s layout budget; the layout itself is quick.
+  const pool = poolOf({ worker: new URL("./fixtures/cold-start-worker.ts", import.meta.url), workerMs: 1_000 });
+  expect(await pool.request({ envelope: await envelope() })).toMatchObject({ status: "ready", complete: true });
+  // The caller's own deadline still bounds the whole wait, start-up included.
+  const late = poolOf({ worker: new URL("./fixtures/cold-start-worker.ts", import.meta.url), workerMs: 1_000 });
+  expect(await late.request({ envelope: await envelope(), deadlineMs: 500 })).toMatchObject({
+    status: "unavailable",
+    reason: "budget_exceeded",
+  });
+}, 15_000);

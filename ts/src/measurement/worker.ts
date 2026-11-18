@@ -4,6 +4,12 @@ import type { CompilationInput } from "./pool.ts";
 import type { AnalysisState } from "../../../shared/layout-analysis.mts";
 const port = parentPort;
 if (port === null) throw new Error("layout-worker runs in a worker thread");
+// Load the compiler and the layout engine up front and say so: the pool starts a job's layout budget
+// only then. A failed load still reports ready, so the job meets the failure itself and says why.
+void Promise.all([loadAnalysis(), import("../application/diagrams.ts"), import("../project/envelope.ts")]).then(
+  () => port.postMessage({ ready: true }),
+  () => port.postMessage({ ready: true }),
+);
 port.on(
   "message",
   (job: {

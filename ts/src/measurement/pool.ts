@@ -74,6 +74,8 @@ interface Slot {
   readonly worker: Worker;
   job: Job | null;
   timer?: NodeJS.Timeout;
+  /** The worker has loaded its modules. Until then its job waits on the caller's deadline alone. */
+  ready: boolean;
 }
 
 export function layoutWorkerLocation(): URL {
@@ -231,13 +233,14 @@ export class LayoutPool {
         return;
       }
       this.#started++;
-      slot = { worker, job: null };
+      slot = { worker, job: null, ready: false };
       this.#slot = slot;
       const owned = slot;
       worker.on(
         "message",
         (message: {
-          id: number;
+          id?: number;
+          ready?: boolean;
           requested?: readonly AnalysisState[];
           compiled?: CompiledInput;
           unavailable?: string;
@@ -246,6 +249,11 @@ export class LayoutPool {
           code?: string;
           error?: string;
         }) => {
+          if (message.ready) {
+            owned.ready = true;
+            if (this.#slot === owned && owned.job !== null) this.#startBudget(owned, owned.job);
+            return;
+          }
           const active = owned.job;
           if (this.#slot !== owned || active === null || message.id !== active.id) return;
           if (message.requested) active.requested = message.requested;
@@ -292,7 +300,9 @@ export class LayoutPool {
     }
     slot.job = job;
     slot.worker.ref();
-    slot.timer = setTimeout(() => this.#finish(job, "budget_exceeded"), this.#options.workerMs);
+    // The layout budget bounds the layout, not a cold worker loading its modules: on a busy machine that
+    // load alone can outlast it. The caller's deadline (job.timer) still bounds the whole wait.
+    if (slot.ready) this.#startBudget(slot, job);
     slot.worker.postMessage({
       id: job.id,
       envelope: job.request.envelope,
@@ -300,6 +310,10 @@ export class LayoutPool {
       ...(job.request.states === undefined ? {} : { states: job.request.states }),
       typeface: job.request.typeface ?? "fira",
     });
+  }
+  #startBudget(slot: Slot, job: Job): void {
+    clearTimeout(slot.timer);
+    slot.timer = setTimeout(() => this.#finish(job, "budget_exceeded"), this.#options.workerMs);
   }
   #remove(job: Job): void {
     this.#jobs.delete(job.key);
