@@ -140,6 +140,15 @@ test("admitted content succeeds while inventory diagnostics remain bounded", () 
   expect(read.inventory.diagnostics).toHaveLength(20);
 });
 
+test("a missing note reads the same with or without an unrelated symlink in the notes folder", () => {
+  const plain = tempDir({ ".archer/a.md": "yes" });
+  const linked = tempDir({ ".archer/a.md": "yes" });
+  fs.symlinkSync(join(linked, ".archer/a.md"), join(linked, ".archer/link.md"));
+  const without = refusal(() => readNoteSource(findProject(plain), "absent.md"), "resource_not_found");
+  const withLink = refusal(() => readNoteSource(findProject(linked), "absent.md"), "resource_not_found");
+  expect(withLink.message).toBe(without.message);
+});
+
 test("depth exactly 64 is admitted and 65 is refused by name", () => {
   const path = Array.from({ length: DISCOVERY_LIMITS.depth }, () => "a").join("/");
   const root = tempDir({ [`.archer/${path}/yes.md`]: "limit", [`.archer/${path}/a/no.md`]: "beyond" }),
