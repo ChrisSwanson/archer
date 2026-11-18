@@ -123,10 +123,10 @@ describe("Launch", () => {
     const script = write(
       tempDir(),
       "record.mjs",
-      `import { writeFileSync } from "node:fs";\n` +
+      `import { renameSync, writeFileSync } from "node:fs";\n` +
         `const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k.startsWith("ARCHER_") && ${JSON.stringify(Object.values(LAUNCHER_ENV))}.includes(k)));\n` +
         `let stdin = ""; process.stdin.setEncoding("utf8"); for await (const chunk of process.stdin) stdin += chunk;\n` +
-        `writeFileSync(process.argv[2], JSON.stringify({ argv: process.argv.slice(2), cwd: process.cwd(), env, keys: Object.keys(process.env).sort(), stdin }));\n`,
+        `writeFileSync(process.argv[2] + ".tmp", JSON.stringify({ argv: process.argv.slice(2), cwd: process.cwd(), env, keys: Object.keys(process.env).sort(), stdin })); renameSync(process.argv[2] + ".tmp", process.argv[2]);\n`,
     );
     mkdirSync(join(state, ".config", "archer"), { recursive: true });
     writeFileSync(
@@ -250,9 +250,9 @@ describe("automatic launch (ADR 0035, amended 2026-10-31)", () => {
     const script = write(
       tempDir(),
       "record.mjs",
-      `import { writeFileSync } from "node:fs";\n` +
+      `import { renameSync, writeFileSync } from "node:fs";\n` +
         `let stdin = ""; process.stdin.setEncoding("utf8"); for await (const chunk of process.stdin) stdin += chunk;\n` +
-        `writeFileSync(process.argv[2] + "/" + process.pid + ".json", JSON.stringify({ argv: process.argv.slice(2), stdin, thread: process.env.ARCHER_THREAD_ID }));\n`,
+        `const tmp = process.argv[2] + "." + process.pid + ".tmp"; writeFileSync(tmp, JSON.stringify({ argv: process.argv.slice(2), stdin, thread: process.env.ARCHER_THREAD_ID })); renameSync(tmp, process.argv[2] + "/" + process.pid + ".json");\n`,
     );
     mkdirSync(join(state, ".config", "archer"), { recursive: true });
     writeFileSync(
@@ -462,8 +462,8 @@ describe("automatic launch, queued sending", () => {
     const script = write(
       tempDir(),
       "record.mjs",
-      `import { writeFileSync } from "node:fs";\nlet stdin = ""; process.stdin.setEncoding("utf8"); for await (const chunk of process.stdin) stdin += chunk;\n` +
-        `writeFileSync(process.argv[2] + "/" + process.pid + ".json", JSON.stringify({ stdin, thread: process.env.ARCHER_THREAD_ID }));\n`,
+      `import { renameSync, writeFileSync } from "node:fs";\nlet stdin = ""; process.stdin.setEncoding("utf8"); for await (const chunk of process.stdin) stdin += chunk;\n` +
+        `const tmp = process.argv[2] + "." + process.pid + ".tmp"; writeFileSync(tmp, JSON.stringify({ stdin, thread: process.env.ARCHER_THREAD_ID })); renameSync(tmp, process.argv[2] + "/" + process.pid + ".json");\n`,
     );
     mkdirSync(join(state, ".config", "archer"), { recursive: true });
     writeFileSync(
