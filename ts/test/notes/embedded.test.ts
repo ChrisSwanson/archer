@@ -152,3 +152,15 @@ describe("pinEmbedded", () => {
     expect(after.envelope?.revision).toBe(before.envelope?.revision);
   });
 });
+
+describe("a diagram in a note says lines of the note", () => {
+  test("a line number in a message is the note's line, as its span is", async () => {
+    const note =
+      "# Notes\n\nSome prose.\n\n## Flow\n\n```mermaid\nsequenceDiagram\n  participant a as A\n  participant b as B\n  a->>b hi: there\n  a-*b: x\n```\n";
+    const project = findProject(tempDir({ ".archer/n.md": note }));
+    const compiled = await compileEmbedded(readEmbedded(project, "n.md#flow")!);
+    const unread = compiled.diagnostics.find((d) => /cannot read line/.test(d.message));
+    expect(unread).toBeDefined();
+    expect(unread!.message).toContain(`line ${unread!.span.start.line} `);
+  });
+});

@@ -86,3 +86,27 @@ describe("state diagram", () => {
     expect(found[0]?.message).toContain("declare `state F <<fork>>` before its first use");
   });
 });
+
+describe("sequence diagram", () => {
+  const S = (body: string) => `sequenceDiagram\n  participant x as X\n  participant y as Y\n${body}\n`;
+
+  test("`option` outside `critical` is refused once, with no second error for its `end`", async () => {
+    const found = await errors(S("  option y\n    x->>y: hi\n  end"));
+    expect(located(found)).toEqual(["unsupported_construct@4:3"]);
+    expect(found[0]?.message).toContain("`opt label`");
+  });
+
+  test("`option` inside `alt` still leaves the `alt` to its own `end`", async () => {
+    const found = await errors(S("  alt a\n    x->>y: hi\n  option y\n    x->>y: again\n  end"));
+    expect(located(found)).toEqual(["unsupported_construct@6:3"]);
+  });
+
+  test("`x--y` gets the supported arrows and the line to write, as `x-xy` does", async () => {
+    const source = S("  x--y: hi");
+    const found = await errors(source);
+    expect(located(found)).toEqual(["unsupported_construct@4:4"]);
+    expect(found[0]?.message).toContain("messages use `->>`");
+    expect(found[0]?.hint).toBe("  x-->>y: hi");
+    expect(await errors(applyHints(source, found))).toEqual([]);
+  });
+});
