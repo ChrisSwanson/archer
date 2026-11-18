@@ -30,6 +30,7 @@ coverage/
 /site/generated/
 /site/public/generated/
 /site/install.md
+/site/other-agents.md
 /site/supported-mermaid.md
 /site/security/network-access.md
 /site/security/known-limits.md
