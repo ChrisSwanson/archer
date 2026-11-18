@@ -49,7 +49,9 @@ export async function run(args: readonly string[], io: OperationIo): Promise<num
   const [viewId, id] = positionals;
   const expected = values.expected === undefined ? undefined : Number(values.expected);
   if (expected !== undefined && !(Number.isInteger(expected) && expected >= 1))
-    throw new UsageError("--expected must be a revision number, 1 or more");
+    throw new UsageError(
+      "--expected must be a revision number, 1 or more; leave --expected off to create a new walkthrough",
+    );
   const json = values.json === true;
   if (values.markdown === true && (action !== "show" || json))
     throw new UsageError("--markdown is for  walkthrough show  and conflicts with --json");

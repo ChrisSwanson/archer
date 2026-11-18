@@ -523,7 +523,8 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
           type: "integer",
           minimum: 1,
           maximum: Number.MAX_SAFE_INTEGER,
-          description: "The walkthrough's revision from list_walkthroughs, to replace or delete it.",
+          description:
+            "The walkthrough's revision from list_walkthroughs, to replace or delete it. Leave it out to create a new walkthrough (0 is not a revision).",
         },
         delete: { type: "boolean", description: "Delete walkthrough.id (needs expectedRevision)." },
       },
