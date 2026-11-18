@@ -3,7 +3,7 @@
 // devkit sandbox, in the light and the dark theme, as animated WebP (inline on GitHub), MP4 (to link) and a poster.
 //
 //   npm run build                                   # the sandbox serves ui/dist/index.html
-//   node tools/devkit/journeys/readme-demo.mjs [--out docs/media] [--theme light|dark|both] [--width 1200] [--fps 20]
+//   node tools/devkit/journeys/readme-demo.mjs [--out docs/media] [--theme light|dark|both] [--width 1360] [--fps 20] [--webp lossless|mixed|lossy]
 //        [--shots <dir>]   also keep a screenshot at every beat (for checking the run)
 //        [--no-encode]     drive and screenshot only; write no media
 //
@@ -18,7 +18,7 @@
 //
 // Headless Chromium paints no mouse pointer, so the page gets a drawn arrow that follows the real mouse events
 // (pointer-events: none); everything else on screen is the app. Needs ffmpeg and img2webp on PATH; frames are
-// assembled at the times Chromium painted them (as site/scripts/readme-film.mts does).
+// assembled at the times Chromium painted them.
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -32,7 +32,8 @@ const { values: opt } = parseArgs({
   options: {
     out: { type: "string", default: join(REPO, "docs/media") },
     theme: { type: "string", default: "both" },
-    width: { type: "string", default: "1200" },
+    width: { type: "string", default: "1360" }, // the viewport's own width: no resampling
+    webp: { type: "string", default: "lossless" }, // lossy blurs and rings the UI's high-contrast edges
     fps: { type: "string", default: "20" },
     shots: { type: "string" },
     "no-encode": { type: "boolean", default: false },
@@ -288,30 +289,30 @@ async function run(theme) {
     });
 
     // 1. The note, then its diagram, and the saved walkthrough step by step.
-    await d.pause(1600);
+    await d.pause(1000);
     await shot("01-note");
     const embed = page.getByRole("link", { name: "Open proposal, Flowchart" });
     await d.to(embed);
     await d.pause(500);
     await d.click(embed);
     await page.locator(".react-flow__node").first().waitFor();
-    await d.pause(1300);
+    await d.pause(900);
     await shot("02-diagram");
     const start = page.getByRole("button", { name: /^How a Payment Is Captured\s*3 steps/ });
     await d.click(start);
     const steps = page.getByRole("group", { name: "Step controls" });
     await steps.getByText("Step 1 of 3").waitFor();
-    await d.pause(2200);
+    await d.pause(1600);
     await shot("03-step1");
     const next = page.getByRole("button", { name: "Next step" });
     await d.click(next);
     await steps.getByText("Step 2 of 3").waitFor();
     posterAt = Date.now() / 1000 + 1.2;
-    await d.pause(2200);
+    await d.pause(1600);
     await shot("04-step2");
     await d.click(next);
     await steps.getByText("Step 3 of 3").waitFor();
-    await d.pause(2200);
+    await d.pause(1600);
     await shot("05-step3");
     await d.click(page.getByRole("button", { name: "Close walkthrough" }));
     await d.pause(700);
@@ -337,13 +338,13 @@ async function run(theme) {
     await box.waitFor();
     await d.to(box);
     await d.pause(300);
-    await box.pressSequentially(COMMENT, { delay: 28 });
+    await box.pressSequentially(COMMENT, { delay: 16 });
     await d.pause(600);
     await shot("06-draft");
     await d.click(discussion.getByRole("button", { name: "Add comment" }));
     await discussion.getByText(COMMENT).waitFor();
     await d.to(discussion.getByText(COMMENT));
-    await d.pause(1600);
+    await d.pause(1100);
     await shot("07-sent");
 
     // 3. The agent's next turn: it reads the comment, replies, redraws, and highlights what it changed.
@@ -370,14 +371,14 @@ async function run(theme) {
     await discussion.getByText(REPLY).waitFor({ timeout: 15_000 });
     await page.locator('.react-flow__node[data-id="dlq"]').waitFor({ timeout: 15_000 });
     await d.to(discussion.getByText(REPLY));
-    await d.pause(2600);
+    await d.pause(2000);
     await shot("08-replied");
     void wrote;
     // Close the thread and see the whole redrawn diagram with the agent's highlights.
     await d.click(discussion.getByRole("button", { name: /^Close/ }).first());
     await d.pause(500);
     await d.click(page.getByRole("button", { name: "Fit view" }));
-    await d.pause(2600);
+    await d.pause(1800);
     await shot("08b-revised");
 
     // 4. The same proposal as a sequence diagram, with the agent's highlights (landing-film.mts SEQUENCE_HIGHLIGHT).
@@ -407,16 +408,16 @@ async function run(theme) {
     await page.keyboard.press("Escape");
     await page.goto(`${O}/projects/shop/diagrams/${SEQUENCE}.mmd`);
     await page.locator("g.archer-seq-participant").first().waitFor();
-    await d.pause(1200);
+    await d.pause(600);
     await shot("09-sequence");
     const showAll = page.getByRole("button", { name: /Show all/ }).first();
     if (await showAll.isVisible()) {
       await d.click(showAll);
-      await d.pause(1200);
+      await d.pause(600);
     }
     const legend = page.getByText("Charged once").first();
     await d.to(legend);
-    await d.pause(2600);
+    await d.pause(3000);
     await shot("10-legend");
 
     await session.send("Page.stopScreencast");
@@ -453,7 +454,7 @@ async function encode(theme, frames) {
   // Frames of differing size (a resize mid-run) are scaled to one size first.
   const filter = [
     `scale=${Math.round(VIEWPORT.width * scale)}:${Math.round(VIEWPORT.height * scale)}`,
-    `scale=${width}:-2:flags=lanczos`,
+    ...(width === VIEWPORT.width ? [] : [`scale=${width}:-2:flags=lanczos`]),
     `fps=${fps}`,
   ].join(",");
   const mp4 = join(out, `archer-demo-${theme}.mp4`);
@@ -461,7 +462,22 @@ async function encode(theme, frames) {
   const poster = join(out, `archer-demo-${theme}.png`);
   const ff = (...args) => execFileSync("ffmpeg", ["-y", "-loglevel", "error", ...args], { stdio: "inherit" });
   const input = ["-f", "concat", "-safe", "0", "-i", join(dir, "list.txt")];
-  ff(...input, "-vf", filter, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "22", "-movflags", "+faststart", mp4);
+  ff(
+    ...input,
+    "-vf",
+    filter,
+    "-c:v",
+    "libx264",
+    "-pix_fmt",
+    "yuv420p",
+    "-crf",
+    "18",
+    "-tune",
+    "animation",
+    "-movflags",
+    "+faststart",
+    mp4,
+  );
   const stills = join(dir, "out");
   mkdirSync(stills);
   ff(...input, "-vf", filter, join(stills, "%05d.png"));
@@ -471,11 +487,9 @@ async function encode(theme, frames) {
   execFileSync("img2webp", [
     "-loop",
     "0",
-    "-lossy",
-    "-q",
-    "70",
+    ...{ lossless: ["-lossless", "-q", "75"], mixed: ["-mixed", "-q", "90"], lossy: ["-lossy", "-q", "90"] }[opt.webp],
     "-m",
-    "4",
+    "6",
     "-d",
     String(Math.round(1000 / fps)),
     ...pngs,
