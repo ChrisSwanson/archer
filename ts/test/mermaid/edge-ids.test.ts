@@ -2,12 +2,12 @@
 // and each refusal names the fix, `add-edge-ids`, which writes a readable ID
 // on every such edge and changes nothing else in the source.
 
-import { expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { editDiagram } from "../../src/authoring/diagram-edit.ts";
 import { previewAuthoring } from "../../src/authoring/preview.ts";
 import { addMissingEdgeIds } from "../../src/mermaid/flowchart/edge-ids.ts";
 import { compile } from "../../src/mermaid/index.ts";
-import { errorsOf } from "./support/compile-helpers.ts";
+import { applyHints, errorsOf } from "./support/compile-helpers.ts";
 
 const pasted = [
   "%% from the wiki",
@@ -177,4 +177,37 @@ test("a node whose ID is not a stable ID is not declared: the fix is not offered
   const once = addMissingEdgeIds(source).source;
   expect(once).not.toContain("[/a]");
   expect(addMissingEdgeIds(once).source).toBe(once);
+});
+
+describe("a chain is split into one edge per line, each with its ID", () => {
+  test("pasted `a --> b --> c`: the fix writes two edges on two lines, and the result is valid", async () => {
+    const source = "flowchart LR\n  a --> b --> c\n";
+    const result = addMissingEdgeIds(source);
+    expect(result.source).toBe("flowchart LR\n  a[a] a_b@--> b[b]\n  b b_c@--> c[c]\n");
+    expect(errorsOf((await compile(result.source)).diagnostics)).toEqual([]);
+    expect(addMissingEdgeIds(result.source)).toEqual({ source: result.source, added: [], declared: [] });
+  });
+
+  test("a glued chain is split too", async () => {
+    const result = addMissingEdgeIds("flowchart LR\n  a[A]-->b[B]-->c[C]\n");
+    expect(result.source).toBe("flowchart LR\n  a[A] a_b@-->b[B]\n  b b_c@-->c[C]\n");
+    expect(errorsOf((await compile(result.source)).diagnostics)).toEqual([]);
+  });
+
+  test("the hint of every error on a chained line is the split, and applying it leaves no error", async () => {
+    const source = "flowchart LR\n  a[A]\n  b[B]\n  c[C]\n  a --> b --> c\n";
+    const errors = errorsOf((await compile(source)).diagnostics);
+    expect(errors.map((d) => d.code)).toEqual(["unsupported_construct", "unsupported_construct"]);
+    expect(errors.map((d) => d.hint)).toEqual(["  a a_b@--> b\n  b b_c@--> c", "  a a_b@--> b\n  b b_c@--> c"]);
+    expect(errors[0]?.message).toContain("`a a_b@--> b`");
+    expect(errorsOf((await compile(applyHints(source, errors))).diagnostics)).toEqual([]);
+  });
+
+  test("a chain whose edges have IDs gets the split as its hint", async () => {
+    const source = "flowchart LR\n  a[A] e1@--> b[B] e2@-.->|reads| c[C]\n";
+    const errors = errorsOf((await compile(source)).diagnostics);
+    expect(errors.map((d) => d.hint)).toEqual(["  a[A] e1@--> b[B]\n  b e2@-.->|reads| c[C]"]);
+    expect(errorsOf((await compile(applyHints(source, errors))).diagnostics)).toEqual([]);
+    expect(addMissingEdgeIds(source).source).toBe("flowchart LR\n  a[A] e1@--> b[B]\n  b e2@-.->|reads| c[C]\n");
+  });
 });

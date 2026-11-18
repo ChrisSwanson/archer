@@ -56,6 +56,11 @@ export interface MissingEdgeId {
   fixable: boolean;
 }
 
+/** A chained edge moved to a line of its own: its line's text from `start` to `end` (UTF-16) becomes `replacement`. */
+export interface ChainSplit extends Edit {
+  line: SourceLine;
+}
+
 export interface FlowchartScan {
   direction: Direction | undefined;
   findings: Finding[];
@@ -75,6 +80,8 @@ export interface FlowchartScan {
   missingIds: MissingEdgeId[];
   /** Nodes never given a label, with the declaration to write at their first mention, in source order. */
   missingDeclarations: Map<string, MissingDeclaration>;
+  /** Each chained edge's move to a line of its own: the text from `start` to `end` of its line becomes `replacement`. */
+  chainSplits: ChainSplit[];
   /** Checking stopped at a subgraph nested too deep; nothing after it was read. */
   stopped: boolean;
 }
@@ -107,6 +114,7 @@ class Scanner {
     anonymousLinks: 0,
     missingIds: [],
     missingDeclarations: new Map(),
+    chainSplits: [],
     stopped: false,
   };
   readonly #open: { id: string; line: SourceLine; keyword: Span }[] = [];
@@ -440,6 +448,8 @@ class Scanner {
     let index = ref.next;
     let edgeId: Extract<Token, { kind: "edge-id" }> | undefined;
     let edges = 0;
+    // Where the last target node's text ends: a chained edge moves from here to a line of its own.
+    let sourceEnd = tokens[ref.next - 1]?.end ?? 0;
     while (index < tokens.length) {
       const token = tokens[index] as Token;
       if (token.kind === "amp") {
@@ -507,16 +517,8 @@ class Scanner {
       edges += 1;
       const linkProblems = linkFindings(line, token, pipe);
       this.#add(...linkProblems);
-      if (edges > 1) {
-        this.report(
-          line,
-          error(
-            "unsupported_construct",
-            "chained edges are not supported: write one edge per line, each with its own ID",
-            line.span(token.start, token.end),
-          ),
-        );
-      }
+      const chained = edges > 1;
+      // The ID goes in before the split is recorded: at one offset, the edit recorded first lands last.
       this.#edgeId(
         line,
         edgeId,
@@ -524,7 +526,23 @@ class Scanner {
         source,
         target.id,
         !linkProblems.some((finding) => !finding.legacy && finding.diagnostic.code === "unsupported_construct"),
+        chained,
       );
+      if (chained) {
+        // The edge moves to a line of its own, from its source by its bare ID: `a --> b --> c` → `a --> b` and `b --> c`.
+        const split = { start: sourceEnd, end: (edgeId ?? token).start, replacement: `\n${line.indent}${source} ` };
+        this.report(
+          line,
+          error(
+            "unsupported_construct",
+            "chained edges are not supported: write one edge per line, each with its own ID",
+            line.span(token.start, token.end),
+          ),
+          [split],
+        );
+        this.scan.chainSplits.push({ line, ...split });
+      }
+      sourceEnd = tokens[target.next - 1]?.end ?? sourceEnd;
       source = target.id;
       edgeId = undefined;
     }
@@ -537,14 +555,16 @@ class Scanner {
     source: string,
     target: string,
     fixable: boolean,
+    chained: boolean,
   ): void {
     if (edgeId === undefined) {
       this.scan.anonymousLinks += 1;
       const before = line.text[link.start - 1];
+      // A chained edge's split ends in a space after its source.
       const edit = {
         start: link.start,
         end: link.start,
-        replacement: before === undefined || /\s/.test(before) ? "" : " ",
+        replacement: chained || before === undefined || /\s/.test(before) ? "" : " ",
       };
       const finding = this.report(
         line,
