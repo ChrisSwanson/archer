@@ -63,17 +63,19 @@ const USAGE = `usage: archer init [dir] [--docs]
        archer --version
 
 init      make this directory an Archer project: archer.toml, the Archer folder
-          (.archer/ by default) and a pointer to it in AGENTS.md and CLAUDE.md;
+          (.archer/ by default) and a pointer to it in AGENTS.md, and in CLAUDE.md if it exists;
           --docs also turns docs mode on (mode = "docs"), with no stub files
 list      the diagrams and notes in the Archer folder, with compile status
-validate  check a diagram: file:line:col code message, with the fix as a hint;
+validate  check a diagram: file:line:col error|warning code message, with the fix as a hint;
           --json prints one JSON value (diagnostics, and lint as present has it);
           an existing view lists up to 5 ids other views already spell differently;
           --suggest lists them all, --no-suggest none
 measure   inspect source layout, reading-screen spans and non-blocking suggestions;
           --project explicitly measures admitted inventory; never starts the service
 compile   print a diagram's envelope (its view and model) as JSON
-draw      draw a diagram, or a compiled graph model, as a box drawing
+draw      draw flowchart, state and entity-relationship diagrams (or a compiled graph model,
+          or the envelope archer compile prints) as a box drawing. Other kinds (sequence, C4,
+          architecture, journey) are drawn on the browser page: archer serve prints its address
 emphasis  discover, replace or clear named highlights using the MCP payload;
           list prints JSON and never starts the service
 walkthrough  list, show, write or delete a diagram's numbered step-by-step walkthroughs;
@@ -95,7 +97,8 @@ inbox     the person's messages waiting in Archer; --hook is the turn-start hook
 skill     print the Archer skill this CLI ships (--references adds its references), or
           --write it as a folder
 doctor    check that this CLI runs, the service and its page are reachable from here and the
-          installed skill matches; each failure says what to tell the person
+          installed skill matches; it starts the service if none is running (archer stop ends
+          it); each failure says what to tell the person
 pair      issue a short single-use code to type at Archer's address on another device
           (a phone, another computer) instead of carrying a link; needs a running service
 network-access
@@ -144,11 +147,10 @@ async function runCommand(argv: readonly string[], io: Io): Promise<number> {
       io.stdout(`${version()}\n`);
       return 0;
     }
-    if (command === "--help" || command === "-h" || command === "help") {
+    if (command === "--help" || command === "-h" || command === "help" || command === undefined) {
       io.stdout(USAGE);
       return 0;
     }
-    if (command === undefined) throw new UsageError("no command given");
     if (command === "call") return await (await import("./operations.ts")).runCall(rest, io);
     if (command === "pair") {
       const { values } = usage(() =>
@@ -236,6 +238,10 @@ async function runCommand(argv: readonly string[], io: Io): Promise<number> {
       return await commands.run(command, rest, io);
     }
     if (PACKAGE_COMMANDS.has(command)) {
+      if (command === "setup" && (rest.includes("--help") || rest.includes("-h"))) {
+        io.stdout(`${SETUP_USAGE}\n`);
+        return 0;
+      }
       // The package's own launcher (ts/pkg/bin/archer.mjs) handles these before this CLI runs.
       io.stderr(notAPackageInstall(command));
       return 1;
@@ -256,6 +262,7 @@ async function runCommand(argv: readonly string[], io: Io): Promise<number> {
 }
 
 const PROJECT_COMMANDS = new Set(["init", "list", "validate", "compile"]);
+const SETUP_USAGE = "usage: archer setup [--mcp] [--no-claude] [--no-codex]";
 const PACKAGE_COMMANDS = new Set(["setup", "upgrade", "uninstall"]);
 
 /** For setup, upgrade and uninstall run from a development or source install, not the package. */

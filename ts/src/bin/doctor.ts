@@ -143,7 +143,7 @@ export async function runDoctor(args: readonly string[], io: Io, deps: Partial<D
       const where = detected.host === "other" ? "for Claude Code or Codex" : `for ${HOST_NAMES[detected.host]}`;
       failure(
         `Skill: no Archer skill installed ${where}`,
-        "the Archer skill is not installed for this agent; run  archer setup  (or  archer skill --write <the host's skills folder>/archer), then restart this session.",
+        'the Archer skill is not installed for this agent. For Claude Code or Codex run  archer setup.  For another agent, do both: register  archer mcp  with it as an MCP server, and run  archer skill --write <its skills folder>/archer  (the guide "Use Archer with another agent": https://chrisswanson.github.io/archer/other-agents). Then restart this session.',
       );
     }
     for (const entry of checked) {

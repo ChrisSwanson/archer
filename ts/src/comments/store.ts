@@ -628,10 +628,16 @@ function agentMay(t: Thread, expectedRevision: number, what: "reply to" | "resol
     const next =
       t.status === "draft"
         ? "It is a draft again: the person has not sent the new text yet, so leave it until they do and call get_comments then."
-        : `Read the new text below, then ${what} it with expectedRevision ${t.revision}.`;
+        : expectedRevision > t.revision
+          ? `Send expectedRevision ${t.revision}, the revision get_comments or your last reply returned.`
+          : `Read the new text below, then ${what} it with expectedRevision ${t.revision}.`;
     throw new CommentsError(
       "thread_changed",
-      `thread ${t.id} changed since you read it (revision ${expectedRevision}; it is now revision ${t.revision}, ${t.status}), so nothing was done. ${next}\n${now}`,
+      `thread ${t.id} ${
+        expectedRevision > t.revision
+          ? `was not changed: you sent ${expectedRevision}; the thread is at ${t.revision} (${t.status})`
+          : `changed since you read it (revision ${expectedRevision}; it is now revision ${t.revision}, ${t.status})`
+      }, so nothing was done. ${next}\n${now}`,
       { threadId: t.id, revision: t.revision, status: t.status, comments: t.comments },
     );
   }

@@ -1,5 +1,79 @@
 # Changelog
 
+## 0.15.1 — 2026-11-18
+
+Clearer errors for the Mermaid agents usually write, CLI and tool messages that say what to do next, a guide
+for agents other than Claude Code and Codex, and fixes for two tests that failed on busy machines.
+
+### Added
+
+- **Agents other than Claude Code and Codex had no instructions.** A new guide on the documentation site, "Use Archer
+  with another agent", gives the two steps (register `archer mcp`, write the skill with `archer skill
+  --write`) and a listen loop for harnesses with no background tasks (also in `archer docs cli`). `archer setup` and
+  `archer doctor` print the two steps when they find neither agent.
+- **Dependabot watched only the workflow actions.** It now proposes npm updates too: minor and patch
+  updates in one weekly pull request, majors one at a time, a release only once it is a week old.
+
+### Changed
+
+- **Moving from the docs site's landing page into the docs changed the top bar**: blue on the landing, plain on
+  the docs, with search and the links in other places. Every page now has the same blue bar, with everything
+  in the same place, in both themes. The search button is named by what it shows, for voice control.
+- **Agents drew every box the same grey.** The skill and the authoring guide now say to give each node a
+  kind or a keyed category, and which colours mean what.
+- **The automatic edge-id fix left a chain (`a --> b --> c`) as a chain**, which still failed. The fix,
+  and the hint on each of its errors, now split it into one edge per line, each with its id.
+- **Opening Project Review with the chat open put the review underneath it.** Opening the review now
+  closes the floating chat, as opening the chat already closed the review.
+- **On a phone, the drawing's left edge sat under the toolbar** when the diagram was wider than the screen.
+  The fit now keeps it clear.
+- **`archer` with no arguments, and `archer setup --help`, were usage errors.** They print the usage and
+  exit 0. `archer tools` and `archer call` now refuse an unknown tool with the same words and exit code.
+- **`archer projects` printed a raw dump after its list**, with a second link that disagreed with the first.
+
+### Fixed
+
+- **`archer validate` printed warnings like errors**, multi-line hints on one line, and "21 errors" for 39.
+  Each line now says `error` or `warning`, hints keep their lines, and past 20 it says "20 errors shown,
+  more remain". `--json` carries the whole fixed source as `fix`, as `validate_diagram` does.
+- **Plain-Mermaid mistakes got a raw parser error at line 1.** `end` as an id, a label starting with `/`,
+  an empty label, a header from another diagram type, `option` in a sequence, `a--b`, a state named only
+  with `state B`, a fork used before it is declared, an entity relationship with no label and a key with no
+  type now each get a named refusal, at their own line, saying how to fix it. A diagram inside a note is
+  counted in the note's lines.
+- **An unsupported diagram type was reported as `expected_flowchart`.** It is `unsupported_diagram_type`,
+  naming the header (`classDiagram`, `gantt`, `C4Code` and others).
+- **`write_walkthrough` refused unknown arguments without naming `walkthrough`**, the one that holds the
+  steps. It is listed now.
+- **A stale revision was described backwards** ("changed since you read it") when the caller's number was
+  too high. The refusal now says which number was sent and which the thread is at.
+- **Tool results in plain text left out what the agent needed next.** Comment results state the thread's
+  revision; listing results say how to get the full listing.
+- **`present_diagram` called a diagram that never compiled "not found".** It is `diagram_not_compiled`.
+- **A wide export was refused without saying how to fit it.** The refusal names the limits (16,000 px a
+  side, 32 million pixels) and a `scale` that fits. A diagram-mode export says that highlights are drawn
+  in presentation mode.
+- **`archer draw --model` refused what `archer compile` writes.** It accepts it, and `draw`'s help says
+  which diagram types it draws.
+- **A bare name for a diagram inside a note was "not found".** The refusal suggests the full address.
+- **One symlink in the notes folder changed the error for every missing note.** A missing note is "not
+  found" again.
+- **Two diagrams with the same `%% archer-id` in one note were renamed silently.** The write warns.
+- **The first layout measurement on a busy machine was refused as over budget** for a diagram that lays out
+  in milliseconds: starting the layout worker counted against the layout. The budget now starts when the
+  worker is ready; the caller's deadline still covers the whole wait.
+- **Messages and docs disagreed with the rules:** edge labels are 2 lines of 24 characters, an id starts
+  with a letter or digit, `archer doctor` starts the service, `archer init` updates `CLAUDE.md` only when
+  there is one, and plain HTTP works on this computer with no setup. The repository's old Mermaid profile,
+  which taught the previous edge-id form, now points at the shipped guide. The package no longer calls
+  itself a private build.
+
+### Measured
+
+| Change | Model | Effort | Runner | Runs | Measure (per run) | Before | After |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Colour guidance in the skill and authoring guide | gpt-6.1-sol | medium | `codex exec`, skill and authoring guide as context, a three-diagram task | 2 before, 3 after | flowchart nodes with a kind or category | 0/23 | 29/33 |
+
 ## 0.15.0 — 2026-11-11
 
 The first public release: compatibility with never-published builds is retired, the code is formatted and

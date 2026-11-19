@@ -1,4 +1,6 @@
 // The `archer` command line, run in-process against a fake terminal.
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
 import { main, type Io } from "../../src/bin/main.ts";
@@ -76,7 +78,6 @@ test.each([
   [["draw", "--model", MINIMAL, "--width", "wide"], /--width/],
   [["draw", "--model", MINIMAL, "--width", "0"], /--width/],
   [["draw", "--model", MINIMAL, "--shout"], /--shout/],
-  [[], /usage/],
 ])("misuse %j is a usage error, exit 2", async (args, message) => {
   const { code, err } = await run(args);
   expect(code).toBe(2);
@@ -121,4 +122,63 @@ test("an unknown command is echoed without its control characters", async () => 
   const { code, err } = await run(["\u001b]0;pwned\u0007\u009b31m‮"]);
   expect(code).toBe(2);
   expect(err).not.toMatch(UNSAFE);
+});
+
+test("no command prints the usage as help and exits 0", async () => {
+  const { code, out, err } = await run([]);
+  expect(code).toBe(0);
+  expect(err).toBe("");
+  expect(out).toContain("usage: archer init");
+});
+
+test("setup --help prints setup's usage and exits 0, even from a development install", async () => {
+  const { code, out, err } = await run(["setup", "--help"]);
+  expect(code).toBe(0);
+  expect(err).toBe("");
+  expect(out).toContain("archer setup [--mcp] [--no-claude] [--no-codex]");
+});
+
+test("a command that takes no arguments says so, and an unknown flag to status is named", async () => {
+  const list = await run(["list", "bogus"]);
+  expect(list.code).toBe(2);
+  expect(list.err).toContain("list takes no arguments");
+  expect(list.err).not.toContain("at most 0");
+  const status = await run(["status", "--help"]);
+  expect(status.code).toBe(2);
+  expect(status.err).toContain("status takes only --json (got --help)");
+});
+
+test("draw --model accepts the envelope archer compile prints, drawing its model", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "archer-draw-envelope-"));
+  try {
+    const file = join(dir, "compiled.json");
+    writeFileSync(
+      file,
+      JSON.stringify({
+        schemaVersion: 2,
+        revision: `sha256:${"a".repeat(64)}`,
+        view: { id: "minimal" },
+        model: JSON.parse(readFileSync(MINIMAL, "utf8")),
+      }),
+    );
+    const { code, out, err } = await run(["draw", "--model", file, "--width", "100"]);
+    expect(err).toBe("");
+    expect(code).toBe(0);
+    expect(out).toContain("Web App");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the usage says which diagram types draw can draw", async () => {
+  const { out } = await run(["--help"]);
+  expect(out).toMatch(/^draw .*flowchart, state and entity-relationship diagrams/m);
+  expect(out).toMatch(/Other kinds[\s\S]*browser page/);
+});
+
+test("the help says doctor starts the service and init updates an existing CLAUDE.md", async () => {
+  const { out } = await run(["--help"]);
+  const section = (name: string): string => new RegExp(`^${name} .*(?:\\n {10}.*)*`, "m").exec(out)?.[0] ?? "";
+  expect(section("doctor")).toMatch(/starts it|starts the service/);
+  expect(section("init")).toMatch(/CLAUDE\.md if it exists/);
 });

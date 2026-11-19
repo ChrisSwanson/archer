@@ -79,3 +79,22 @@ test("docs index refuses unknown flags with usage", async () => {
   expect(result.code).not.toBe(0);
   expect(result.err).toMatch(/usage|unknown/i);
 });
+
+test("outside docs mode a missing router is a note, not a word next to 'pass'", async () => {
+  const dir = tempDir({
+    "archer.toml": "version = 1\n",
+    ".archer/architecture.md": "---\ntype: architecture\n---\n# Architecture\n",
+  });
+  const result = await run(dir, ["docs", "index", "--check"]);
+  expect(result.code).toBe(0);
+  expect(result.out).toContain("Pack health: pass");
+  expect(result.out).not.toMatch(/router missing/);
+  expect(result.out).toMatch(/note: .*index\.md.*docs mode.*archer docs index --write/);
+});
+
+test("in docs mode a missing router is a failure and exits 1", async () => {
+  const result = await run(pack(), ["docs", "index", "--check"]);
+  expect(result.code).toBe(1);
+  expect(result.out).toContain("fail: index.md is missing");
+  expect(result.out).not.toMatch(/router missing/);
+});

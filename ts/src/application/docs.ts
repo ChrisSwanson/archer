@@ -57,8 +57,13 @@ const entrySummary = (pack: Pack) =>
 
 function healthText(health: Health, stale: Staleness, walkthroughs: readonly StaleWalkthrough[]): string {
   const lines = [
-    `Pack health: ${health.status}${health.failures.length ? ` (${health.failures.length} failure(s))` : ""}. Pack ${health.budgets.pack.chars}/${health.budgets.pack.budget} characters; router ${health.router.status}.`,
+    `Pack health: ${health.status}${health.failures.length ? ` (${health.failures.length} failure(s))` : ""}. Pack ${health.budgets.pack.chars}/${health.budgets.pack.budget} characters.`,
   ];
+  // A missing router outside docs mode is no failure (packHealth); say so apart from the verdict.
+  if (health.router.status === "missing" && !health.failures.some((failure) => failure.includes("is missing")))
+    lines.push(
+      "- note: there is no index.md router yet; only docs mode requires one. `archer docs index --write` creates it.",
+    );
   for (const failure of health.failures.slice(0, 20)) lines.push(`- fail: ${failure}`);
   if (health.failures.length > 20) lines.push(`- … ${health.failures.length - 20} more in the structured result`);
   for (const warning of health.warnings.slice(0, 10)) lines.push(`- warn: ${warning}`);

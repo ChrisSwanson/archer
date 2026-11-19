@@ -274,7 +274,9 @@ export async function runListen(args: readonly string[], io: Io, deps: AgentDeps
         "Tell the person that line, then keep listening: run  archer wait  in the background, and again after each message.",
       );
     if (file === null)
-      lines.push(`Pass --as ${agentId} to archer wait and archer inbox: this session's host process was not found.`);
+      lines.push(
+        `Pass --as ${agentId} to archer wait and archer inbox: this session's host process was not found, so Archer cannot tell later calls come from this session without it.`,
+      );
     io.stdout(`${lines.map(safe).join("\n")}\n`);
     return 0;
   } catch (error) {

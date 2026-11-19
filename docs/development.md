@@ -64,10 +64,13 @@ checked-in `ts/assets/archer-mcp-app.html`: when shipping UI changes, refresh it
 package (`npm --workspace ts run package`) and install or upgrade with it as
 [docs/install.md](install.md) says; `scripts/ship.sh --to <ssh-host>` does that on another machine.
 
-New services use native HTTPS. Run `archer tls setup --host <browser-host-or-LAN-IP>` to explicitly
-provision local certificates, then follow [certificate and browser trust setup](tls.md).
-Merge its printed certificate paths into global configuration before starting; no trust stores or
-configuration are edited automatically. Plain HTTP requires the explicit `force_http` override.
+On this computer Archer works over plain HTTP on loopback (`127.0.0.1`) with no setup. The HTTPS steps
+are only for opening Archer to another device: `archer network-access` does them for you (it asks first),
+or run `archer tls setup --host <browser-host-or-LAN-IP>` to provision certificates explicitly and follow
+[certificate and browser trust setup](tls.md). `tls setup` edits no trust store or configuration: merge
+its printed certificate paths into global configuration before starting. `force_http` keeps plain HTTP when
+certificates are configured.
+
 For private browser links, discover `issue_access_link`, `list_access_links`, and
 `revoke_access_link` through `archer tools`. Grants cover all attached projects, survive restart
 and remain valid until individually revoked. Opening an issued link removes its token from the URL

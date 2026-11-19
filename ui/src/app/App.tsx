@@ -2698,12 +2698,15 @@ function ProjectApp(): JSX.Element {
     const opener = reviewToggleRef.current;
     reviewLauncherRef.current = opener;
     setReviewOpen((open) => !open);
+    // One conversation surface at a time: the review opening takes the room a floating chat sat in, as the chat
+    // opening on a review does. Focus goes to the review's tab below, not back to the chat's launcher.
+    if (!reviewOpenRef.current && chatOpenRef.current) closeChat();
     // Opened from the bell: focus goes in, to the selected Show tab (round 1, F71). The review stays nonmodal.
     if (!reviewOpenRef.current)
       trackFocus(
         focusWhenShown(`#${REVIEW_PANEL_ID} [role="tablist"] [role="tab"][aria-selected="true"]`, { from: opener }),
       );
-  }, [trackFocus]);
+  }, [trackFocus, closeChat]);
   const dismissReview = useCallback(() => setReviewOpen(false), []);
   const closeReview = useCallback(() => {
     setReviewOpen(false);

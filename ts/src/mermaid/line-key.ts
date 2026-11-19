@@ -31,7 +31,7 @@ import { KINDS } from "./flowchart/adapt.ts";
 import { KEY_PATTERNS, type DiagramModel, type EdgeLine, type KeyPattern, type LineKeyEntry } from "../model/index.ts";
 import { error, span, warning, type Diagnostic, type Span } from "./diagnostics.ts";
 import type { DiagramFamily } from "./preamble.ts";
-import type { SourceLine } from "./source.ts";
+import { edgeLineOf, type SourceLine } from "./source.ts";
 
 /** The patterns an `archer-line` may give; `thick` is a flowchart's `==>`. */
 export const LINE_PATTERNS = ["dotted", "dashed", "dashdot"] as const;
@@ -279,7 +279,9 @@ function applyCategoryKeys(
 }
 
 /** The ids a family's edges carry, and a setter for each one's line. */
-function edgesOf(model: DiagramModel): { id: string; line?: EdgeLine | undefined }[] {
+function edgesOf(
+  model: DiagramModel,
+): { id: string; line?: EdgeLine | undefined; source?: string; target?: string; label?: string | null | undefined }[] {
   switch (model.type) {
     case "c4-model":
       return model.relationships;
@@ -398,6 +400,11 @@ export function lintLinePatterns(source: string, model: DiagramModel): { identit
   const key = new Map(("lineKey" in model ? (model.lineKey ?? []) : []).map((entry) => [entry.pattern, entry.meaning]));
   const findings: { identity: string; diagnostic: Diagnostic }[] = [];
   const at = (line: number): Span => span(line, 1);
+  const byId = new Map(edges.map((edge) => [edge.id, edge]));
+  const edgeLine = (id: string): number => {
+    const edge = byId.get(id);
+    return edgeLineOf(source, id, edge?.label ?? "", [edge?.source ?? id, edge?.target ?? id]);
+  };
   for (const [pattern, ids] of used) {
     if (!key.has(pattern))
       // One finding per edge, so a write that adds an unexplained edge to an
@@ -408,7 +415,7 @@ export function lintLinePatterns(source: string, model: DiagramModel): { identit
           diagnostic: warning(
             "line_meaning_missing",
             `edge '${id}' is drawn ${pattern} with no stated meaning: add \`%% archer-key ${pattern}: <what it means>\`, or make it solid. Archer will not guess`,
-            at(1),
+            at(edgeLine(id)),
           ),
         });
     if (ids.length === edges.length && edges.length > 1 && pattern !== "thick")

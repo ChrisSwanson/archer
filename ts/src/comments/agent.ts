@@ -68,7 +68,7 @@ export async function createComment(
   }
   const { value } = new CommentsStore(project).createByAgent(resolved.place, { anchor, body, expectedModelRevision });
   return {
-    text: `Opened thread ${value.id} on ${value.target}; the person sees your comment in the page.`,
+    text: `Opened thread ${value.id} on ${value.target} at revision ${value.revision}; the person sees your comment in the page.`,
     structured: { ...value },
   };
 }
@@ -373,7 +373,7 @@ export function getComments(
 export function replyComment(project: Project, threadId: string, body: string, expectedRevision: number): ToolAnswer {
   const { value } = new CommentsStore(project).reply(threadId, body, "agent", expectedRevision);
   return {
-    text: `Replied in thread ${value.id} on ${value.target}; the person sees it in the page.`,
+    text: `Replied in thread ${value.id} on ${value.target}; the person sees it in the page. The thread is still at revision ${value.revision}: a reply of yours leaves the revision unchanged, so use it as expectedRevision for your next reply or resolve until the person writes again.`,
     structured: { ...value },
   };
 }

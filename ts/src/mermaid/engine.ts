@@ -21,6 +21,8 @@ export interface ParserErrorHash {
   token?: unknown;
   loc?: { first_line: number; last_line: number; first_column: number; last_column: number };
   expected?: unknown;
+  /** The 0-based line a lexical error stopped on (a lexical error has no `loc`). */
+  line?: unknown;
 }
 
 export interface MermaidFailure {

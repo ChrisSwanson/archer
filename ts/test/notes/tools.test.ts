@@ -110,6 +110,26 @@ describe("read_diagram by address", () => {
 });
 
 describe("write_diagram by address", () => {
+  test("a note with two blocks under one archer-id is warned about at the write", async () => {
+    const twice = (name: string) =>
+      `\`\`\`mermaid\n%% archer-id: ${name}\nflowchart LR\n  a["A"] e1@--> b["B"]\n\`\`\`\n`;
+    const { app } = setUp(`# Dup\n\n${twice("same")}\n${twice("same")}`);
+    try {
+      const { sourceRevision } = (await app.call("read_diagram", { viewId: "notes/auth.md#same" })).structured as {
+        sourceRevision: string;
+      };
+      const wrote = await app.call("write_diagram", {
+        viewId: "notes/auth.md#same",
+        source: '%% archer-id: same\nflowchart LR\n  a["A"] e1@--> b["C"]\n',
+        expectedRevision: sourceRevision,
+      });
+      expect(wrote.text).toMatch(/"same" already names the diagram at line 3/);
+      expect(wrote.text).toMatch(/Give each block its own %% archer-id/);
+    } finally {
+      app.close();
+    }
+  });
+
   test("replaces only that fence's body, pins its name, and keeps everything else byte for byte", async () => {
     const { app, note } = setUp();
     try {

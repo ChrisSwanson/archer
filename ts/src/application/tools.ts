@@ -244,7 +244,8 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
     name: "find_elements",
     description:
       "Look up what this project's diagrams already draw, before drawing: by name, id or technology (query), or one element with its " +
-      "relationships (id). Reuse a hit's id; a new element needs a specific id. kind, parent and diagram filter exactly. Proposed designs and based-on copies are left out.",
+      "relationships (id). Reuse a hit's id; a new element needs a specific id. kind, parent and diagram filter exactly. Proposed designs and based-on copies are left out. " +
+      "Only elements with a kind are indexed: C4 and architecture elements, sequence participants, and flowchart nodes with a kind class (`a[Orders]:::system`; also person, container, component, database). A plain flowchart node without one is not found: add the class to make it visible.",
     annotations: { readOnlyHint: true },
     inputSchema: closed({
       query: {
@@ -374,7 +375,7 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
   {
     name: "export_diagram",
     description:
-      "Export a diagram (or the current presentation) as self-contained SVG or PNG, light or dark, optionally with an emphasis. Returns base64 bytes; CLI --output writes a file instead. A last-good drawing needs allowLastGood.",
+      "Export a diagram (or the current presentation) as self-contained SVG or PNG, light or dark, optionally with an emphasis. Returns base64 bytes; CLI --output writes a file instead. A last-good drawing needs allowLastGood. Highlights (emphasis) are drawn only with mode 'presentation'. A drawing over 16,000 px a side or 32 million pixels is refused: pass a smaller scale.",
     inputSchema: closed(
       {
         viewId,
@@ -388,7 +389,8 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
           type: ["string", "null"],
           minLength: 1,
           maxLength: 200,
-          description: "Stored emphasis id, null to omit emphasis, or omitted to select the newest stored emphasis.",
+          description:
+            'With mode "presentation" only (a diagram-mode export draws no emphasis): a stored emphasis id, null to omit emphasis, or omitted to select the newest stored emphasis.',
         },
         annotation: { type: "string", maxLength: MAX_ANNOTATION_CHARS },
         diagramKey: { type: "boolean" },
@@ -434,7 +436,7 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
     description:
       "Replace a view's Mermaid source when the person wants it changed; a new subject goes in a new note or file, and pointing at parts is set_emphasis. Pass its current sourceRevision as expectedRevision; if the file changed since, nothing is " +
       "written and the error gives the revision to use. A compiled write returns a fresh modelRevision for present_diagram. Source that " +
-      `does not compile is still written, with status "failed" and every problem: fix it. For <note path>#<name> only that mermaid ` +
+      `does not compile is still written, with status "failed" and every problem: fix it. A source identical to the file is not rewritten: status "unchanged". For <note path>#<name> only that mermaid ` +
       "block's body is replaced; prose edits around it are no conflict. A block nested in a list or blockquote is refused: relocate: true " +
       "moves it to the top level, only in your own note (author: agent) or when the person asked (then also personRequested: true). " +
       "Optional layoutReview is non-blocking; pending advice can be inspected with measure_diagram and never changes write success. " +
@@ -523,7 +525,8 @@ const BASE_OPERATIONS: readonly OperationDefinition[] = [
           type: "integer",
           minimum: 1,
           maximum: Number.MAX_SAFE_INTEGER,
-          description: "The walkthrough's revision from list_walkthroughs, to replace or delete it.",
+          description:
+            "The walkthrough's revision from list_walkthroughs, to replace or delete it. Leave it out to create a new walkthrough (0 is not a revision).",
         },
         delete: { type: "boolean", description: "Delete walkthrough.id (needs expectedRevision)." },
       },

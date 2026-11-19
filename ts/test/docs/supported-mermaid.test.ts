@@ -51,6 +51,12 @@ describe.each(blocks)("the example at line $line", ({ source }) => {
     expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
     expect(model).not.toBeNull();
   });
+
+  test("a flowchart example is itself well drawn: no unconnected node and no group of one", async () => {
+    if (!source.startsWith("flowchart")) return;
+    const { diagnostics } = await compile(source);
+    expect(diagnostics.filter((d) => d.code === "unconnected_node" || d.code === "nest_single_child")).toEqual([]);
+  });
 });
 
 describe("the Entity codes section", () => {

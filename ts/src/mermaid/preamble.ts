@@ -85,6 +85,33 @@ function blankDirectives(text: string, lines: readonly SourceLine[], diagnostics
   return blanked;
 }
 
+/** Mermaid diagram types Archer knows it does not draw (lower case), so the refusal can name them. */
+const UNSUPPORTED_TYPES: ReadonlySet<string> = new Set([
+  "classdiagram",
+  "c4code",
+  "gantt",
+  "pie",
+  "gitgraph",
+  "mindmap",
+  "timeline",
+  "quadrantchart",
+  "requirementdiagram",
+  "sankey-beta",
+  "xychart-beta",
+  "block-beta",
+  "packet-beta",
+  "kanban",
+  "zenuml",
+  "radar-beta",
+  "treemap-beta",
+  "sankey",
+  "xychart",
+  "block",
+  "packet",
+  "radar",
+  "treemap",
+]);
+
 function familyOf(header: string): DiagramFamily | undefined {
   if (/^(flowchart|graph)(\s|$)/.test(header)) return "flowchart";
   if (/^sequenceDiagram(\s|$)/.test(header)) return "sequence";
@@ -119,14 +146,26 @@ export function readPreamble(source: string): Preamble {
   const family = header ? familyOf(header.text.trim()) : undefined;
   if (family === undefined) {
     const at = header ? header.statementSpan() : { start: { line: 1, column: 1 }, end: { line: 1, column: 2 } };
-    diagnostics.push(
-      error(
-        "expected_flowchart",
-        "expected a diagram header: `flowchart LR` (or `graph`, with LR, RL, TB, TD or BT), `sequenceDiagram`, " +
-          "`stateDiagram-v2`, `erDiagram`, `C4Context` (or `C4Container`, `C4Component`), `architecture-beta` or `journey`",
-        at,
-      ),
-    );
+    const word = header?.text.trim().match(/^[A-Za-z][A-Za-z0-9-]*/)?.[0];
+    if (word !== undefined && UNSUPPORTED_TYPES.has(word.toLowerCase())) {
+      diagnostics.push(
+        error(
+          "unsupported_diagram_type",
+          `\`${word}\` is a Mermaid diagram type Archer does not support. Archer draws \`flowchart\`, \`sequenceDiagram\`, ` +
+            "`stateDiagram-v2`, `erDiagram`, `C4Context` (or `C4Container`, `C4Component`), `architecture-beta` and `journey`: " +
+            "say so, or draw the same facts in one of those",
+          at,
+        ),
+      );
+    } else
+      diagnostics.push(
+        error(
+          "expected_flowchart",
+          "expected a diagram header: `flowchart LR` (or `graph`, with LR, RL, TB, TD or BT), `sequenceDiagram`, " +
+            "`stateDiagram-v2`, `erDiagram`, `C4Context` (or `C4Container`, `C4Component`), `architecture-beta` or `journey`",
+          at,
+        ),
+      );
   }
   const mermaidText = statements.map((line) => (isCommentLine(line.text) ? "" : line.text)).join("\n");
   return { lines: original, statements, header, family, diagnostics, mermaidText };

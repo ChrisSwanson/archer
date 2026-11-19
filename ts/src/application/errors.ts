@@ -45,6 +45,9 @@ export const ERROR_CODES = {
   unknown_tool: CALLER,
   invalid_request: CALLER,
   diagram_not_found: NOT_FOUND,
+  // The view exists, but its source has never compiled (read_diagram says why). Like a missing view it has
+  // no drawing to give, so MCP clients see the same not-found number; the code string tells them apart.
+  diagram_not_compiled: NOT_FOUND,
   resource_not_found: NOT_FOUND,
   revision_conflict: CALLER,
   invalid_source: CALLER,

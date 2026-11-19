@@ -94,7 +94,7 @@ silently relabel it); naming it by its bare ID is a reference. Node, edge, and s
 be unique within their kind (`duplicate_node`, `duplicate_edge`, `duplicate_subgraph`). The three
 kinds are separate namespaces, so a node may share an ID with a subgraph.
 
-An ID is letters, digits, `_` and `-`, starting with a letter, digit or `_`. A few IDs are Mermaid
+An ID is letters, digits, `_` and `-`, starting with a letter or digit (not `_`). A few IDs are Mermaid
 keywords and are refused where Mermaid refuses them: `end`, `style`, `class`, `classDef`,
 `linkStyle`, `subgraph`, `graph`, `flowchart`, `interpolate`, and `default` for edges and
 subgraphs. `click`, `call` and `href` work only as a declaration with a shape (`click[Click]`), not
@@ -191,9 +191,12 @@ Mermaid pasted from elsewhere has no IDs, so each such diagnostic names its fix,
 (`fix.operation`): it writes an ID on every edge that has none, `source_target` (`web_api`), numbered
 `_2`, `_3` where that is taken. The same fix declares every node the source only names (an
 `undeclared_node` error names it too), at its first mention with its ID as its label (`a` becomes
-`a[a]`), so pasted `a --> b` is valid in one step. It only inserts: no other byte of the source
-changes, and applying it again changes nothing. `validate_diagram` returns the fixed source as
-`fix.source` (with `fix.added` and `fix.declared`), and the editor applies it as the `add-edge-ids` edit.
+`a[a]`), so pasted `a --> b` is valid in one step. It also splits a chain into one edge per line,
+each from its source's bare ID (`a --> b --> c` becomes `a[a] a_b@--> b[b]` and `b b_c@--> c[c]`);
+a chain's diagnostic shows the same split as its hint. Apart from those IDs, declarations and line
+splits, no byte of the source changes, and applying it again changes nothing. `validate_diagram` returns the fixed source as
+`fix.source` (with `fix.added` and `fix.declared`), as does `archer validate <diagram> --json` as `fix`, and the editor
+applies it as the `add-edge-ids` edit.
 
 The link operator sets the edge's `line`:
 
@@ -254,7 +257,7 @@ flowchart LR
 A caption wraps at about 24 characters, on at most two lines, and the layout keeps line visible on
 both sides of it. A label that needs a third line at that wrap is the warning
 `edge_label_too_long`; `write_diagram` refuses a source that introduces one. Say it
-in two short lines (about 28 characters, 4 words) and put the detail in the note. A C4
+in two short lines (2 lines of 24 characters) and put the detail in the note. A C4
 relationship's technology and description are not counted: they are drawn under the label in
 smaller type, the description wrapped on its own.
 
@@ -271,11 +274,14 @@ flowchart BT
   subgraph backend["Backend services (core)"]
     subgraph data
       db[(Orders)]
+      cache[(Cache)]
     end
     api
     worker[Worker]
   end
-  worker e1@--> db
+  api e1@--> worker
+  worker e2@--> db
+  worker e3@--> cache
 ```
 
 Subgraphs may nest at most 24 levels deep (`subgraph_nesting_too_deep`, at the `subgraph` keyword

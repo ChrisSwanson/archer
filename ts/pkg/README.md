@@ -1,4 +1,4 @@
-# Archer (private build)
+# Archer
 
 Diagrams and notes you and your agents share, for Claude Code and the Codex CLI.
 
@@ -8,4 +8,4 @@ archer upgrade ./archer-<version>.tgz    # a later version, hot swapped into the
 archer uninstall                     # remove it again
 ```
 
-Full guide: `docs/install.md` in the Archer repository. This package is private: never publish it.
+Full guide: `docs/install.md` in the Archer repository. This package is not published to npm: it is distributed through GitHub Releases.

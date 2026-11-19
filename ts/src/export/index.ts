@@ -90,6 +90,18 @@ export const EXPORT_LIMITS = {
   dimension: 16000,
   pixels: 32000000,
 } as const;
+/** Names the limits, this drawing's size and a scale that fits, so the next call can succeed. */
+function extentMessage(width: number, height: number, scale: number): string {
+  const limits = `Export drawing is ${width} × ${height} px; the limits are ${EXPORT_LIMITS.dimension.toLocaleString("en-US")} px a side and ${EXPORT_LIMITS.pixels / 1_000_000} million pixels in all.`;
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return limits;
+  const fit = Math.min(
+    EXPORT_LIMITS.dimension / width,
+    EXPORT_LIMITS.dimension / height,
+    Math.sqrt(EXPORT_LIMITS.pixels / (width * height)),
+  );
+  const suggested = Number((scale * fit * 0.95).toPrecision(2));
+  return `${limits} Pass a smaller \`scale\` (this drawing was exported at ${scale}; a scale of ${suggested} fits), or export a smaller diagram.`;
+}
 function boundedJson(input: unknown): void {
   const pending = [{ value: input, depth: 0 }];
   const seen = new Set<object>();
@@ -292,7 +304,7 @@ async function renderDiagram(envelope: unknown, options: ExportOptions): Promise
     height > EXPORT_LIMITS.dimension ||
     width * height > EXPORT_LIMITS.pixels
   )
-    throw new ExportRefusal("export_extent_limit", "Export drawing exceeds the dimension or pixel limit.");
+    throw new ExportRefusal("export_extent_limit", extentMessage(width, height, scale));
   const resources = options.resources;
   if (!hasRegularFace(resources) || !resources?.themeCss || !resources.fontLicense)
     throw new ExportRefusal("export_resources_missing", "Export requires the packaged theme and Fira Sans font.");

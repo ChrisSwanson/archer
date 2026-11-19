@@ -134,6 +134,23 @@ import {
   type ViewSuggestions,
 } from "./suggest.ts";
 export { suggestionFields, suggestionText } from "./suggest.ts";
+
+/** The `fix` of a validation answer: what `addMissingEdgeIds` wrote, with the whole fixed source. */
+function fixFields(fixed: ReturnType<typeof addMissingEdgeIds>): Record<string, unknown> {
+  return {
+    operation: "add-edge-ids",
+    source: fixed.source,
+    added: fixed.added,
+    ...(fixed.declared.length > 0 ? { declared: fixed.declared } : {}),
+  };
+}
+
+/** The `fix` for a source whose diagnostics ask for `add-edge-ids`; none when there is nothing to add. */
+export function fixFor(source: string, diagnostics: readonly { fix?: { operation: string } }[]) {
+  if (!diagnostics.some((d) => d.fix?.operation === "add-edge-ids")) return undefined;
+  const fixed = addMissingEdgeIds(source);
+  return fixed.added.length > 0 || fixed.declared.length > 0 ? fixFields(fixed) : undefined;
+}
 import { draftAdvice, drawnIds, projectReport, type Advice } from "../project-model/advice.ts";
 import {
   expansionOf,
@@ -426,8 +443,12 @@ export class Application {
           ? tool.inputSchema
           : {
               ...tool.inputSchema,
+              // The name stays (accepting any value) so a refusal lists it among the accepted names.
               properties: Object.fromEntries(
-                Object.entries(tool.inputSchema.properties ?? {}).filter(([key]) => !own.includes(key)),
+                Object.entries(tool.inputSchema.properties ?? {}).map(([key, value]) => [
+                  key,
+                  own.includes(key) ? {} : value,
+                ]),
               ),
               ...(tool.inputSchema.required === undefined
                 ? {}
@@ -1007,11 +1028,17 @@ export class Application {
       );
     const compiled = await compileEmbedded(written);
     const status = compiled.envelope ? "compiled" : "failed";
-    const text = compiled.envelope
+    let text = compiled.envelope
       ? `Diagram '${written.name}' updated in ${written.notePath} (source revision ${short(written.sourceRevision)}); the rest of the note is unchanged.`
       : `Diagram '${written.name}' written to ${written.notePath} but it does not compile:\n${compiled.diagnostics.map(diagnosticLine).join("\n")}\n` +
         `Its body is now at source revision ${written.sourceRevision}: pass that as expectedRevision to write the fix.`;
     const moved = walkthroughChange(held, before, compiled.envelope);
+    // Two blocks under one archer-id: the later one is named as if it had none, which the person does not expect.
+    const clashes = embeddedFromText(read.notePath, next, written.noteRevision).problems.filter((p) =>
+      p.includes("already names the diagram"),
+    );
+    if (clashes.length > 0)
+      text += `\nWarning: ${clashes.join("; ")}. Give each block its own %% archer-id so each keeps a stable address.`;
     // Advice on the diagram written (A6): a renamed block replaces its old address; "new" is against the body it replaced.
     let advice: readonly Advice[] | null = null;
     if (compiled.envelope !== null) {
@@ -1200,6 +1227,9 @@ export class Application {
       text = `View '${view.title}' ${modelRevision === null ? "has not compiled" : "does not compile"} (${compiled.diagnostics.length} problem(s)):\n${lines.join("\n")}\n${model}`;
     }
     text += ` ${aboutSource}`;
+    text += compiled.envelope
+      ? ` Pass outputFormat: text for the element ids${view.kind === "sequence" ? ", message and fragment ids" : ""}.`
+      : "";
     if (sourceRevision !== null)
       text += ` To change it, pass sourceRevision ${sourceRevision} to write_diagram as expectedRevision.`;
 
@@ -1398,12 +1428,7 @@ export class Application {
     if (diagnostics.some((d) => d.fix?.operation === "add-edge-ids")) {
       const fixed = addMissingEdgeIds(source);
       if (fixed.added.length > 0 || fixed.declared.length > 0) {
-        structured["fix"] = {
-          operation: "add-edge-ids",
-          source: fixed.source,
-          added: fixed.added,
-          ...(fixed.declared.length > 0 ? { declared: fixed.declared } : {}),
-        };
+        structured["fix"] = fixFields(fixed);
         const said = [
           ...(fixed.added.length > 0
             ? [
@@ -2126,7 +2151,7 @@ export class Application {
     const { envelope, failing } = await this.model(project, view);
     if (envelope === null)
       throw toolError(
-        "diagram_not_found",
+        "diagram_not_compiled",
         `no compiled diagram is available for view '${view.id}': its source has never compiled (${failing?.length ?? 0} problem(s)). ` +
           "Call read_diagram to see why and to get its source.",
         { diagnostics: failing ?? [] },
@@ -2271,7 +2296,13 @@ export class Application {
                 });
               })();
         const count = snapshot.views.reduce((n, view) => n + view.emphases.length, 0);
-        return result(`${count} active emphasis(es) across ${snapshot.views.length} view(s).`, snapshot);
+        const lines = snapshot.views.flatMap((view) =>
+          view.emphases.map((emphasis) => `- ${view.viewId}: ${(emphasis as { id?: string }).id ?? "(no id)"}`),
+        );
+        return result(
+          `${count} active emphasis(es) across ${snapshot.views.length} view(s).${lines.length === 0 ? "" : `\n${lines.join("\n")}`}\nPass outputFormat: text for the full listing.`,
+          snapshot,
+        );
       } catch (error) {
         if (error instanceof OperationError) throw error;
         if (error instanceof ServiceCallError && error.error.code === "service_stopping" && attempt === 0) {
@@ -2308,7 +2339,7 @@ export class Application {
     const { envelope, failing } = await this.model(project, view);
     if (envelope === null)
       throw toolError(
-        "diagram_not_found",
+        "diagram_not_compiled",
         `no compiled diagram is available for view '${view.id}': its source has never compiled (${failing?.length ?? 0} problem(s)). Call read_diagram to see why.`,
       );
     const resolved = emphasis.resolve(draft, emphasis.addressable(envelope.model));

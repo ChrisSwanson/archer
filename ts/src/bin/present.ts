@@ -134,6 +134,7 @@ const OWN_FAULT = new Set([
   "invalid_expand",
   "revision_conflict",
   "diagram_not_found",
+  "diagram_not_compiled",
   "unknown_tool",
   "instance_choice_needed",
   "walkthrough_not_found",

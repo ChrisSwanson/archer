@@ -14,8 +14,8 @@ Operations below use `archer call <name> --stdin --json`; Mermaid source goes in
 file, `--source <file.mmd>` ([CLI](references/cli.md), [MCP](references/mcp.md)). On first use in a
 session run `archer doctor`;
 repeat any "Tell the person: …" line it prints.
-Work in the existing project: never create another `archer.toml` or rename the project. Only
-`archer init` creates one, named after the repository, never a task or folder.
+Work in the existing project: never create another `archer.toml` or rename it. Only `archer init`
+creates one, named after the repository, never a task or folder.
 If `archer.toml` has `mode = "docs"`, follow [docs mode](references/docs-mode.md) (`archer docs docs-mode`).
 
 ## The heartbeat
@@ -40,12 +40,13 @@ that holds the answer, emphasised; prose in chat is the fallback. Keep the knowl
 - Honor the person's notation, scope and detail. Otherwise: C4 for structure at the asked level,
   flowchart for a process or data path, sequence for ordered messages, ER for data, state for a
   lifecycle, journey for a user's experience. Draw only facts you were given: no invented services,
-  and a shape is a claim (do not draw an unnamed component as a database).
+  and a shape is a claim (do not draw an unnamed component as a database). Colour by meaning: each
+  node a kind (`:::database`) or a `classDef` category with an `archer-key` meaning.
 - Before writing Mermaid, read its family's syntax: `archer docs supported-mermaid <family>`
   (flowchart, sequence, state, er, c4, architecture, journey).
-  It is stricter than upstream: flowchart edges need ids (`a sends@-->|Sends data| b`). Labels over
-  about 28 characters are refused. Titles and element names are Title Case ("Back Office"); arrow
-  and message labels stay sentence case.
+  It is stricter than upstream: each flowchart edge needs an id after its source node
+  (`a --> b` becomes `a a_b@--> b`); a long edge label is refused. Titles and element names are Title Case ("Back Office"); arrow and message labels stay
+  sentence case.
   `classDiagram`, `C4Code` and `C4Deployment` are unsupported: say so, never substitute.
   [Authoring](references/authoring.md) has family details. Never hand-draw diagrams in chat.
 
@@ -53,13 +54,12 @@ that holds the answer, emphasised; prose in chat is the fallback. Keep the knowl
 
 - New subjects get new diagrams. Change an existing diagram only for a request about what it shows.
 - Look up before you draw: `find_elements` each thing you will draw; reuse a hit's id for the same thing.
-- By default embed it in a new note in `notes/`: front matter `author: agent` (always, whatever
-  other notes carry) and `description: ...`
-  (one sentence), then a top-level ```mermaid block whose first line inside the fence is
+- By default embed it in a new note in `notes/`: front matter `author: agent` (always) and
+  `description: ...` (one sentence), then a top-level ```mermaid block whose first line inside the fence is
   `%% archer-id: <name>`. Its view id is `notes/<file>.md#<name>`.
 - A new diagram that deserves its own file (durable architecture) goes in `diagrams/<name>.mmd` with
   a `%% description: ...` line; its view id is the file name without `.mmd`. No registration needed.
-- Leave existing files where they are: comments and links follow their paths.
+- Leave existing files in place (comments and links follow paths).
   Offer descriptions for existing files that lack one; never add them unasked.
 - Then `validate_diagram` the view with your source, fix every problem and label warning, fix each
   `advice` finding (validate or write) or say in one line why not, present it, and give the
@@ -93,7 +93,7 @@ person asks for (a table, one sentence, a note).
 - To show related views, present one diagram with expansions (`expand`), not several links.
 - More detail: elaborate in a copy, never the original. A new note in `notes/scratch/` with front
   matter `author: agent`, `description:`, `based-on: <view id>@<sourceRevision>`, a sentence
-  on what it adds, then the source with the detail added. Validate, `read_diagram` the copy
+  on what it adds, then the detailed source. Validate, `read_diagram` the copy
   (message ids shift), then present it with what is new emphasised.
 - No diagram shows the steps asked about (a structure diagram holding the parts is not the flow):
   draw them from what you were told in a new note in `notes/scratch/`, and say it is new.
@@ -104,7 +104,7 @@ person asks for (a table, one sentence, a note).
 - Emphasis: up to 3 groups, most important first, a path in travel order. Labels of 4 words or fewer, no numbers or colours; "(proposed)" for what
   does not exist yet, "(assumed)" for what you inferred. `flow` for a path (on a sequence, its
   messages), `highlight` for a set; ids from `read_diagram`. For note passages,
-  `set_note_emphasis` (same rules); the note is not changed. Emphasis does not scroll the page.
+  `set_note_emphasis` (same rules); the note is not changed.
 
 ## Comments and context
 

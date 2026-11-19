@@ -92,6 +92,7 @@ import {
   withHeading,
   drawnOn,
   frameClearOfChrome,
+  leftmostUnder,
   measureFloating,
   graphObstacles,
   hitsAny,
@@ -851,6 +852,7 @@ function useFraming(options: {
             ? overflowOf(bounds, { across: current.layout.nodes, down: current.layout.nodes }, frame, canvas)
             : NO_OVERFLOW,
         hits: (frame, rect) => hitsAny(drawnOn(drawn, frame), rect),
+        leftmostUnder: (frame, rect) => leftmostUnder(drawnOn(drawn, frame), rect),
         // The band is kept for the overview cue too, or the pill that says
         // "all of it, too small to read" sits on the drawing it describes.
         cueFor: (frame) => showsAll && tooSmallToRead(frame.zoom),

@@ -1,7 +1,37 @@
 # The workflows pin every action to a commit (a tag can be moved); Dependabot proposes the updates.
+# npm covers the root lockfile, which holds both workspaces (ts, ui) and the docs site's tools.
+# Minor and patch updates arrive as one weekly PR per ecosystem, so CI runs once for the batch.
+# Majors are not grouped: each arrives as its own PR, to be upgraded deliberately. They are not
+# ignored either, since ignore rules may also filter a security update that needs a major.
+# The cooldown applies to version updates only; security updates are never delayed.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    versioning-strategy: increase
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Node 22 is the supported runtime (engines: >=22.18); the types follow it.
+      - dependency-name: "@types/node"
+        versions: [">=23"]
+      # axe 4.14 adds label-content-name-mismatch, which the app fails in many places (diagram nodes,
+      # menus, cues). Held at 4.13 until that accessibility pass lands; then delete this rule.
+      - dependency-name: "@axe-core/playwright"
+        versions: [">=4.14"]

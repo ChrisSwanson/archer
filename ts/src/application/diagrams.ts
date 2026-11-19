@@ -211,9 +211,11 @@ export function findViewIn(views: readonly ViewEntry[], project: Project, viewId
     tool === "write_diagram" || tool === "validate_diagram"
       ? " For a new diagram, embed it in a note by default (a top-level ```mermaid block in notes/<file>.md whose first line is %% archer-id: <name>) and use notes/<file>.md#<name>; a diagram that needs its own file is diagrams/<name>.mmd, the view <name>."
       : "";
+  const inNotes = views.filter((v) => v.registration === "embedded" && v.name === viewId).map((v) => v.id);
+  const didYouMean = inNotes.length === 0 ? "" : ` Did you mean ${inNotes.slice(0, 3).join(" or ")}?`;
   throw toolError(
     "diagram_not_found",
-    `no diagram view is named '${viewId}' in the Archer folder (${project.folderSetting}). Call list_diagrams to see the views.${advice}`,
+    `no diagram view is named '${viewId}' in the Archer folder (${project.folderSetting}).${didYouMean} Call list_diagrams to see the views.${advice}`,
   );
 }
 

@@ -19,11 +19,12 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { HOOK_COMMAND as CONTRACT_HOOK } from "../../src/agents/contract.ts";
 import {
   HOOK_COMMAND,
   MIN_NODE,
+  main as setupMain,
   SKILL_MODES,
   addTurnHook,
   isOwnShim,
@@ -418,6 +419,19 @@ const userServers = (dir: string) =>
     : {};
 
 describe("archer setup and uninstall", () => {
+  test("setup says a service starts on first use and archer stop ends it; with neither Claude Code nor Codex it gives the two generic steps", () => {
+    const pkg = fakePackage("neither");
+    const home = fresh("neither-home");
+    const env = { HOME: home, PATH: [dirname(process.execPath), "/usr/bin", "/bin"].join(":") };
+    const setup = archer(pkg, env, "setup");
+    expect(setup.status, setup.stderr + setup.stdout).toBe(0);
+    expect(setup.stdout).toMatch(/service starts on first use.*archer stop/i);
+    expect(setup.stdout).toContain("Still to do by hand");
+    expect(setup.stdout).toMatch(/Another agent.*archer mcp/s);
+    expect(setup.stdout).toMatch(/archer skill --write <.*skills folder>\/archer/);
+    expect(setup.stdout).toContain("other-agents");
+  });
+
   test("a new install links the skill and adds one turn-start hook per host, with no plugin and no MCP", () => {
     const pkg = fakePackage("new");
     const { env, p, claudeDir } = machine("new-home");
@@ -725,4 +739,15 @@ describe("archer upgrade", () => {
     expect(result.stderr).toContain("The running Archer was not swapped");
     expect(result.stderr).not.toContain("unchanged");
   }, 300_000);
+});
+
+test("setup --help prints its usage and exits 0 instead of calling --help an unknown option", async () => {
+  const lines: string[] = [];
+  const log = vi.spyOn(console, "log").mockImplementation((line: string) => void lines.push(line));
+  try {
+    expect(await setupMain("setup", ["--help"])).toBe(0);
+  } finally {
+    log.mockRestore();
+  }
+  expect(lines.join("\n")).toContain("archer setup [--mcp]");
 });

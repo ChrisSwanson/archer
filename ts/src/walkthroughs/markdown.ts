@@ -23,7 +23,10 @@ function refsOf(step: Step): string[] {
 export function walkthroughMarkdown(w: Walkthrough, resolution?: Resolution): string {
   const lines = [`### ${w.title}`];
   if (w.description !== undefined) lines.push(w.description);
-  lines.push("", `revision: ${w.modelRevision.replace(/^sha256:/, "").slice(0, 7)}`);
+  lines.push(
+    "",
+    `diagram revision: ${w.modelRevision.replace(/^sha256:/, "").slice(0, 7)}; walkthrough revision: ${w.revision}`,
+  );
   if (w.note !== undefined) lines.push(`scenario: ${w.note}`);
   lines.push("");
   w.steps.forEach((step, i) => {

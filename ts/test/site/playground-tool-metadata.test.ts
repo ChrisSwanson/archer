@@ -12,7 +12,7 @@ import { buildOptions } from "../../scripts/bundle.ts";
 
 it("preserves every live tool name, description and schema byte for byte during extraction", () => {
   expect(createHash("sha256").update(JSON.stringify(OPERATIONS)).digest("hex")).toBe(
-    "a9b163768bb5c922586dc5aedab789b4389627cc2b7b37a88d48eb219c6b9aea",
+    "787c9128f61a2ad98b0645b04acfaf05783f430dba979070b4770aa13cba5e15",
   );
 });
 

@@ -18,6 +18,7 @@ import { GUIDANCE, readGuidance, type GuidanceId } from "../guidance/index.ts";
 import { isProfileFamily, PROFILE_FAMILIES, profileForFamily } from "../guidance/profile.ts";
 import { pendingChangeHint } from "../application/changes.ts";
 import { SURFACES_RULE } from "../guidance/surfaces.ts";
+import { ServiceCallError } from "../service/service-client.ts";
 export interface ArcherServerOptions extends ApplicationOptions {
   /** Declares `tools.listChanged`: the service's relay host (host.ts), whose tools change on a hot swap. */
   readonly listChanged?: boolean;
@@ -194,7 +195,10 @@ export function createArcherServer(options: ArcherServerOptions): Server {
         seenPending.set(root, fingerprint);
       }
       return hint;
-    } catch {
+    } catch (error) {
+      // list_changes cannot work here either, so it is no remedy.
+      if (error instanceof ServiceCallError && error.error.code === "project_not_attached")
+        return "[Archer: saved-change feed unavailable: this project is not attached, so list_changes cannot list its saved changes either. Attach it with attach_project if you want them; the operation itself completed unchanged.]";
       return "[Archer: saved-change feed unavailable; primary operation completed unchanged. Use list_changes to reconcile when available.]";
     } finally {
       if (timer !== undefined) clearTimeout(timer);
