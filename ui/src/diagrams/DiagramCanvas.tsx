@@ -28,7 +28,6 @@ import {
   SelectionMode,
   type Edge,
   type Node,
-  type OnSelectionChangeFunc,
   type ReactFlowProps,
   type ReactFlowInstance,
   type Viewport,
@@ -1073,7 +1072,6 @@ function Flow(props: {
   onElementPress?: (channel: "node" | "edge", id: string) => void;
   onPaneClick?: () => void;
   onClearSelection?: () => void;
-  onSelectionChange?: OnSelectionChangeFunc;
   /** A marquee drag began; `additive` is whether it merges into the selection. */
   onMarqueeStart?: (additive: boolean) => void;
   onMarqueeEnd?: () => void;
@@ -1755,7 +1753,6 @@ function Flow(props: {
          * live canvas keeps the description it can honour.
          */
         disableKeyboardA11y={keyboard.stopId === null && edgeKeyboard.stopId === null}
-        onSelectionChange={props.onSelectionChange}
         /*
          * Clicks carry their own modifier state, so additive selection is
          * resolved HERE rather than left to React Flow.
@@ -2565,7 +2562,6 @@ function EmphasisSurface(props: {
   onElementPress?: (channel: "node" | "edge", id: string) => void;
   onPaneClick?: () => void;
   onClearSelection?: () => void;
-  onSelectionChange?: OnSelectionChangeFunc;
   onMarqueeStart?: (additive: boolean) => void;
   onMarqueeEnd?: () => void;
   /** What the marquee covers, each time that changes during the drag. */
@@ -2898,7 +2894,6 @@ function EmphasisSurface(props: {
         onElementPress={props.onElementPress}
         onPaneClick={props.onPaneClick}
         onClearSelection={props.onClearSelection}
-        onSelectionChange={props.onSelectionChange}
         onMarqueeStart={props.onMarqueeStart}
         onMarqueeEnd={props.onMarqueeEnd}
         onMarqueeChange={props.onMarqueeChange}
@@ -2943,7 +2938,6 @@ export function DiagramCanvas(props: {
   onElementPress?: (channel: "node" | "edge", id: string) => void;
   onPaneClick?: () => void;
   onClearSelection?: () => void;
-  onSelectionChange?: OnSelectionChangeFunc;
   onMarqueeStart?: (additive: boolean) => void;
   onMarqueeEnd?: () => void;
   /** What the marquee covers, each time that changes during the drag. */
@@ -2982,7 +2976,6 @@ export function DiagramCanvas(props: {
           <Flow
             primaryShell={props.primaryShell}
             layout={state.lastValid}
-            onSelectionChange={props.onSelectionChange}
             tools={props.tools}
             controls={props.controls}
           />
@@ -3083,7 +3076,6 @@ export function DiagramCanvas(props: {
       onElementPress={props.onElementPress}
       onPaneClick={props.onPaneClick}
       onClearSelection={props.onClearSelection}
-      onSelectionChange={props.onSelectionChange}
       onMarqueeStart={props.onMarqueeStart}
       onMarqueeEnd={props.onMarqueeEnd}
       onMarqueeChange={props.onMarqueeChange}
