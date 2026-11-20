@@ -543,7 +543,9 @@ describe("web shell tab navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Select mode" }));
     await act(async () => {
       fireEvent.click(container.querySelector<HTMLElement>('.react-flow__node[data-id="api"]')!);
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      // Let the click's own publication settle (its throttle window included), so what is posted below is
+      // only the reload's: on a slow run a trailing send of the click landed after the clear (O281).
+      await new Promise((resolve) => setTimeout(resolve, SELECTION_SETTLE_MS));
     });
 
     // The same presentation at a new revision: the agent's file was saved.
