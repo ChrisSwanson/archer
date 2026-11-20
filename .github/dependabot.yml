@@ -41,3 +41,8 @@ updates:
       # not expect yet. Held at 26 until the component tests load their stylesheets; then delete this rule.
       - dependency-name: "jsdom"
         versions: [">=27"]
+      # TypeScript 7 (the native compiler) ships no stable JS API: `import ts from "typescript"` is only
+      # its version, and the AST lives under typescript/unstable/*. site/scripts/cli-reference.mts and its
+      # test walk the AST, and vue-tsc builds on the JS API. Held at 6.x until both have a stable path.
+      - dependency-name: "typescript"
+        versions: [">=7"]
