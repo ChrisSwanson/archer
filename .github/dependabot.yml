@@ -2,7 +2,8 @@
 # npm covers the root lockfile, which holds both workspaces (ts, ui) and the docs site's tools.
 # Minor and patch updates arrive as one weekly PR per ecosystem, so CI runs once for the batch.
 # Majors are not grouped: each arrives as its own PR, to be upgraded deliberately. They are not
-# ignored either, since ignore rules may also filter a security update that needs a major.
+# ignored by default, since ignore rules may also filter a security update that needs a major; the
+# exceptions are the holds under `ignore` below, each with its reason and the condition that ends it.
 # The cooldown applies to version updates only; security updates are never delayed.
 version: 2
 updates:
