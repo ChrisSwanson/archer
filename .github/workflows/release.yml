@@ -139,7 +139,7 @@ jobs:
           set -euo pipefail
           echo "$(uname -sm), Node $(node --version)"
           scripts/release-smoke.sh "dist/archer-$VERSION.tgz" "$VERSION"
-          npm install --global --no-audit --no-fund --loglevel=error "dist/archer-$VERSION.tgz"
+          npm install --global --no-audit --no-fund --loglevel=error "./dist/archer-$VERSION.tgz"
           # Archer reads only inside a project's .archer folder: lay out a diagram in a throwaway one.
           project="$(mktemp -d)"
           mkdir "$project/.archer" && cp ts/test/fixtures/flowchart/minimal.mmd "$project/.archer/flow.mmd"
