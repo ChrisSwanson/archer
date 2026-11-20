@@ -11,13 +11,15 @@ import {
   mkdirSync,
   openSync,
   readSync,
+  realpathSync,
   renameSync,
   unlinkSync,
   type Stats,
 } from "node:fs";
-import { relative, sep } from "node:path";
+import { join, relative, sep } from "node:path";
 import { cumulativeDiff } from "../changes/cumulative-diff.ts";
-import { ConfinedFileSystem, type ConfinedHandle } from "../project/confined-fs.ts";
+import { ConfinedFileSystem, ConfinedRefusal, type ConfinedHandle } from "../project/confined-fs.ts";
+import { folderOthersCanChange } from "../project/ownership.ts";
 import { findProject, writeAllSync, type Project } from "../project/project.ts";
 import { SourceWriteError, withSourceWriterLock } from "../project/source-writer.ts";
 import type { AuthoringStore, CumulativeReview } from "./store.ts";
@@ -87,6 +89,13 @@ function render(store: AuthoringStore, review: CumulativeReview): string {
       : "# diff complete=false; body omitted; exact source available through read_change baseline/latest parts\n")
   );
 }
+/** The path anchor's window needs another account able to change a folder on the way (known-limits §1). */
+function refuseShared(fs: ConfinedFileSystem, project: Project, path: string): void {
+  if (fs.descriptorRelative) return;
+  const shared = folderOthersCanChange(join(realpathSync.native(project.root), path));
+  if (shared !== undefined) refuse("blocked", new ConfinedRefusal("shared", path, shared).message);
+}
+
 function same(a: Stats, b: Stats): boolean {
   return a.dev === b.dev && a.ino === b.ino;
 }
@@ -345,6 +354,8 @@ export function materializeReview(
           try {
             parent = fs.open(folderPath);
             if (!parent.stat.isDirectory()) refuse("blocked", "authoring folder is not a directory");
+            // The path anchor's window needs another account able to change a folder on the way (known-limits §1).
+            refuseShared(fs, project, folderPath);
             const directoryPath = folderPath + "/.review";
             path = directoryPath + "/" + filename(review);
             if (review.state === "pending") {
@@ -363,6 +374,7 @@ export function materializeReview(
               throw error;
             }
             if (!directory.stat.isDirectory()) refuse("blocked", "review directory is not a directory");
+            refuseShared(fs, project, directoryPath);
             checkBinding(fs, parent, directory, project);
             if (review.state === "pending") ensureIgnore(fs, parent, directory, project, store, options);
             const name = filename(review),

@@ -96,6 +96,7 @@ export function projectFailure(error: unknown): unknown {
       ambiguous_diagram: "invalid_request",
       io_error: "io_failure",
       write_rule_denied: "write_rule_denied",
+      shared_folder: "shared_folder",
     } as const
   )[error.code];
   const failure = toolError(code, error.message, error instanceof WriteRuleDenied ? { rule: error.rule } : {});

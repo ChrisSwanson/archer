@@ -447,6 +447,11 @@ const ENTRIES: Record<string, Entry> = {
     todo: "You can still read. Copy your Mermaid if you want to keep it.",
     severity: "problem",
   },
+  shared_folder: {
+    what: "Another account on this computer can change a folder on the way to this file, so Archer saved nothing.",
+    todo: "Make that folder yours alone (the details name it; run chmod go-w on it), then try again. Copy your Mermaid if you want to keep it.",
+    severity: "problem",
+  },
   // --- Not found ----------------------------------------------------------------------------------------
   authoring_not_found: {
     what: "The diagram or project could not be found.",

@@ -190,5 +190,24 @@ describe("path-anchor writers", () => {
       expect(result.status).not.toBe("written");
       expect(fs.readdirSync(outside)).toEqual([]);
     });
+
+    // known-limits §1: with the Archer folder writable by other accounts, nothing is written there at all.
+    it.runIf(process.getuid !== undefined)("a review under a folder other accounts can change is refused", () => {
+      const { project, store, reviewId, directory } = pendingReview("shared");
+      fs.chmodSync(join(directory, ".."), 0o777);
+      const result = materializeReview(project, store, reviewId);
+      expect(result.status).toBe("blocked");
+      expect(result.message).toContain("chmod go-w");
+      expect(fs.existsSync(directory)).toBe(false);
+    });
+
+    it.runIf(process.getuid !== undefined)("an existing review folder other accounts can change is refused", () => {
+      const { project, store, reviewId, directory } = pendingReview("shared-review");
+      fs.mkdirSync(directory);
+      fs.chmodSync(directory, 0o777);
+      const result = materializeReview(project, store, reviewId);
+      expect(result.status).toBe("blocked");
+      expect(fs.readdirSync(directory)).toEqual([]);
+    });
   });
 });

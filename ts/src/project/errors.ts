@@ -17,7 +17,10 @@ export type ProjectErrorCode =
   // `archer init` was asked to write through a link that leaves the project.
   | "path_outside_project"
   // The account's [[projects]] write rules refuse this write (ADR 0013, ADR 0028).
-  | "write_rule_denied";
+  | "write_rule_denied"
+  // Where no descriptor filesystem is verified (macOS), a write under a folder another account can
+  // change is refused (docs/security/known-limits.md §1).
+  | "shared_folder";
 
 export class ProjectError extends Error {
   constructor(

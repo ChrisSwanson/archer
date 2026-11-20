@@ -10,6 +10,8 @@ import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { DIAGRAM_KINDS, isStableId, type DiagramKind } from "../model/index.ts";
 import { ProjectError } from "./errors.ts";
+import { groupIsPrivate } from "./ownership.ts";
+export { groupIsPrivate };
 import {
   misplacedAgentsKeyMessage,
   misplacedKey,
@@ -181,31 +183,6 @@ function trusted(path: string): boolean {
   } catch {
     return false;
   }
-}
-
-/**
- * Whether group `gid` has no member but user `uid`: no other account has it
- * as its primary group, and its member list names nobody else.
- */
-export function groupIsPrivate(uid: number, gid: number, passwd: string, group: string): boolean {
-  let owner: string | undefined;
-  for (const line of passwd.split("\n")) {
-    const f = line.split(":");
-    if (f.length < 4) continue;
-    if (Number(f[2]) === uid) owner = f[0];
-    else if (Number(f[3]) === gid) return false;
-  }
-  if (owner === undefined) return false;
-  for (const line of group.split("\n")) {
-    const f = line.split(":");
-    if (f.length < 4 || Number(f[2]) !== gid) continue;
-    const members = (f[3] ?? "")
-      .split(",")
-      .map((m) => m.trim())
-      .filter((m) => m !== "");
-    return members.every((m) => m === owner);
-  }
-  return false;
 }
 
 /**

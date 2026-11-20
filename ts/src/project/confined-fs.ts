@@ -21,6 +21,7 @@ import {
 } from "node:fs";
 import { join, parse } from "node:path";
 import { ProjectError } from "./errors.ts";
+import { folderOthersCanChange } from "./ownership.ts";
 
 export class ConfinementUnavailable extends Error {}
 export interface ConfinedHandle {
@@ -272,7 +273,7 @@ function lstatWalk(base: string, parts: readonly string[], allDirectories: boole
 // segment before and after the open, compared by (dev, ino) with the descriptor. That narrows the
 // check-to-use window to a few syscalls but cannot close it: see ADR 0018's amendment for what remains.
 
-export type ConfinedRefusalReason = "link" | "hard_link" | "not_regular" | "moved" | "invalid";
+export type ConfinedRefusalReason = "link" | "hard_link" | "not_regular" | "moved" | "invalid" | "shared";
 
 const REFUSALS: Readonly<Record<ConfinedRefusalReason, (shown: string, detail: string) => string>> = {
   link: (shown) =>
@@ -282,6 +283,9 @@ const REFUSALS: Readonly<Record<ConfinedRefusalReason, (shown: string, detail: s
   not_regular: (shown) => `${shown} is not a regular file`,
   moved: (shown) => `${shown} moved while Archer was using it, so nothing was read or written there; try again`,
   invalid: (shown) => `${shown} is not a path inside the Archer folder`,
+  shared: (shown, folder) =>
+    `${shown} is under ${folder}, a folder another account can change (it is not yours, others can write to it, or it is a link). ` +
+    `On this computer Archer cannot change files there safely, so nothing was changed. If the folder is yours, run: chmod go-w "${folder}"`,
 };
 
 /** A path the seam will not read or write. A confinement refusal (`path_outside_archer_folder`), except a non-regular file (`io_error`). */
@@ -291,7 +295,10 @@ export class ConfinedRefusal extends ProjectError {
     shown: string,
     detail = "",
   ) {
-    super(reason === "not_regular" ? "io_error" : "path_outside_archer_folder", REFUSALS[reason](shown, detail));
+    super(
+      reason === "not_regular" ? "io_error" : reason === "shared" ? "shared_folder" : "path_outside_archer_folder",
+      REFUSALS[reason](shown, detail),
+    );
     this.name = "ConfinedRefusal";
   }
 }
@@ -557,6 +564,23 @@ function anchorFor(dir: string, shown: string): Anchor {
   return anchor;
 }
 
+/**
+ * On the path anchor, refuses a change under a folder another account can change. The anchor's
+ * check-to-use window can be won only by swapping a folder on the path for a link, which needs write
+ * access to that folder's parent: with every folder from `/` down to the one changed held by this account
+ * (or root), no other account can (docs/security/known-limits.md §1). A descriptor anchor has no window.
+ */
+function refuseSharedFolders(anchor: Anchor, dir: string, parts: readonly string[], shown: string): void {
+  if (!(anchor instanceof PathAnchor)) return;
+  let shared: string | undefined;
+  try {
+    shared = folderOthersCanChange(join(dir, ...parts));
+  } catch (error) {
+    throw classify(error, dir, parts, shown);
+  }
+  if (shared !== undefined) throw new ConfinedRefusal("shared", shown, shared);
+}
+
 /** Refuses what is not a plain file with one name. */
 function admitFile(stat: Stats, shown: string): void {
   if (!stat.isFile()) throw new ConfinedRefusal("not_regular", shown);
@@ -671,6 +695,7 @@ export function publishConfined(
   let anchor: Anchor, parent: Opened;
   try {
     anchor = anchorFor(dir, shown);
+    refuseSharedFolders(anchor, dir, parentParts, shown);
     parent = anchor.open(parentParts, true, shown);
   } catch (error) {
     throw error instanceof ConfinedRefusal ? error : new ConfinedWriteRefusedError(error);
@@ -793,6 +818,7 @@ export function removeConfined(dir: string, parentParts: readonly string[], name
   const anchor = anchorFor(dir, shown);
   let parent: Opened;
   try {
+    refuseSharedFolders(anchor, dir, parentParts, shown);
     parent = anchor.open(parentParts, true, shown);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
@@ -826,6 +852,7 @@ export function ensureConfinedDirectories(
   try {
     for (let at = 0; at < parts.length; at++) {
       const prefix = parts.slice(0, at + 1);
+      refuseSharedFolders(anchor, dir, parts.slice(0, at), shown(at));
       try {
         mkdirSync(anchor.child(parent, parts.slice(0, at), parts[at]!), { mode });
       } catch (error) {
