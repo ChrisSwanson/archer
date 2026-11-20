@@ -118,23 +118,24 @@ describe("DiagramCanvas rendering", () => {
     expect(screen.getByText("Web")).toBeInTheDocument();
   });
 
-  it("keeps reporting selection while an error banner is showing", async () => {
-    const selections: string[][] = [];
+  // A read error means the server has moved past this drawing's revision, so a selection made on it would be
+  // refused as stale: the last valid drawing stays visible under the banner but reports no clicks (ADR 0010).
+  it("keeps the last valid drawing under an error banner but reports no selection from it", () => {
+    const clicks: string[] = [];
     const { container } = render(
       <DiagramCanvas
         state={{ status: "error", message: "boom", lastValid: dataFlowLayout }}
-        onSelectionChange={({ nodes }) => selections.push(nodes.map((n) => n.id))}
+        onNodeClick={(id) => clicks.push(id)}
       />,
     );
 
+    expect(screen.getByRole("alert")).toHaveTextContent("boom");
     const web = container.querySelector<HTMLElement>('.react-flow__node[data-id="web"]');
     expect(web).not.toBeNull();
     fireEvent.click(container.querySelector<HTMLButtonElement>('button[aria-label="Select mode"]')!);
     fireEvent.click(web!);
 
-    await waitFor(() => {
-      expect(selections.some((ids) => ids.includes("web"))).toBe(true);
-    });
+    expect(clicks).toEqual([]);
   });
 
   it("shows only the message when there is no last valid diagram", () => {

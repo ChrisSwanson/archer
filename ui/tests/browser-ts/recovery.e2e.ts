@@ -725,6 +725,18 @@ test("an agent correction after offline restart preserves the pending node comme
         message.type === "error" && !(message.phase === "recovery" && offlineCheck(message.location.url, message.text)),
     );
     await Promise.all(failureObservations);
+    // The event stream the page reopened after recovery is still open when this test reloads the page, and
+    // a reload aborts it. The Chromium of Playwright 1.65 reports that answered stream as a failed request;
+    // 1.63's did not (O277). Exactly one such stream is expected: a second would be a stream the page leaked.
+    const reloadAbortOfRecoveryStream = failedRequests.find(
+      (request) =>
+        request.requestPhase === "recovery" &&
+        request.failurePhase === "reload" &&
+        request.method === "GET" &&
+        request.error === "net::ERR_ABORTED" &&
+        request.responseStatus === 200 &&
+        request.url === landedUrl.replace(/\/projects\/([^/]+)\/.*$/, "/p/$1/api/events"),
+    );
     // This Chromium run reports ERR_ABORTED for selection POSTs that received HTTP 204.
     // See [attached observations](correction-restart-stage-observations.json); service-accepted selections are asserted above.
     const unexpectedFailedRequests = failedRequests.filter(
@@ -745,7 +757,8 @@ test("an agent correction after offline restart preserves the pending node comme
           request.method === "GET" &&
           /ERR_ABORTED|ERR_INTERNET_DISCONNECTED/.test(request.error ?? "") &&
           request.url === landedUrl.replace(/\/projects\/([^/]+)\/.*$/, "/p/$1/api/events")
-        ),
+        ) &&
+        request !== reloadAbortOfRecoveryStream,
     );
     expect(unexpectedConsoleErrors, "unexpected browser console errors").toEqual([]);
     expect(unexpectedFailedRequests, "unexpected browser request failures").toEqual([]);

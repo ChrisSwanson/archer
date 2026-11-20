@@ -140,7 +140,9 @@ async function expectClearFilterEdges(dialog: Locator): Promise<void> {
         paddingRight: Number.parseFloat(style.paddingRight),
         backgroundImage: style.backgroundImage,
         backgroundPosition: style.backgroundPosition,
-        backgroundRepeat: style.backgroundRepeat,
+        // Every layer's repeat, however the browser spells the list: Chromium 159 reports one value for a
+        // property set once over two images, where earlier builds repeated it per layer (O279).
+        backgroundRepeat: [...new Set(style.backgroundRepeat.split(",").map((value) => value.trim()))],
       };
     });
     expect(control, "a styled dropdown remains a native, single-select combobox").toMatchObject({
@@ -149,7 +151,7 @@ async function expectClearFilterEdges(dialog: Locator): Promise<void> {
       multiple: false,
       size: 0,
       appearance: "none",
-      backgroundRepeat: "no-repeat, no-repeat",
+      backgroundRepeat: ["no-repeat"],
     });
     expect(control.paddingRight, "dropdown text clears the indicator").toBeGreaterThanOrEqual(32);
     expect(control.backgroundImage, "the dropdown carries the familiar fine chevron").not.toBe("none");

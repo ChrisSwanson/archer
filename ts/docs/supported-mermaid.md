@@ -1,7 +1,7 @@
 # Supported Mermaid
 
 Archer accepts a subset of real Mermaid: every diagram Archer accepts parses in Mermaid itself
-(the version `ts/package.json` pins, 12.2.0), and a test runs every example on this page through it. Where this
+(the version `ts/package.json` pins, 12.3.0), and a test runs every example on this page through it. Where this
 page and Mermaid differ, the difference is a refusal on Archer's side, never a different reading of
 the same text.
 

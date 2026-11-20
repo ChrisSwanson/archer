@@ -1,6 +1,6 @@
 {
   "name": "archer",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "private": true,
   "license": "Apache-2.0",
   "description": "Archer in TypeScript: agent-authored Mermaid diagrams as a shared visual layer between a person and their agents",
@@ -26,17 +26,17 @@
     "@modelcontextprotocol/sdk": "1.32.2",
     "@resvg/resvg-wasm": "2.6.2",
     "dompurify": "3.4.18",
-    "elkjs": "0.11.1",
+    "elkjs": "0.12.1",
     "markdown-it": "15.0.3",
-    "mermaid": "12.2.0",
-    "parse5": "7.3.0"
+    "mermaid": "12.3.0",
+    "parse5": "8.1.1"
   },
   "devDependencies": {
     "@types/markdown-it": "14.2.0",
     "@types/node": "22.20.5",
     "esbuild": "0.28.2",
     "tsx": "4.23.15",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "4.1.12"
   }
 }

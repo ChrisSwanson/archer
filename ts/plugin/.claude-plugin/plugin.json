@@ -1,5 +1,5 @@
 {
   "name": "archer-ts",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "description": "Archer (TypeScript): diagrams as a shared visual layer between you and your agents, in the terminal and the browser"
 }

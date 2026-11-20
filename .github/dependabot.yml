@@ -2,7 +2,8 @@
 # npm covers the root lockfile, which holds both workspaces (ts, ui) and the docs site's tools.
 # Minor and patch updates arrive as one weekly PR per ecosystem, so CI runs once for the batch.
 # Majors are not grouped: each arrives as its own PR, to be upgraded deliberately. They are not
-# ignored either, since ignore rules may also filter a security update that needs a major.
+# ignored by default, since ignore rules may also filter a security update that needs a major; the
+# exceptions are the holds under `ignore` below, each with its reason and the condition that ends it.
 # The cooldown applies to version updates only; security updates are never delayed.
 version: 2
 updates:
@@ -35,3 +36,15 @@ updates:
       # menus, cues). Held at 4.13 until that accessibility pass lands; then delete this rule.
       - dependency-name: "@axe-core/playwright"
         versions: [">=4.14"]
+      # jsdom 27 computes accessible names from display without the app's CSS (Vitest feeds jsdom none), so
+      # flex children read as inline and five component tests see "Files2 active" where Chromium, with the
+      # real CSS, says "Files 2 active". jsdom 31 also serializes CSSOM as browsers do, which three tests do
+      # not expect yet, and jsdom 31 needs Node ^22.22.2 (contributors may be on 22.18). Held at 26 until the
+      # component tests load their stylesheets and the Node floor rises (O276); then delete this rule.
+      - dependency-name: "jsdom"
+        versions: [">=27"]
+      # TypeScript 7 (the native compiler) ships no stable JS API: `import ts from "typescript"` is only
+      # its version, and the AST lives under typescript/unstable/*. site/scripts/cli-reference.mts and its
+      # test walk the AST, and vue-tsc builds on the JS API. Held at 6.x until both have a stable path.
+      - dependency-name: "typescript"
+        versions: [">=7"]
