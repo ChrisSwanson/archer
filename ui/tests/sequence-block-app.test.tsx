@@ -274,8 +274,12 @@ for (const kind of ["block", "participant", "message"] as const) {
     });
     fireEvent.click(within(discussion()).getByRole("button", { name: "Add comment" }));
     await within(discussion()).findByText("Keep this question", { exact: true });
-    const pin = container.querySelector<SVGElement>('[data-pin-thread][role="button"]')!;
-    expect(pin).not.toBeNull();
+    // The pin is drawn for the saved thread, which can land a render after the comment's text does (O280).
+    const pin = await waitFor(() => {
+      const drawn = container.querySelector<SVGElement>('[data-pin-thread][role="button"]');
+      expect(drawn).not.toBeNull();
+      return drawn!;
+    });
     fireEvent.click(within(discussion()).getByRole("button", { name: "Close discussion" }));
     expect(pin).toHaveFocus();
   });
