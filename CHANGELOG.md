@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.15.2 — 2026-11-19
+
+Dependency updates from the first week of Dependabot: each one tested, and the four that failed
+fixed or held for a recorded reason.
+
+### Changed
+
+- **Reading the text of a note's comments ran on parse5 7**, which could take seconds on very deeply
+  nested Markdown. The service now uses parse5 8.1.1, which fixes those quadratic cases. (#15)
+- **The service and the page ran on older libraries.** The service now parses with Mermaid 12.3.0 (the
+  speed-up patch applies unchanged), and both lay out with ELK 0.12.1. The page uses React Flow 12.12.1 and
+  the MCP Apps SDK 2.0.4, whose client and core packages are now pinned too. The diagram layout worker
+  is 34 KB larger (ELK) and the MCP App page 82 KB (20 KB gzipped; ELK and the MCP Apps SDK). (#12, #13)
+- **On a touchscreen, a one-finger drag in Select mode drew a marquee rectangle and panned at the same
+  time, and selected nothing.** With React Flow 12.12.1 it now just pans. A tap still selects a node; a
+  marquee by touch did not work before and does not now.
+- **Contributors built and tested with TypeScript 5.9, jsdom 25 and Playwright 1.63.** They now use TypeScript
+  6.0.3, jsdom 26.1.0 and Playwright 1.65.1. TypeScript 7 and jsdom 27+ are held in Dependabot, with the
+  reasons in `docs/known-failures.md` (O276, O278). (#14, #16)
+- **The Mermaid guide named 12.2.0 as the version Archer checks against.** It names 12.3.0.
+
+### Fixed
+
+- **Two UI tests could fail on a busy machine**: one looked for a new comment pin a render too early, the
+  other cleared its record of selection posts while the click's own was still pending. Both now wait for
+  what they assert on. (O280, O281)
+
+### Removed
+
+- **The diagram canvas accepted an `onSelectionChange` handler that the page never used**, and React
+  Flow 12.12.1 stopped calling it on clicks. The handler is removed. Selection still comes from clicks
+  and the marquee, as before. The drawing kept under a read-error banner still takes no clicks, as
+  designed. (O275)
+
 ## 0.15.1 — 2026-11-18
 
 Clearer errors for the Mermaid agents usually write, CLI and tool messages that say what to do next, a guide

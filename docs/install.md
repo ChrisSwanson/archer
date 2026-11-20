@@ -22,7 +22,7 @@ curl -fsSL https://chrisswanson.github.io/archer/install.sh | sh
 To choose a version or pass setup options:
 
 ```sh
-curl -fsSL https://chrisswanson.github.io/archer/install.sh | ARCHER_VERSION=0.15.1 sh -s -- --mcp
+curl -fsSL https://chrisswanson.github.io/archer/install.sh | ARCHER_VERSION=0.15.2 sh -s -- --mcp
 ```
 
 ## Windows (WSL)
