@@ -35,3 +35,9 @@ updates:
       # menus, cues). Held at 4.13 until that accessibility pass lands; then delete this rule.
       - dependency-name: "@axe-core/playwright"
         versions: [">=4.14"]
+      # jsdom 27 computes accessible names from display without the app's CSS (Vitest feeds jsdom none), so
+      # flex children read as inline and five component tests see "Files2 active" where Chromium, with the
+      # real CSS, says "Files 2 active". jsdom 31 also serializes CSSOM as browsers do, which three tests do
+      # not expect yet. Held at 26 until the component tests load their stylesheets; then delete this rule.
+      - dependency-name: "jsdom"
+        versions: [">=27"]
