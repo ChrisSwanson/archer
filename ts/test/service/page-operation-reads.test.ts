@@ -14,13 +14,26 @@ afterEach(async () => {
 test("export_diagram from the page answers without reloading the project; a front door's read still reloads", async () => {
   const root = project();
   // The project's watcher may report the files written just before it started (macOS delivers such events
-  // late): that reload is the watcher's, not the page's, so the count starts once it has settled.
+  // late, sometimes after it first settles): that reload is the watcher's, not the page's. Counting starts once
+  // it has settled, and reloads the watcher starts later are told apart by its trace.
   let settled!: () => void;
   const watcherQuiet = new Promise<void>((resolve) => {
     settled = resolve;
     setTimeout(resolve, 1_500);
   });
-  const { svc } = await service({ watchTrace: (line) => line.includes("reload:settled") && settled() });
+  // The watcher's lines once counting starts: a reload it began is not the page's (O285), and a failure
+  // shows what it saw.
+  let counting = false;
+  let watcherReloads = 0;
+  const traced: string[] = [];
+  const { svc } = await service({
+    watchTrace: (line) => {
+      if (line.includes("reload:settled")) settled();
+      if (!counting) return;
+      traced.push(line);
+      if (line.includes("reload:start")) watcherReloads++;
+    },
+  });
   const client = await connectService(svc.socketPath);
   try {
     const { url } = await client.call("attach", { root });
@@ -28,6 +41,9 @@ test("export_diagram from the page answers without reloading the project; a fron
     await ownerCookie(apiBase(url));
     await watcherQuiet;
     const reloads = vi.spyOn(ProjectState.prototype, "reload");
+    counting = true;
+    /** Reloads not started by the watcher: the page's or a front door's. */
+    const notWatcher = () => reloads.mock.calls.length - watcherReloads;
     const operation = (args: Record<string, unknown>) =>
       http(`${apiBase(url)}api/operations`, {
         method: "POST",
@@ -38,10 +54,10 @@ test("export_diagram from the page answers without reloading the project; a fron
     expect(JSON.parse(plain.body)).toMatchObject({ mimeType: "image/svg+xml" });
     const presented = await operation({ viewId: "flow", format: "svg", mode: "presentation" });
     expect(presented.status, presented.body).toBe(200);
-    expect(reloads).not.toHaveBeenCalled();
+    expect(notWatcher(), traced.join("\n")).toBe(0);
 
     await client.call("getModel", { root, viewId: "flow" });
-    expect(reloads).toHaveBeenCalledTimes(1);
+    expect(notWatcher(), traced.join("\n")).toBe(1);
   } finally {
     client.close();
   }
