@@ -126,8 +126,8 @@ export class ConfinedFileSystem {
     return this.#descriptors !== null;
   }
   /** Before a change in folder `path` (relative to the root): on the path anchor, `refuseSharedFolders`. */
-  refuseSharedFolders(path: string): void {
-    if (this.#descriptors === null) refuseSharedFolders(this.root, path.split("/"), path);
+  refuseSharedFolders(path: string, shown = path): void {
+    if (this.#descriptors === null) refuseSharedFolders(this.root, segments(path), shown);
   }
   close(): void {
     closeSync(this.#root);
@@ -397,8 +397,13 @@ function classify(error: unknown, dir: string, parts: readonly string[], shown: 
   return error;
 }
 
-/** Linux (/proc/self/fd) or another verified descriptor filesystem: every segment is opened relative to the descriptor before it. */
-class DescriptorAnchor implements Anchor {
+/**
+ * A `ConfinedFileSystem` held on the anchor folder. With a verified descriptor filesystem (Linux /proc/self/fd)
+ * every segment is opened relative to the descriptor before it; elsewhere it is the path anchor, the lstat walk
+ * around each open (docs/security/known-limits.md §1), and every name handed out for a change is refused under
+ * a folder another account can change.
+ */
+class FolderAnchor implements Anchor {
   constructor(
     readonly dir: string,
     readonly fs: ConfinedFileSystem,
@@ -419,7 +424,8 @@ class DescriptorAnchor implements Anchor {
   bound(opened: Opened, parts: readonly string[]): boolean {
     return this.fs.bound({ fd: opened.fd, stat: opened.stat, path: parts.length === 0 ? "." : parts.join("/") });
   }
-  child(directory: Opened, parts: readonly string[], name: string, _shown: string): string {
+  child(directory: Opened, parts: readonly string[], name: string, shown: string): string {
+    this.fs.refuseSharedFolders(parts.join("/"), shown);
     return `${this.fs.descriptorPath({ fd: directory.fd, stat: directory.stat, path: parts.length === 0 ? "." : parts.join("/") })}/${name}`;
   }
   valid(): boolean {
@@ -427,89 +433,6 @@ class DescriptorAnchor implements Anchor {
   }
   close(): void {
     this.fs.close();
-  }
-}
-
-/**
- * The portable fallback where no descriptor filesystem is verified: each segment is lstat-ed (no link, a
- * directory on the way) before and after the open, and the open descriptor must be the same (dev, ino) as
- * the walk's last entry, with every segment unchanged. A writer racing several swaps inside those few
- * syscalls can still win; it is the documented residual (ADR 0018, amended 2026-10-31).
- */
-class PathAnchor implements Anchor {
-  readonly #self: Stats;
-  constructor(readonly dir: string) {
-    const self = lstatSync(dir);
-    if (!self.isDirectory()) throw errno("ENOTDIR", "the confinement anchor is not a folder");
-    this.#self = self;
-  }
-  #walk(parts: readonly string[], shown: string): Stats[] {
-    const top = lstatSync(this.dir);
-    if (!top.isDirectory() || !sameFile(top, this.#self)) throw new ConfinedRefusal("moved", shown);
-    const seen = [top];
-    let at = this.dir;
-    for (const [index, part] of parts.entries()) {
-      if (part === "" || part === "." || part === ".." || /[\\/\0]/u.test(part))
-        throw new ConfinedRefusal("invalid", shown);
-      at = join(at, part);
-      const entry = lstatSync(at);
-      if (entry.isSymbolicLink()) throw new ConfinedRefusal("link", shown);
-      if (index < parts.length - 1 && !entry.isDirectory())
-        throw errno("ENOTDIR", `${shown}: a segment is not a folder`);
-      seen.push(entry);
-    }
-    return seen;
-  }
-  #unchanged(before: readonly Stats[], parts: readonly string[], shown: string): boolean {
-    try {
-      const after = this.#walk(parts, shown);
-      return after.every((entry, index) => sameFile(entry, before[index]!));
-    } catch {
-      return false;
-    }
-  }
-  open(parts: readonly string[], directory: boolean, shown: string): Opened {
-    const before = this.#walk(parts, shown);
-    let fd: number;
-    try {
-      fd = openSync(
-        join(this.dir, ...parts),
-        constants.O_RDONLY | constants.O_NONBLOCK | constants.O_NOFOLLOW | (directory ? constants.O_DIRECTORY : 0),
-      );
-    } catch (error) {
-      throw classify(error, this.dir, parts, shown);
-    }
-    try {
-      const stat = fstatSync(fd);
-      if (!sameFile(stat, before.at(-1)!) || !this.#unchanged(before, parts, shown))
-        throw new ConfinedRefusal("moved", shown);
-      return { fd, stat };
-    } catch (error) {
-      closeSync(fd);
-      throw error;
-    }
-  }
-  bound(opened: Opened, parts: readonly string[]): boolean {
-    try {
-      return sameFile(this.#walk(parts, "").at(-1)!, opened.stat);
-    } catch {
-      return false;
-    }
-  }
-  child(_directory: Opened, parts: readonly string[], name: string, shown: string): string {
-    refuseSharedFolders(this.dir, parts, shown);
-    return join(this.dir, ...parts, name);
-  }
-  valid(): boolean {
-    try {
-      const now = lstatSync(this.dir);
-      return now.isDirectory() && sameFile(now, this.#self);
-    } catch {
-      return false;
-    }
-  }
-  close(): void {
-    /* holds no descriptor */
   }
 }
 
@@ -549,23 +472,15 @@ function anchorFor(dir: string, shown: string): Anchor {
     }
     held.close();
   }
-  let anchor: Anchor;
-  let opened: ConfinedFileSystem | undefined;
-  if (descriptorConfinement()) {
-    try {
-      opened = new ConfinedFileSystem(dir);
-    } catch (error) {
-      // The platform is verified, so a failure here is the folder itself: a link on its way, moved, or missing.
-      if (error instanceof ConfinementUnavailable) throw new ConfinedRefusal("moved", shown);
-      throw classify(error, "/", dir.split("/").filter(Boolean), shown);
-    }
+  let opened: ConfinedFileSystem;
+  try {
+    opened = new ConfinedFileSystem(dir);
+  } catch (error) {
+    // A failure here is the folder itself: a link on its way, moved, or missing.
+    if (error instanceof ConfinementUnavailable) throw new ConfinedRefusal("moved", shown);
+    throw classify(error, "/", dir.split("/").filter(Boolean), shown);
   }
-  // The capability is probed once; this folder's own filesystem decides (a later probe can fall back).
-  if (opened?.descriptorRelative === true) anchor = new DescriptorAnchor(dir, opened);
-  else {
-    opened?.close();
-    anchor = new PathAnchor(dir);
-  }
+  const anchor = new FolderAnchor(dir, opened);
   anchors.set(dir, anchor);
   if (anchors.size > MAX_ANCHORS) {
     const [oldest, evicted] = anchors.entries().next().value!;
