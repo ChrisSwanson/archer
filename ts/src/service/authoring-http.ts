@@ -206,6 +206,8 @@ const AUTHORING_HTTP_STATUS: Readonly<Record<string, number>> = {
   edit_requires_valid_flowchart: 422,
   // The account's or the project's rules refuse this write (ADR 0028).
   write_rule_denied: 403,
+  // A folder on the path is not this account's alone; the person can fix its permissions (known-limits §1).
+  shared_folder: 403,
   editing_disabled: 403,
   create_not_allowed: 403,
   edit_invalid_shape: 422,

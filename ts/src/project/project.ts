@@ -5,11 +5,12 @@
 // agents' instructions.
 import { parseDiscoverySettings, type DiscoverySettings } from "./discovery.ts";
 import { assertWriteAllowed, type WriteRule } from "../config/write-policy.ts";
-import { existsSync, lstatSync, readFileSync, realpathSync, statSync, type Stats } from "node:fs";
+import { existsSync, lstatSync, realpathSync, statSync, type Stats } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { DIAGRAM_KINDS, isStableId, type DiagramKind } from "../model/index.ts";
 import { ProjectError } from "./errors.ts";
+import { writableOnlyBy } from "./ownership.ts";
 import {
   misplacedAgentsKeyMessage,
   misplacedKey,
@@ -156,56 +157,17 @@ function realHome(): string | null {
 }
 
 /**
- * Whether only the current user can change what is at `path`: it is theirs,
- * nobody else may write to it, and its group may write only when that group
- * is private to the user (a user-private group, as on umask 002 systems,
- * where every file is group-writable). True where there are no user ids
- * (Windows).
+ * Whether only the current user can change what is at `path` (`writableOnlyBy`). True where there are no
+ * user ids (Windows).
  */
 function trusted(path: string): boolean {
   const uid = process.getuid?.();
   if (uid === undefined) return true;
-  let stats;
   try {
-    stats = statSync(path);
+    return writableOnlyBy(statSync(path), uid);
   } catch {
     return false;
   }
-  if (stats.uid !== uid || (stats.mode & 0o002) !== 0) return false;
-  if ((stats.mode & 0o020) === 0) return true;
-  // Group-writable: only when nobody else is in that group. Accounts that are
-  // not in the local files (LDAP and the like) cannot be checked, so a group
-  // is private only when both files can be read and show no one else.
-  try {
-    return groupIsPrivate(uid, stats.gid, readFileSync("/etc/passwd", "utf8"), readFileSync("/etc/group", "utf8"));
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Whether group `gid` has no member but user `uid`: no other account has it
- * as its primary group, and its member list names nobody else.
- */
-export function groupIsPrivate(uid: number, gid: number, passwd: string, group: string): boolean {
-  let owner: string | undefined;
-  for (const line of passwd.split("\n")) {
-    const f = line.split(":");
-    if (f.length < 4) continue;
-    if (Number(f[2]) === uid) owner = f[0];
-    else if (Number(f[3]) === gid) return false;
-  }
-  if (owner === undefined) return false;
-  for (const line of group.split("\n")) {
-    const f = line.split(":");
-    if (f.length < 4 || Number(f[2]) !== gid) continue;
-    const members = (f[3] ?? "")
-      .split(",")
-      .map((m) => m.trim())
-      .filter((m) => m !== "");
-    return members.every((m) => m === owner);
-  }
-  return false;
 }
 
 /**
@@ -216,14 +178,7 @@ export function groupIsPrivate(uid: number, gid: number, passwd: string, group: 
 export function isTrustedManifestStat(stats: Stats): boolean {
   if (!stats.isFile() || stats.isSymbolicLink()) return false;
   const uid = process.getuid?.();
-  if (uid === undefined) return true;
-  if (stats.uid !== uid || (stats.mode & 0o002) !== 0) return false;
-  if ((stats.mode & 0o020) === 0) return true;
-  try {
-    return groupIsPrivate(uid, stats.gid, readFileSync("/etc/passwd", "utf8"), readFileSync("/etc/group", "utf8"));
-  } catch {
-    return false;
-  }
+  return uid === undefined || writableOnlyBy(stats, uid);
 }
 
 function requireTrustedManifest(manifest: string, refused = false): void {

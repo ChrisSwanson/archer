@@ -90,6 +90,8 @@ export const ERROR_CODES = {
   instance_choice_needed: CALLER,
   // The account's [[projects]] write rules refuse this write (ADR 0028).
   write_rule_denied: CALLER,
+  // A write under a folder another account can change, where no descriptor filesystem is verified (known-limits §1).
+  shared_folder: CALLER,
   // The project has no archer.toml to write; `archer init` makes one (ADR 0028).
   no_manifest: CALLER,
   // Access and TLS (ts/src/service/access-fix.ts): `data.fix` names the tool or command, and whether the person's yes is needed.

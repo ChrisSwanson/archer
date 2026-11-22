@@ -21,6 +21,7 @@ import {
   readdirSync,
   readFileSync,
   readSync,
+  chmodSync,
   closeSync,
   renameSync,
   rmSync,
@@ -33,6 +34,7 @@ import { createApplication, type Application } from "../../src/application/index
 import { TOOLS } from "../../src/application/tools.ts";
 import { AGENT_METHODS } from "../../src/agents/contract.ts";
 import { initProject } from "../../src/project/index.ts";
+import { descriptorConfinement } from "../../src/project/confined-fs.ts";
 import { connectService, type ServiceClient } from "../../src/service/service-client.ts";
 import { apiBase, cleanUp, http, service, slugOf, tempDir, type Reply, pageHttp } from "../service/support.ts";
 
@@ -1269,10 +1271,14 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
   // G6 (P5 "a link swapped between check and use"): a parent swapped to a directory link while the writers
   // run. Before round 1 `writeConfined` resolved the parent by realpath, then opened the temporary and renamed
   // by name, so the temporary (and with a held swap, the outside file) landed outside: 2 of 8 full-suite runs.
-  // The seam now creates and renames inside the parent descriptor it opened without following links, so no
-  // interleaving reaches outside; this free-running race is bounded (RACE_MS) and expects 0 hits, and the
-  // exact interleavings are scheduled deterministically in confined-seam.test.ts.
-  test("write × a parent directory swapped to a link while writing", async () => {
+  // On the descriptor anchor (Linux with /proc) the seam creates and renames inside the parent descriptor it
+  // opened without following links, so no interleaving reaches outside. On the path anchor (macOS) a swap
+  // inside its few-syscall window can still leave an Archer temporary outside: docs/security/known-limits.md
+  // §1 keeps that for a swapper with this account's own access, and closes it for any other account by
+  // refusing writes under a folder another account can change (the second case; O283). This free-running race
+  // is bounded (RACE_MS); the exact interleavings are scheduled in confined-seam.test.ts and shared-folder.test.ts.
+  /** Races writes against the swap; `changed`: what it changed outside, relative to T (new files it made are removed). */
+  const raceParentWrites = async () => {
     // The decoy outside (wdir/race.md) is byte-identical to the note inside, so a revision check cannot tell them apart.
     writeFileSync(join(T, "proj-race-template.md"), NOTE("Race"));
     const outsideBefore = outsideSnapshot();
@@ -1304,7 +1310,6 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
       await exited(child);
       restoreRace("parent directory", "notes/racewdir/race.md");
     }
-    console.info(`[G6 race] write × parent directory: ${rounds} rounds`);
     const after = outsideSnapshot();
     const changed = [...after]
       .filter(([p, h]) => outsideBefore.get(p) !== h && !p.endsWith("proj-race-template.md"))
@@ -1312,6 +1317,26 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
     restoreOutside();
     for (const [p] of after)
       if (!outsideBefore.has(p) && !p.endsWith("proj-race-template.md")) rmSync(p, { force: true });
+    return { rounds, before: outsideBefore, changed };
+  };
+
+  test("write × a parent directory swapped to a link while writing", async () => {
+    const { rounds, before, changed } = await raceParentWrites();
+    console.info(`[G6 race] write × parent directory: ${rounds} rounds`);
+    expect(rounds).toBeGreaterThan(2);
+    if (descriptorConfinement()) expect(changed).toEqual([]);
+    else {
+      // The same-account case known-limits §1 keeps: at most new Archer temporaries, never an outside file that was there.
+      const temporary = /(^|\/)\.[^/]+\.[0-9a-f]{12}\.tmp$/u;
+      expect(changed.filter((p) => before.has(join(T, p)) || !temporary.test(p))).toEqual([]);
+    }
+  }, 60_000);
+
+  test("write × a parent directory swapped to a link, under a folder other accounts can change", async () => {
+    const notes = join(PROJ, ".archer/notes");
+    chmodSync(notes, 0o777);
+    const { rounds, changed } = await raceParentWrites().finally(() => chmodSync(notes, 0o755));
+    console.info(`[G6 race] write × parent directory, shared folder: ${rounds} rounds`);
     expect(rounds).toBeGreaterThan(2);
     expect(changed).toEqual([]);
   }, 60_000);

@@ -23,9 +23,24 @@ and after each open, create and rename, and compares (dev, ino) with the descrip
 single step is refused (tested in `ts/test/security/confined-seam.test.ts`, path anchor). Launch's working
 folder is checked again by path just before the spawn on these hosts, with the same kind of window.
 
+**Writes under a folder another account can change are refused (since 0.15.3).** Swapping a folder
+for a link needs write access to the folder that holds it. So before each create, rename, removal or new
+folder in the Archer folder, and before writing a review file, the path anchor walks every folder from the
+one it changes up to `/` (`folderOthersCanChange`, `ts/src/project/ownership.ts`). It refuses with
+`shared_folder` when a folder there is not this account's or root's, or is writable by other accounts, or
+is a link. A group may write only when it is this account's private group, the same rule archer.toml's
+trust check uses. On macOS no group counts as private, because accounts are not listed in `/etc/passwd`.
+A sticky folder others can write, such as `/tmp` or `/Users/Shared`, is allowed above a child this account
+or root owns, since others cannot rename or remove that child. The refusal names the folder and says
+`chmod go-w`. Nothing is created first. The walk reads links without following them: resolving one would
+check wherever it pointed at that moment, which is the swap itself. The descriptor anchor has no window
+and does not check. Tested in `ts/test/security/shared-folder.test.ts`, including a swap scheduled at
+the temporary's create that never runs, with a control showing the same swap does run otherwise.
+
 **What an attacker needs.**
-- Write access to a directory inside the project, on the path being read or written. That means the
-  same account as Archer, or an account the project folder is shared with.
+- Write access to a directory inside the project, on the path being read or written. Since 0.15.3 only
+  the same account as Archer has that for a write: a path another account can change is refused.
+  Another account still has it for a read (below).
 - The ability to swap that directory for a link to an outside folder and back, several times, inside
   the few syscalls between Archer's walk, its open or create, and its re-walk. That means a racing
   local process and repeated attempts. One request gives the attacker one chance.
@@ -35,13 +50,28 @@ folder is checked again by path just before the spawn on these hosts, with the s
 **What they get.**
 - Read: the outside file's bytes are returned to whoever made the request (an agent, or a page grant
   holder).
-- Write: Archer's temporary file is created in the outside folder (7 temporaries in one scheduled
+- Write (before 0.15.3 from any account that could write in the project; since then from this account only):
+  Archer's temporary file is created in the outside folder (7 temporaries in one scheduled
   run). It can be renamed over an outside file of the same name, with Archer's bytes. No overwrite was
   seen in that run, but the design does not rule one out.
 - The change store and review artifacts (since 0.14.1) check the parent before each create and prove it
   holds the new file before writing a byte, so a swap that wins the window leaves at most an empty
   temporary or an empty `snapshots` / `.review` folder outside. Cleanup removes only what a still-bound
   parent holds.
+
+**What remains since 0.15.3.**
+- A process running as this account can still win the write window and leave Archer's temporary, or
+  in the worst case Archer's bytes under an Archer file name, in a folder outside that this account can
+  write. It already has this account's access, so it can write there directly. That stops being true only
+  where it is confined to less than the account: a sandbox or container that shares this account's uid
+  but sees only the project. Only an `openat`-equivalent closes that case. `path-escape.test.ts` (G6)
+  allows such a run at most new Archer temporaries, never a change to an outside file that was there (O283).
+- Reads are not checked. Another account that can write in the project can still race a read and get
+  the bytes of an outside file this account can read.
+- POSIX owners and modes only: an ACL (`chmod +a` on macOS) that lets another account write to a folder
+  is not seen. Not tried on network volumes or volumes with ownership ignored.
+- The change store lives in Archer's private state directory, which must already be this account's alone
+  (§3), so it is not walked. Launch's working folder is a spawn's cwd, not a write, and is not walked.
 
 **Why it is kept.** Closing it needs an `openat`-equivalent that Node does not provide, or a refusal
 of all project access on these hosts. The fix direction, if a non-Linux host comes into scope, is to

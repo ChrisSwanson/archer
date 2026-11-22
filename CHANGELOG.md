@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.15.3 — 2026-11-21
+
+Closes the macOS write race for other accounts on the computer, and fixes two tests and the release
+step that failed on CI.
+
+### Security
+
+- **On macOS, another account that could write in your project could race Archer and have it write
+  outside the project.** macOS has no safe way for Archer to open a folder relative to another, so a write
+  could be redirected by swapping a folder for a link at the right moment. Archer now refuses to change
+  anything under a folder another account can change (not yours, writable by others, or a link). The
+  message names the folder and says to run `chmod go-w` on it. Linux is unchanged: it has no such window.
+  A process running as your own account can still race a write; reads are not checked. (O283)
+
+### Fixed
+
+- **The 0.15.2 release could not be published**: its install check named the package as
+  `dist/archer-0.15.2.tgz`, which npm read as a GitHub repository. It now names `./dist/…`. (#18, O282)
+- **Two tests failed on macOS CI.** The write-race test expected a guarantee only Linux gives, and now
+  checks what each platform promises. The page-export test counted the file watcher's own reload as the
+  page's, and now counts only reloads the watcher did not start. (O283, O285)
+- **On the website, the demo film's caret jumped as the follow-up question appeared**, a small layout
+  shift. The question now gets its own caret. (O286)
+
 ## 0.15.2 — 2026-11-19
 
 Dependency updates from the first week of Dependabot: each one tested, and the four that failed

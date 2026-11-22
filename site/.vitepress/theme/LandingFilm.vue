@@ -369,7 +369,8 @@ const commentOn = "Charge (Payment Worker to Payment Provider)";
             <span class="film-ask-mark">›</span>
             <span v-if="view.followUp" class="film-ask-q">wait, which part talks to the payment provider again?</span>
             <span v-else class="film-ask-hint">Ask a follow-up</span>
-            <span class="film-caret" />
+            <!-- A new caret at the new line's end, not the old one moved there: the swap shifts no layout (O286). -->
+            <span :key="view.followUp ? 'question' : 'hint'" class="film-caret" />
           </div>
         </div>
       </div>

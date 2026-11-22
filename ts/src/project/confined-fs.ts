@@ -20,7 +20,8 @@ import {
   type Stats,
 } from "node:fs";
 import { join, parse } from "node:path";
-import { ProjectError } from "./errors.ts";
+import { ProjectError, type ProjectErrorCode } from "./errors.ts";
+import { folderOthersCanChange } from "./ownership.ts";
 
 export class ConfinementUnavailable extends Error {}
 export interface ConfinedHandle {
@@ -123,6 +124,10 @@ export class ConfinedFileSystem {
   /** Whether segments are opened from the descriptor before them (no check-to-use window), not by the path anchor. */
   get descriptorRelative(): boolean {
     return this.#descriptors !== null;
+  }
+  /** Before a change in folder `path` (relative to the root): on the path anchor, `refuseSharedFolders`. */
+  refuseSharedFolders(path: string, shown = path): void {
+    if (this.#descriptors === null) refuseSharedFolders(this.root, segments(path), shown);
   }
   close(): void {
     closeSync(this.#root);
@@ -272,7 +277,7 @@ function lstatWalk(base: string, parts: readonly string[], allDirectories: boole
 // segment before and after the open, compared by (dev, ino) with the descriptor. That narrows the
 // check-to-use window to a few syscalls but cannot close it: see ADR 0018's amendment for what remains.
 
-export type ConfinedRefusalReason = "link" | "hard_link" | "not_regular" | "moved" | "invalid";
+export type ConfinedRefusalReason = "link" | "hard_link" | "not_regular" | "moved" | "invalid" | "shared";
 
 const REFUSALS: Readonly<Record<ConfinedRefusalReason, (shown: string, detail: string) => string>> = {
   link: (shown) =>
@@ -282,16 +287,25 @@ const REFUSALS: Readonly<Record<ConfinedRefusalReason, (shown: string, detail: s
   not_regular: (shown) => `${shown} is not a regular file`,
   moved: (shown) => `${shown} moved while Archer was using it, so nothing was read or written there; try again`,
   invalid: (shown) => `${shown} is not a path inside the Archer folder`,
+  shared: (shown, folder) =>
+    `${shown} is under ${folder}, a folder another account can change (it is not yours, others can write to it, or it is a link). ` +
+    `On this computer Archer cannot change files there safely, so nothing was changed. If the folder is yours, run: chmod go-w "${folder}"`,
 };
 
-/** A path the seam will not read or write. A confinement refusal (`path_outside_archer_folder`), except a non-regular file (`io_error`). */
+/** The codes that are not a confinement refusal (`path_outside_archer_folder`). */
+const REFUSAL_CODES: Partial<Record<ConfinedRefusalReason, ProjectErrorCode>> = {
+  not_regular: "io_error",
+  shared: "shared_folder",
+};
+
+/** A path the seam will not read or write: `path_outside_archer_folder`, or its `REFUSAL_CODES` entry. */
 export class ConfinedRefusal extends ProjectError {
   constructor(
     readonly reason: ConfinedRefusalReason,
     shown: string,
     detail = "",
   ) {
-    super(reason === "not_regular" ? "io_error" : "path_outside_archer_folder", REFUSALS[reason](shown, detail));
+    super(REFUSAL_CODES[reason] ?? "path_outside_archer_folder", REFUSALS[reason](shown, detail));
     this.name = "ConfinedRefusal";
   }
 }
@@ -345,9 +359,18 @@ interface Anchor {
   readonly dir: string;
   /** Opens `parts` (none: the anchor itself) following no link; `directory` asks the last to be a directory too. */
   open(parts: readonly string[], directory: boolean, shown: string): Opened;
+  /**
+   * Opens the directory `parts` to create, rename or remove entries in it. The path anchor first refuses one
+   * under a folder another account can change, before the open, so the walk adds nothing to the window
+   * between the open's binding check and the change (docs/security/known-limits.md §1).
+   */
+  openForChange(parts: readonly string[], shown: string): Opened;
   /** Whether `opened` is still the entry `parts` names under the anchor. */
   bound(opened: Opened, parts: readonly string[]): boolean;
-  /** A name for `name` inside the opened directory `parts`: descriptor-relative where the platform allows. */
+  /**
+   * A name for creating, renaming or removing `name` inside `directory`, which `openForChange` opened (any other
+   * is an internal error, so no writer can skip that check): descriptor-relative where the platform allows.
+   */
   child(directory: Opened, parts: readonly string[], name: string): string;
   /** Whether the anchor is still the directory at its path (else it is reopened). */
   valid(): boolean;
@@ -380,12 +403,28 @@ function classify(error: unknown, dir: string, parts: readonly string[], shown: 
   return error;
 }
 
-/** Linux (/proc/self/fd) or another verified descriptor filesystem: every segment is opened relative to the descriptor before it. */
-class DescriptorAnchor implements Anchor {
+/**
+ * A `ConfinedFileSystem` held on the anchor folder. With a verified descriptor filesystem (Linux /proc/self/fd)
+ * every segment is opened relative to the descriptor before it; elsewhere it is the path anchor, the lstat walk
+ * around each open (docs/security/known-limits.md §1), and every name handed out for a change is refused under
+ * a folder another account can change.
+ */
+class FolderAnchor implements Anchor {
   constructor(
     readonly dir: string,
     readonly fs: ConfinedFileSystem,
   ) {}
+  readonly #forChange = new WeakSet<Opened>();
+  openForChange(parts: readonly string[], shown: string): Opened {
+    try {
+      this.fs.refuseSharedFolders(parts.join("/"), shown);
+    } catch (error) {
+      throw classify(error, this.dir, parts, shown);
+    }
+    const opened = this.open(parts, true, shown);
+    this.#forChange.add(opened);
+    return opened;
+  }
   open(parts: readonly string[], directory: boolean, shown: string): Opened {
     let handle: ConfinedHandle;
     try {
@@ -403,6 +442,7 @@ class DescriptorAnchor implements Anchor {
     return this.fs.bound({ fd: opened.fd, stat: opened.stat, path: parts.length === 0 ? "." : parts.join("/") });
   }
   child(directory: Opened, parts: readonly string[], name: string): string {
+    if (!this.#forChange.has(directory)) throw new Error("a change needs a folder opened by openForChange");
     return `${this.fs.descriptorPath({ fd: directory.fd, stat: directory.stat, path: parts.length === 0 ? "." : parts.join("/") })}/${name}`;
   }
   valid(): boolean {
@@ -410,88 +450,6 @@ class DescriptorAnchor implements Anchor {
   }
   close(): void {
     this.fs.close();
-  }
-}
-
-/**
- * The portable fallback where no descriptor filesystem is verified: each segment is lstat-ed (no link, a
- * directory on the way) before and after the open, and the open descriptor must be the same (dev, ino) as
- * the walk's last entry, with every segment unchanged. A writer racing several swaps inside those few
- * syscalls can still win; it is the documented residual (ADR 0018, amended 2026-10-31).
- */
-class PathAnchor implements Anchor {
-  readonly #self: Stats;
-  constructor(readonly dir: string) {
-    const self = lstatSync(dir);
-    if (!self.isDirectory()) throw errno("ENOTDIR", "the confinement anchor is not a folder");
-    this.#self = self;
-  }
-  #walk(parts: readonly string[], shown: string): Stats[] {
-    const top = lstatSync(this.dir);
-    if (!top.isDirectory() || !sameFile(top, this.#self)) throw new ConfinedRefusal("moved", shown);
-    const seen = [top];
-    let at = this.dir;
-    for (const [index, part] of parts.entries()) {
-      if (part === "" || part === "." || part === ".." || /[\\/\0]/u.test(part))
-        throw new ConfinedRefusal("invalid", shown);
-      at = join(at, part);
-      const entry = lstatSync(at);
-      if (entry.isSymbolicLink()) throw new ConfinedRefusal("link", shown);
-      if (index < parts.length - 1 && !entry.isDirectory())
-        throw errno("ENOTDIR", `${shown}: a segment is not a folder`);
-      seen.push(entry);
-    }
-    return seen;
-  }
-  #unchanged(before: readonly Stats[], parts: readonly string[], shown: string): boolean {
-    try {
-      const after = this.#walk(parts, shown);
-      return after.every((entry, index) => sameFile(entry, before[index]!));
-    } catch {
-      return false;
-    }
-  }
-  open(parts: readonly string[], directory: boolean, shown: string): Opened {
-    const before = this.#walk(parts, shown);
-    let fd: number;
-    try {
-      fd = openSync(
-        join(this.dir, ...parts),
-        constants.O_RDONLY | constants.O_NONBLOCK | constants.O_NOFOLLOW | (directory ? constants.O_DIRECTORY : 0),
-      );
-    } catch (error) {
-      throw classify(error, this.dir, parts, shown);
-    }
-    try {
-      const stat = fstatSync(fd);
-      if (!sameFile(stat, before.at(-1)!) || !this.#unchanged(before, parts, shown))
-        throw new ConfinedRefusal("moved", shown);
-      return { fd, stat };
-    } catch (error) {
-      closeSync(fd);
-      throw error;
-    }
-  }
-  bound(opened: Opened, parts: readonly string[]): boolean {
-    try {
-      return sameFile(this.#walk(parts, "").at(-1)!, opened.stat);
-    } catch {
-      return false;
-    }
-  }
-  child(_directory: Opened, parts: readonly string[], name: string): string {
-    return join(this.dir, ...parts, name);
-  }
-  valid(): boolean {
-    try {
-      const now = lstatSync(this.dir);
-      return now.isDirectory() && sameFile(now, this.#self);
-    } catch {
-      return false;
-    }
-  }
-  close(): void {
-    /* holds no descriptor */
   }
 }
 
@@ -531,23 +489,15 @@ function anchorFor(dir: string, shown: string): Anchor {
     }
     held.close();
   }
-  let anchor: Anchor;
-  let opened: ConfinedFileSystem | undefined;
-  if (descriptorConfinement()) {
-    try {
-      opened = new ConfinedFileSystem(dir);
-    } catch (error) {
-      // The platform is verified, so a failure here is the folder itself: a link on its way, moved, or missing.
-      if (error instanceof ConfinementUnavailable) throw new ConfinedRefusal("moved", shown);
-      throw classify(error, "/", dir.split("/").filter(Boolean), shown);
-    }
+  let opened: ConfinedFileSystem;
+  try {
+    opened = new ConfinedFileSystem(dir);
+  } catch (error) {
+    // A failure here is the folder itself: a link on its way, moved, or missing.
+    if (error instanceof ConfinementUnavailable) throw new ConfinedRefusal("moved", shown);
+    throw classify(error, "/", dir.split("/").filter(Boolean), shown);
   }
-  // The capability is probed once; this folder's own filesystem decides (a later probe can fall back).
-  if (opened?.descriptorRelative === true) anchor = new DescriptorAnchor(dir, opened);
-  else {
-    opened?.close();
-    anchor = new PathAnchor(dir);
-  }
+  const anchor = new FolderAnchor(dir, opened);
   anchors.set(dir, anchor);
   if (anchors.size > MAX_ANCHORS) {
     const [oldest, evicted] = anchors.entries().next().value!;
@@ -555,6 +505,22 @@ function anchorFor(dir: string, shown: string): Anchor {
     evicted.close();
   }
   return anchor;
+}
+
+/**
+ * Refuses a change in `dir`/`parts` when a folder from there up to `/` is one another account can change.
+ * The path anchor's check-to-use window can be won only by swapping a folder on the path for a link, which
+ * needs write access to that folder's parent: with every folder held by this account (or root), no other
+ * account can (docs/security/known-limits.md §1). A descriptor anchor has no window and does not call it.
+ */
+export function refuseSharedFolders(dir: string, parts: readonly string[], shown: string): void {
+  let shared: string | undefined;
+  try {
+    shared = folderOthersCanChange(join(dir, ...parts));
+  } catch (error) {
+    throw classify(error, dir, parts, shown);
+  }
+  if (shared !== undefined) throw new ConfinedRefusal("shared", shown, shared);
 }
 
 /** Refuses what is not a plain file with one name. */
@@ -671,7 +637,7 @@ export function publishConfined(
   let anchor: Anchor, parent: Opened;
   try {
     anchor = anchorFor(dir, shown);
-    parent = anchor.open(parentParts, true, shown);
+    parent = anchor.openForChange(parentParts, shown);
   } catch (error) {
     throw error instanceof ConfinedRefusal ? error : new ConfinedWriteRefusedError(error);
   }
@@ -793,7 +759,7 @@ export function removeConfined(dir: string, parentParts: readonly string[], name
   const anchor = anchorFor(dir, shown);
   let parent: Opened;
   try {
-    parent = anchor.open(parentParts, true, shown);
+    parent = anchor.openForChange(parentParts, shown);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
     throw error;
@@ -822,7 +788,7 @@ export function ensureConfinedDirectories(
   mode = 0o755,
 ): void {
   const anchor = anchorFor(dir, shown(0));
-  let parent = anchor.open([], true, shown(0));
+  let parent = anchor.openForChange([], shown(0));
   try {
     for (let at = 0; at < parts.length; at++) {
       const prefix = parts.slice(0, at + 1);
@@ -831,7 +797,7 @@ export function ensureConfinedDirectories(
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       }
-      const next = anchor.open(prefix, true, shown(at + 1));
+      const next = anchor.openForChange(prefix, shown(at + 1));
       closeSync(parent.fd);
       parent = next;
     }
