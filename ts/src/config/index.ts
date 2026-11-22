@@ -1,9 +1,10 @@
 import { parseDiscoverySettings, type DiscoverySettings } from "../project/discovery.ts";
-import { constants, closeSync, fstatSync, lstatSync, openSync, readFileSync, readSync, type Stats } from "node:fs";
+import { constants, closeSync, fstatSync, lstatSync, openSync, readSync, type Stats } from "node:fs";
 import { isIP } from "node:net";
 import { isAbsolute, normalize } from "node:path";
 import { ProjectError } from "../project/errors.ts";
-import { groupIsPrivate, MAX_MANIFEST_BYTES } from "../project/project.ts";
+import { writableOnlyBy } from "../project/ownership.ts";
+import { MAX_MANIFEST_BYTES } from "../project/project.ts";
 import {
   misplacedAgentsKeyMessage,
   misplacedKey,
@@ -502,14 +503,8 @@ function optionalBoolean(doc: TomlTable, key: string): boolean | undefined {
 function trusted(uid: number, gid: number, mode: number, principal: "user" | "system"): boolean {
   const current = process.getuid?.();
   if (current === undefined) return false;
-  if (uid !== (principal === "system" ? 0 : current) || (mode & 0o002) !== 0) return false;
-  if ((mode & 0o020) === 0) return true;
-  if (principal === "system") return false;
-  try {
-    return groupIsPrivate(current, gid, readFileSync("/etc/passwd", "utf8"), readFileSync("/etc/group", "utf8"));
-  } catch {
-    return false;
-  }
+  // The system file is root's and writable by nobody else; a user file follows writableOnlyBy.
+  return principal === "system" ? uid === 0 && (mode & 0o022) === 0 : writableOnlyBy({ uid, gid, mode }, current);
 }
 const hardLinked = (path: string, names: number) =>
   new ProjectError(

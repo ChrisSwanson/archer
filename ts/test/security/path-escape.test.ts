@@ -1277,11 +1277,8 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
   // §1 keeps that for a swapper with this account's own access, and closes it for any other account by
   // refusing writes under a folder another account can change (the second case; O283). This free-running race
   // is bounded (RACE_MS); the exact interleavings are scheduled in confined-seam.test.ts and shared-folder.test.ts.
-  const raceParentWrites = async (): Promise<{
-    rounds: number;
-    before: Map<string, string>;
-    after: Map<string, string>;
-  }> => {
+  /** Races writes against the swap; `changed`: what it changed outside, relative to T (new files it made are removed). */
+  const raceParentWrites = async () => {
     // The decoy outside (wdir/race.md) is byte-identical to the note inside, so a revision check cannot tell them apart.
     writeFileSync(join(T, "proj-race-template.md"), NOTE("Race"));
     const outsideBefore = outsideSnapshot();
@@ -1313,22 +1310,19 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
       await exited(child);
       restoreRace("parent directory", "notes/racewdir/race.md");
     }
-    return { rounds, before: outsideBefore, after: outsideSnapshot() };
-  };
-  /** What the race changed outside, relative to T; the new files it made are removed. */
-  const settleOutside = (before: Map<string, string>, after: Map<string, string>): string[] => {
+    const after = outsideSnapshot();
     const changed = [...after]
-      .filter(([p, h]) => before.get(p) !== h && !p.endsWith("proj-race-template.md"))
+      .filter(([p, h]) => outsideBefore.get(p) !== h && !p.endsWith("proj-race-template.md"))
       .map(([p]) => relative(T, p));
     restoreOutside();
-    for (const [p] of after) if (!before.has(p) && !p.endsWith("proj-race-template.md")) rmSync(p, { force: true });
-    return changed;
+    for (const [p] of after)
+      if (!outsideBefore.has(p) && !p.endsWith("proj-race-template.md")) rmSync(p, { force: true });
+    return { rounds, before: outsideBefore, changed };
   };
 
   test("write × a parent directory swapped to a link while writing", async () => {
-    const { rounds, before, after } = await raceParentWrites();
+    const { rounds, before, changed } = await raceParentWrites();
     console.info(`[G6 race] write × parent directory: ${rounds} rounds`);
-    const changed = settleOutside(before, after);
     expect(rounds).toBeGreaterThan(2);
     if (descriptorConfinement()) expect(changed).toEqual([]);
     else {
@@ -1341,15 +1335,10 @@ describe("G6: races between check and use (TOCTOU, best effort)", () => {
   test("write × a parent directory swapped to a link, under a folder other accounts can change", async () => {
     const notes = join(PROJ, ".archer/notes");
     chmodSync(notes, 0o777);
-    let result: Awaited<ReturnType<typeof raceParentWrites>>;
-    try {
-      result = await raceParentWrites();
-    } finally {
-      chmodSync(notes, 0o755);
-    }
-    console.info(`[G6 race] write × parent directory, shared folder: ${result.rounds} rounds`);
-    expect(result.rounds).toBeGreaterThan(2);
-    expect(settleOutside(result.before, result.after)).toEqual([]);
+    const { rounds, changed } = await raceParentWrites().finally(() => chmodSync(notes, 0o755));
+    console.info(`[G6 race] write × parent directory, shared folder: ${rounds} rounds`);
+    expect(rounds).toBeGreaterThan(2);
+    expect(changed).toEqual([]);
   }, 60_000);
 });
 

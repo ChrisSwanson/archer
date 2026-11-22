@@ -21,15 +21,13 @@ test("export_diagram from the page answers without reloading the project; a fron
     settled = resolve;
     setTimeout(resolve, 1_500);
   });
-  // The watcher's lines once counting starts: a reload it began is not the page's (O285), and a failure
+  // The watcher's lines since counting started: a reload it began is not the page's (O285), and a failure
   // shows what it saw.
-  let counting = false;
   let watcherReloads = 0;
   const traced: string[] = [];
   const { svc } = await service({
     watchTrace: (line) => {
       if (line.includes("reload:settled")) settled();
-      if (!counting) return;
       traced.push(line);
       if (line.includes("reload:start")) watcherReloads++;
     },
@@ -41,7 +39,8 @@ test("export_diagram from the page answers without reloading the project; a fron
     await ownerCookie(apiBase(url));
     await watcherQuiet;
     const reloads = vi.spyOn(ProjectState.prototype, "reload");
-    counting = true;
+    watcherReloads = 0;
+    traced.length = 0;
     /** Reloads not started by the watcher: the page's or a front door's. */
     const notWatcher = () => reloads.mock.calls.length - watcherReloads;
     const operation = (args: Record<string, unknown>) =>

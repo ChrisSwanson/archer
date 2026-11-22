@@ -89,19 +89,19 @@ test("started inside the Archer folder of a project without archer.toml, the pro
 // user: no other account has it as its primary group or lists it as a member.
 describe("group membership", () => {
   test("a group shared with another account is not private", async () => {
-    const { groupIsPrivate } = await import("../../src/project/project.ts");
+    const { groupIsPrivate } = await import("../../src/project/ownership.ts");
     const passwd = "me:x:1000:1000::/home/me:/bin/sh\nother:x:1001:1000::/home/other:/bin/sh\n";
     const group = "me:x:1000:\n";
     expect(groupIsPrivate(1000, 1000, passwd, group)).toBe(false);
   });
   test("a group listing another member is not private", async () => {
-    const { groupIsPrivate } = await import("../../src/project/project.ts");
+    const { groupIsPrivate } = await import("../../src/project/ownership.ts");
     const passwd = "me:x:1000:1000::/home/me:/bin/sh\n";
     const group = "me:x:1000:other\n";
     expect(groupIsPrivate(1000, 1000, passwd, group)).toBe(false);
   });
   test("a user-private group is private", async () => {
-    const { groupIsPrivate } = await import("../../src/project/project.ts");
+    const { groupIsPrivate } = await import("../../src/project/ownership.ts");
     const passwd = "me:x:1000:1000::/home/me:/bin/sh\nother:x:1001:1001::/home/other:/bin/sh\n";
     const group = "me:x:1000:\nother:x:1001:\n";
     expect(groupIsPrivate(1000, 1000, passwd, group)).toBe(true);

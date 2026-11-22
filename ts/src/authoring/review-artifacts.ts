@@ -11,15 +11,13 @@ import {
   mkdirSync,
   openSync,
   readSync,
-  realpathSync,
   renameSync,
   unlinkSync,
   type Stats,
 } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { relative, sep } from "node:path";
 import { cumulativeDiff } from "../changes/cumulative-diff.ts";
 import { ConfinedFileSystem, ConfinedRefusal, type ConfinedHandle } from "../project/confined-fs.ts";
-import { folderOthersCanChange } from "../project/ownership.ts";
 import { findProject, writeAllSync, type Project } from "../project/project.ts";
 import { SourceWriteError, withSourceWriterLock } from "../project/source-writer.ts";
 import type { AuthoringStore, CumulativeReview } from "./store.ts";
@@ -89,11 +87,14 @@ function render(store: AuthoringStore, review: CumulativeReview): string {
       : "# diff complete=false; body omitted; exact source available through read_change baseline/latest parts\n")
   );
 }
-/** The path anchor's window needs another account able to change a folder on the way (known-limits §1). */
-function refuseShared(fs: ConfinedFileSystem, project: Project, path: string): void {
-  if (fs.descriptorRelative) return;
-  const shared = folderOthersCanChange(join(realpathSync.native(project.root), path));
-  if (shared !== undefined) refuse("blocked", new ConfinedRefusal("shared", path, shared).message);
+/** Before a change in folder `path`: refused, as blocked, under a folder another account can change (known-limits §1). */
+function refuseShared(fs: ConfinedFileSystem, path: string): void {
+  try {
+    fs.refuseSharedFolders(path);
+  } catch (error) {
+    if (error instanceof ConfinedRefusal) refuse("blocked", error.message);
+    throw error;
+  }
 }
 
 function same(a: Stats, b: Stats): boolean {
@@ -354,8 +355,7 @@ export function materializeReview(
           try {
             parent = fs.open(folderPath);
             if (!parent.stat.isDirectory()) refuse("blocked", "authoring folder is not a directory");
-            // The path anchor's window needs another account able to change a folder on the way (known-limits §1).
-            refuseShared(fs, project, folderPath);
+            refuseShared(fs, folderPath);
             const directoryPath = folderPath + "/.review";
             path = directoryPath + "/" + filename(review);
             if (review.state === "pending") {
@@ -374,7 +374,7 @@ export function materializeReview(
               throw error;
             }
             if (!directory.stat.isDirectory()) refuse("blocked", "review directory is not a directory");
-            refuseShared(fs, project, directoryPath);
+            refuseShared(fs, directoryPath);
             checkBinding(fs, parent, directory, project);
             if (review.state === "pending") ensureIgnore(fs, parent, directory, project, store, options);
             const name = filename(review),

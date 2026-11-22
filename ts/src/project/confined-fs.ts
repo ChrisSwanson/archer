@@ -20,7 +20,7 @@ import {
   type Stats,
 } from "node:fs";
 import { join, parse } from "node:path";
-import { ProjectError } from "./errors.ts";
+import { ProjectError, type ProjectErrorCode } from "./errors.ts";
 import { folderOthersCanChange } from "./ownership.ts";
 
 export class ConfinementUnavailable extends Error {}
@@ -124,6 +124,10 @@ export class ConfinedFileSystem {
   /** Whether segments are opened from the descriptor before them (no check-to-use window), not by the path anchor. */
   get descriptorRelative(): boolean {
     return this.#descriptors !== null;
+  }
+  /** Before a change in folder `path` (relative to the root): on the path anchor, `refuseSharedFolders`. */
+  refuseSharedFolders(path: string): void {
+    if (this.#descriptors === null) refuseSharedFolders(this.root, path.split("/"), path);
   }
   close(): void {
     closeSync(this.#root);
@@ -288,17 +292,20 @@ const REFUSALS: Readonly<Record<ConfinedRefusalReason, (shown: string, detail: s
     `On this computer Archer cannot change files there safely, so nothing was changed. If the folder is yours, run: chmod go-w "${folder}"`,
 };
 
-/** A path the seam will not read or write. A confinement refusal (`path_outside_archer_folder`), except a non-regular file (`io_error`). */
+/** The codes that are not a confinement refusal (`path_outside_archer_folder`). */
+const REFUSAL_CODES: Partial<Record<ConfinedRefusalReason, ProjectErrorCode>> = {
+  not_regular: "io_error",
+  shared: "shared_folder",
+};
+
+/** A path the seam will not read or write: `path_outside_archer_folder`, or its `REFUSAL_CODES` entry. */
 export class ConfinedRefusal extends ProjectError {
   constructor(
     readonly reason: ConfinedRefusalReason,
     shown: string,
     detail = "",
   ) {
-    super(
-      reason === "not_regular" ? "io_error" : reason === "shared" ? "shared_folder" : "path_outside_archer_folder",
-      REFUSALS[reason](shown, detail),
-    );
+    super(REFUSAL_CODES[reason] ?? "path_outside_archer_folder", REFUSALS[reason](shown, detail));
     this.name = "ConfinedRefusal";
   }
 }
@@ -354,8 +361,11 @@ interface Anchor {
   open(parts: readonly string[], directory: boolean, shown: string): Opened;
   /** Whether `opened` is still the entry `parts` names under the anchor. */
   bound(opened: Opened, parts: readonly string[]): boolean;
-  /** A name for `name` inside the opened directory `parts`: descriptor-relative where the platform allows. */
-  child(directory: Opened, parts: readonly string[], name: string): string;
+  /**
+   * A name for creating, renaming or removing `name` inside the opened directory `parts`: descriptor-relative
+   * where the platform allows. The path anchor refuses one under a folder another account can change.
+   */
+  child(directory: Opened, parts: readonly string[], name: string, shown: string): string;
   /** Whether the anchor is still the directory at its path (else it is reopened). */
   valid(): boolean;
   close(): void;
@@ -409,7 +419,7 @@ class DescriptorAnchor implements Anchor {
   bound(opened: Opened, parts: readonly string[]): boolean {
     return this.fs.bound({ fd: opened.fd, stat: opened.stat, path: parts.length === 0 ? "." : parts.join("/") });
   }
-  child(directory: Opened, parts: readonly string[], name: string): string {
+  child(directory: Opened, parts: readonly string[], name: string, _shown: string): string {
     return `${this.fs.descriptorPath({ fd: directory.fd, stat: directory.stat, path: parts.length === 0 ? "." : parts.join("/") })}/${name}`;
   }
   valid(): boolean {
@@ -486,7 +496,8 @@ class PathAnchor implements Anchor {
       return false;
     }
   }
-  child(_directory: Opened, parts: readonly string[], name: string): string {
+  child(_directory: Opened, parts: readonly string[], name: string, shown: string): string {
+    refuseSharedFolders(this.dir, parts, shown);
     return join(this.dir, ...parts, name);
   }
   valid(): boolean {
@@ -565,13 +576,12 @@ function anchorFor(dir: string, shown: string): Anchor {
 }
 
 /**
- * On the path anchor, refuses a change under a folder another account can change. The anchor's
- * check-to-use window can be won only by swapping a folder on the path for a link, which needs write
- * access to that folder's parent: with every folder from `/` down to the one changed held by this account
- * (or root), no other account can (docs/security/known-limits.md §1). A descriptor anchor has no window.
+ * Refuses a change in `dir`/`parts` when a folder from there up to `/` is one another account can change.
+ * The path anchor's check-to-use window can be won only by swapping a folder on the path for a link, which
+ * needs write access to that folder's parent: with every folder held by this account (or root), no other
+ * account can (docs/security/known-limits.md §1). A descriptor anchor has no window and does not call it.
  */
-function refuseSharedFolders(anchor: Anchor, dir: string, parts: readonly string[], shown: string): void {
-  if (!(anchor instanceof PathAnchor)) return;
+export function refuseSharedFolders(dir: string, parts: readonly string[], shown: string): void {
   let shared: string | undefined;
   try {
     shared = folderOthersCanChange(join(dir, ...parts));
@@ -695,14 +705,13 @@ export function publishConfined(
   let anchor: Anchor, parent: Opened;
   try {
     anchor = anchorFor(dir, shown);
-    refuseSharedFolders(anchor, dir, parentParts, shown);
     parent = anchor.open(parentParts, true, shown);
   } catch (error) {
     throw error instanceof ConfinedRefusal ? error : new ConfinedWriteRefusedError(error);
   }
   const destination = join(dir, ...parentParts, name);
   try {
-    const target = anchor.child(parent, parentParts, name);
+    const target = anchor.child(parent, parentParts, name, shown);
     let mode = options.mode ?? 0o644;
     if (!options.exclusive) {
       try {
@@ -713,7 +722,7 @@ export function publishConfined(
       }
     }
     const temporaryName = `.${name}.${randomBytes(options.randomBytes ?? 6).toString("hex")}.tmp`;
-    const temporary = anchor.child(parent, parentParts, temporaryName);
+    const temporary = anchor.child(parent, parentParts, temporaryName, shown);
     let fd: number;
     try {
       fd = openSync(temporary, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, mode);
@@ -818,7 +827,6 @@ export function removeConfined(dir: string, parentParts: readonly string[], name
   const anchor = anchorFor(dir, shown);
   let parent: Opened;
   try {
-    refuseSharedFolders(anchor, dir, parentParts, shown);
     parent = anchor.open(parentParts, true, shown);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
@@ -827,7 +835,7 @@ export function removeConfined(dir: string, parentParts: readonly string[], name
   try {
     if (!anchor.bound(parent, parentParts)) throw new ConfinedRefusal("moved", shown);
     try {
-      unlinkSync(anchor.child(parent, parentParts, name));
+      unlinkSync(anchor.child(parent, parentParts, name, shown));
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
@@ -852,9 +860,8 @@ export function ensureConfinedDirectories(
   try {
     for (let at = 0; at < parts.length; at++) {
       const prefix = parts.slice(0, at + 1);
-      refuseSharedFolders(anchor, dir, parts.slice(0, at), shown(at));
       try {
-        mkdirSync(anchor.child(parent, parts.slice(0, at), parts[at]!), { mode });
+        mkdirSync(anchor.child(parent, parts.slice(0, at), parts[at]!, shown(at)), { mode });
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       }

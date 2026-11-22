@@ -2,9 +2,9 @@
 // archer.toml, keeping every path inside the folder, listing diagrams and
 // notes, naming a diagram, compiling it, and `archer init`.
 export { ProjectError, type ProjectErrorCode } from "./errors.ts";
+export { groupIsPrivate } from "./ownership.ts";
 export {
   confine,
-  groupIsPrivate,
   writeConfined,
   DEFAULT_FOLDER,
   findProject,

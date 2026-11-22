@@ -7,7 +7,6 @@ import { syncBuiltinESMExports } from "node:module";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import {
-  ConfinedRefusal,
   descriptorConfinement,
   ensureConfinedDirectories,
   publishConfined,
@@ -63,97 +62,91 @@ describe.runIf(posix)("folderOthersCanChange", () => {
   });
 });
 
+/** `notes/` writable by every account, as in a folder shared with another account. */
+function shared() {
+  const l = project();
+  fs.chmodSync(join(l.folder, "notes"), 0o777);
+  return l;
+}
+
+/** Swaps notes/d for a link to the outside `d` just before the temporary is created: the window the path anchor allows. */
+function swapAtTemporary(folder: string, outside: string): () => boolean {
+  let fired = false;
+  vi.spyOn(fs, "openSync").mockImplementation(((...args: Parameters<typeof fs.openSync>) => {
+    if (!fired && /\.race\.md\.[0-9a-f]+\.tmp$/u.test(String(args[0]))) {
+      fired = true;
+      real.renameSync(join(folder, "notes/d"), join(folder, "notes/d.aside"));
+      fs.symlinkSync(join(outside, "d"), join(folder, "notes/d"));
+    }
+    return real.openSync(...args);
+  }) as never);
+  syncBuiltinESMExports();
+  return () => fired;
+}
+
+describe.runIf(posix)("path anchor", () => {
+  beforeAll(() => usePathAnchorsForTests(true));
+  afterAll(() => usePathAnchorsForTests(false));
+  const expectShared = (run: () => unknown, folder: string) =>
+    expect(run).toThrow(
+      expect.objectContaining({
+        reason: "shared",
+        code: "shared_folder",
+        message: expect.stringContaining(`chmod go-w "${join(folder, "notes")}"`),
+      }),
+    );
+
+  test("a write under a shared folder is refused and creates nothing", () => {
+    const l = shared();
+    expectShared(() => writeConfined(l.project, "notes/d/race.md", "# changed\n", "notes"), l.folder);
+    expect(fs.readFileSync(join(l.folder, "notes/d/race.md"), "utf8")).toBe("# inside\n");
+    expect(entries(join(l.folder, "notes/d"))).toEqual(["race.md"]);
+  });
+
+  test("a removal and a new folder under a shared folder are refused too", () => {
+    const l = shared();
+    expectShared(() => removeConfined(l.folder, ["notes", "d"], "race.md", "notes/d/race.md"), l.folder);
+    expect(entries(join(l.folder, "notes/d"))).toEqual(["race.md"]);
+    expectShared(() => ensureConfinedDirectories(l.folder, ["notes", "e"], () => "notes/e"), l.folder);
+    expect(entries(join(l.folder, "notes"))).toEqual(["d"]);
+  });
+
+  test("the swap that wins the window has nothing to win under a shared folder", () => {
+    const l = shared();
+    const outside = tempDir({ "d/race.md": "# outside\n" });
+    const fired = swapAtTemporary(l.folder, outside);
+    expectShared(
+      () => publishConfined(l.folder, ["notes", "d"], "race.md", "# changed\n", "notes/d/race.md"),
+      l.folder,
+    );
+    expect(fired()).toBe(false);
+    expect(entries(join(outside, "d"))).toEqual(["race.md"]);
+  });
+
+  // The control: the same scheduled swap does fire under folders only this account can change. That is the
+  // same-account case known-limits §1 keeps (the swapping process already has this account's access).
+  test("the same swap fires when no other account can change the folders", () => {
+    const l = project();
+    const outside = tempDir({ "d/race.md": "# outside\n" });
+    const fired = swapAtTemporary(l.folder, outside);
+    try {
+      publishConfined(l.folder, ["notes", "d"], "race.md", "# changed\n", "notes/d/race.md");
+    } catch {
+      /* refused as moved, or not: the case is whether the window was reached */
+    }
+    expect(fired()).toBe(true);
+  });
+});
+
 for (const anchor of ["descriptor", "path"] as const)
   describe.runIf(posix && (anchor === "path" || descriptorConfinement()))(`${anchor} anchor`, () => {
     beforeAll(() => usePathAnchorsForTests(anchor === "path"));
     afterAll(() => usePathAnchorsForTests(false));
-    const refuses = anchor === "path";
 
-    /** `notes/` writable by every account, as in a folder shared with another account. */
-    function shared() {
-      const l = project();
-      fs.chmodSync(join(l.folder, "notes"), 0o777);
-      return l;
-    }
-    const expectShared = (run: () => unknown, folder: string) => {
-      let caught: unknown;
-      try {
-        run();
-      } catch (error) {
-        caught = error;
-      }
-      expect(caught).toBeInstanceOf(ConfinedRefusal);
-      expect((caught as ConfinedRefusal).reason).toBe("shared");
-      expect((caught as ConfinedRefusal).code).toBe("shared_folder");
-      expect((caught as Error).message).toContain(`chmod go-w "${join(folder, "notes")}"`);
-    };
-
-    test(
-      refuses
-        ? "a write under a shared folder is refused and creates nothing"
-        : "a write under a shared folder is made (no window)",
-      () => {
-        const l = shared();
-        const write = () => writeConfined(l.project, "notes/d/race.md", "# changed\n", "notes");
-        if (refuses) {
-          expectShared(write, l.folder);
-          expect(fs.readFileSync(join(l.folder, "notes/d/race.md"), "utf8")).toBe("# inside\n");
-          expect(entries(join(l.folder, "notes/d"))).toEqual(["race.md"]);
-        } else {
-          write();
-          expect(fs.readFileSync(join(l.folder, "notes/d/race.md"), "utf8")).toBe("# changed\n");
-        }
-      },
-    );
-
-    test.runIf(refuses)("a removal and a new folder under a shared folder are refused too", () => {
+    test.runIf(anchor === "descriptor")("a write under a shared folder is made (no window)", () => {
       const l = shared();
-      expectShared(() => removeConfined(l.folder, ["notes", "d"], "race.md", "notes/d/race.md"), l.folder);
-      expect(entries(join(l.folder, "notes/d"))).toEqual(["race.md"]);
-      expectShared(() => ensureConfinedDirectories(l.folder, ["notes", "e"], () => "notes/e"), l.folder);
-      expect(entries(join(l.folder, "notes"))).toEqual(["d"]);
-    });
-
-    /** Swaps notes/d for a link to the outside `d` just before the temporary is created: the window the path anchor allows. */
-    function swapAtTemporary(folder: string, outside: string): { fired: () => boolean } {
-      let fired = false;
-      const original = real.openSync as (...args: unknown[]) => unknown;
-      vi.spyOn(fs, "openSync").mockImplementation(((...args: unknown[]) => {
-        if (!fired && /\.race\.md\.[0-9a-f]+\.tmp$/u.test(String(args[0]))) {
-          fired = true;
-          real.renameSync(join(folder, "notes/d"), join(folder, "notes/d.aside"));
-          fs.symlinkSync(join(outside, "d"), join(folder, "notes/d"));
-        }
-        return original(...args);
-      }) as never);
-      syncBuiltinESMExports();
-      return { fired: () => fired };
-    }
-
-    test.runIf(refuses)("the swap that wins the window has nothing to win under a shared folder", () => {
-      const l = shared();
-      const outside = tempDir({ "d/race.md": "# outside\n" });
-      const swap = swapAtTemporary(l.folder, outside);
-      expectShared(
-        () => publishConfined(l.folder, ["notes", "d"], "race.md", "# changed\n", "notes/d/race.md"),
-        l.folder,
-      );
-      expect(swap.fired()).toBe(false);
-      expect(entries(join(outside, "d"))).toEqual(["race.md"]);
-    });
-
-    // The control: the same scheduled swap does fire under folders only this account can change. That is the
-    // same-account case known-limits §1 keeps (the swapping process already has this account's access).
-    test.runIf(refuses)("the same swap fires when no other account can change the folders", () => {
-      const l = project();
-      const outside = tempDir({ "d/race.md": "# outside\n" });
-      const swap = swapAtTemporary(l.folder, outside);
-      try {
-        publishConfined(l.folder, ["notes", "d"], "race.md", "# changed\n", "notes/d/race.md");
-      } catch {
-        /* refused as moved, or not: the case is whether the window was reached */
-      }
-      expect(swap.fired()).toBe(true);
+      writeConfined(l.project, "notes/d/race.md", "# changed\n", "notes");
+      expect(fs.readFileSync(join(l.folder, "notes/d/race.md"), "utf8")).toBe("# changed\n");
     });
 
     test("a write under folders only this account can change is made as before", () => {
