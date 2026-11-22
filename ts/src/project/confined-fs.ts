@@ -359,13 +359,19 @@ interface Anchor {
   readonly dir: string;
   /** Opens `parts` (none: the anchor itself) following no link; `directory` asks the last to be a directory too. */
   open(parts: readonly string[], directory: boolean, shown: string): Opened;
+  /**
+   * Opens the directory `parts` to create, rename or remove entries in it. The path anchor first refuses one
+   * under a folder another account can change, before the open, so the walk adds nothing to the window
+   * between the open's binding check and the change (docs/security/known-limits.md §1).
+   */
+  openForChange(parts: readonly string[], shown: string): Opened;
   /** Whether `opened` is still the entry `parts` names under the anchor. */
   bound(opened: Opened, parts: readonly string[]): boolean;
   /**
-   * A name for creating, renaming or removing `name` inside the opened directory `parts`: descriptor-relative
-   * where the platform allows. The path anchor refuses one under a folder another account can change.
+   * A name for creating, renaming or removing `name` inside `directory`, which `openForChange` opened (any other
+   * is an internal error, so no writer can skip that check): descriptor-relative where the platform allows.
    */
-  child(directory: Opened, parts: readonly string[], name: string, shown: string): string;
+  child(directory: Opened, parts: readonly string[], name: string): string;
   /** Whether the anchor is still the directory at its path (else it is reopened). */
   valid(): boolean;
   close(): void;
@@ -408,6 +414,17 @@ class FolderAnchor implements Anchor {
     readonly dir: string,
     readonly fs: ConfinedFileSystem,
   ) {}
+  readonly #forChange = new WeakSet<Opened>();
+  openForChange(parts: readonly string[], shown: string): Opened {
+    try {
+      this.fs.refuseSharedFolders(parts.join("/"), shown);
+    } catch (error) {
+      throw classify(error, this.dir, parts, shown);
+    }
+    const opened = this.open(parts, true, shown);
+    this.#forChange.add(opened);
+    return opened;
+  }
   open(parts: readonly string[], directory: boolean, shown: string): Opened {
     let handle: ConfinedHandle;
     try {
@@ -424,8 +441,8 @@ class FolderAnchor implements Anchor {
   bound(opened: Opened, parts: readonly string[]): boolean {
     return this.fs.bound({ fd: opened.fd, stat: opened.stat, path: parts.length === 0 ? "." : parts.join("/") });
   }
-  child(directory: Opened, parts: readonly string[], name: string, shown: string): string {
-    this.fs.refuseSharedFolders(parts.join("/"), shown);
+  child(directory: Opened, parts: readonly string[], name: string): string {
+    if (!this.#forChange.has(directory)) throw new Error("a change needs a folder opened by openForChange");
     return `${this.fs.descriptorPath({ fd: directory.fd, stat: directory.stat, path: parts.length === 0 ? "." : parts.join("/") })}/${name}`;
   }
   valid(): boolean {
@@ -620,13 +637,13 @@ export function publishConfined(
   let anchor: Anchor, parent: Opened;
   try {
     anchor = anchorFor(dir, shown);
-    parent = anchor.open(parentParts, true, shown);
+    parent = anchor.openForChange(parentParts, shown);
   } catch (error) {
     throw error instanceof ConfinedRefusal ? error : new ConfinedWriteRefusedError(error);
   }
   const destination = join(dir, ...parentParts, name);
   try {
-    const target = anchor.child(parent, parentParts, name, shown);
+    const target = anchor.child(parent, parentParts, name);
     let mode = options.mode ?? 0o644;
     if (!options.exclusive) {
       try {
@@ -637,7 +654,7 @@ export function publishConfined(
       }
     }
     const temporaryName = `.${name}.${randomBytes(options.randomBytes ?? 6).toString("hex")}.tmp`;
-    const temporary = anchor.child(parent, parentParts, temporaryName, shown);
+    const temporary = anchor.child(parent, parentParts, temporaryName);
     let fd: number;
     try {
       fd = openSync(temporary, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, mode);
@@ -742,7 +759,7 @@ export function removeConfined(dir: string, parentParts: readonly string[], name
   const anchor = anchorFor(dir, shown);
   let parent: Opened;
   try {
-    parent = anchor.open(parentParts, true, shown);
+    parent = anchor.openForChange(parentParts, shown);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
     throw error;
@@ -750,7 +767,7 @@ export function removeConfined(dir: string, parentParts: readonly string[], name
   try {
     if (!anchor.bound(parent, parentParts)) throw new ConfinedRefusal("moved", shown);
     try {
-      unlinkSync(anchor.child(parent, parentParts, name, shown));
+      unlinkSync(anchor.child(parent, parentParts, name));
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
@@ -771,16 +788,16 @@ export function ensureConfinedDirectories(
   mode = 0o755,
 ): void {
   const anchor = anchorFor(dir, shown(0));
-  let parent = anchor.open([], true, shown(0));
+  let parent = anchor.openForChange([], shown(0));
   try {
     for (let at = 0; at < parts.length; at++) {
       const prefix = parts.slice(0, at + 1);
       try {
-        mkdirSync(anchor.child(parent, parts.slice(0, at), parts[at]!, shown(at)), { mode });
+        mkdirSync(anchor.child(parent, parts.slice(0, at), parts[at]!), { mode });
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       }
-      const next = anchor.open(prefix, true, shown(at + 1));
+      const next = anchor.openForChange(prefix, shown(at + 1));
       closeSync(parent.fd);
       parent = next;
     }
