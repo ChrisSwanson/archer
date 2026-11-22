@@ -66,6 +66,9 @@ const STICKY = 0o1000;
  * resolving it would check wherever the link leads at that moment, which is the swap this guards against.
  * Callers pass a real path for the part they trust (the anchor's folder) and the confined parts below it.
  *
+ * Walked on every change, never cached: a mode changed while the service runs must count. It costs a few
+ * microseconds beside the write's fsync.
+ *
  * Reads POSIX owners and modes only: an ACL that grants another account write access is not seen.
  * Where the platform has no uids nothing is reported.
  */

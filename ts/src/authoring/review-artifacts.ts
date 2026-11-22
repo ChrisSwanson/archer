@@ -355,6 +355,7 @@ export function materializeReview(
           try {
             parent = fs.open(folderPath);
             if (!parent.stat.isDirectory()) refuse("blocked", "authoring folder is not a directory");
+            // Before `.review` is created, not only after: a refused review leaves nothing behind.
             refuseShared(fs, folderPath);
             const directoryPath = folderPath + "/.review";
             path = directoryPath + "/" + filename(review);

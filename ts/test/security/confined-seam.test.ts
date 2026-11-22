@@ -8,82 +8,16 @@
 // descriptor filesystem is verified.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import { createHash } from "node:crypto";
 import { syncBuiltinESMExports } from "node:module";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import { ConfinedRefusal, descriptorConfinement, usePathAnchorsForTests } from "../../src/project/confined-fs.ts";
-import { findProject, readInFolder, writeConfined, type Project } from "../../src/project/project.ts";
+import { findProject, readInFolder, writeConfined } from "../../src/project/project.ts";
 import { readNoteBytes } from "../../src/notes/embedded.ts";
 import { readProjectManifest } from "../../src/config/project-settings.ts";
 import { writeManifest } from "../../src/application/manifest.ts";
 import { removeTempDirs, tempDir } from "../project/support.ts";
-
-const real = { openSync: fs.openSync, renameSync: fs.renameSync, linkSync: fs.linkSync };
-const INSIDE = "# inside\n";
-const OUTSIDE = "# OUTSIDE canary\n";
-const sha = (path: string) => createHash("sha256").update(fs.readFileSync(path)).digest("hex");
-
-interface Layout {
-  readonly project: Project;
-  readonly folder: string;
-  readonly outside: string;
-}
-/** A project with notes/d/race.md, and outside it a directory with a file of the same name. */
-function layout(): Layout {
-  const root = tempDir({
-    "archer.toml": "version = 1\n",
-    ".archer/notes/d/race.md": INSIDE,
-    ".archer/notes/top.md": INSIDE,
-  });
-  const outside = tempDir({ "d/race.md": OUTSIDE, "canary.md": OUTSIDE });
-  return { project: findProject(root), folder: join(root, ".archer"), outside };
-}
-/** Every file under `dir`, by path, with its hash. */
-function snapshot(dir: string): Map<string, string> {
-  const files = new Map<string, string>();
-  for (const entry of fs.readdirSync(dir, { recursive: true, withFileTypes: true }) as fs.Dirent[]) {
-    const path = join(entry.parentPath, entry.name);
-    if (entry.isFile()) files.set(path, sha(path));
-  }
-  return files;
-}
-/** Replaces `notes/d` with a link to the outside `d` (the real folder kept aside, inside the project). */
-const swapParent = (l: Layout) => () => {
-  real.renameSync(join(l.folder, "notes/d"), join(l.folder, "notes/d.aside"));
-  fs.symlinkSync(join(l.outside, "d"), join(l.folder, "notes/d"));
-};
-/** Replaces `notes/top.md` with a link to the outside canary. */
-const swapFile = (l: Layout) => () => {
-  fs.symlinkSync(join(l.outside, "canary.md"), join(l.folder, "notes/top.md.link"));
-  real.renameSync(join(l.folder, "notes/top.md.link"), join(l.folder, "notes/top.md"));
-};
-
-/** Runs `swap` once, at the first call of `syscall` whose path ends with `suffix`, before or after it runs. */
-function once(
-  syscall: "openSync" | "renameSync" | "linkSync",
-  suffix: RegExp,
-  when: "before" | "after",
-  swap: () => void,
-): { fired: () => boolean } {
-  let fired = false;
-  const original = real[syscall] as (...args: unknown[]) => unknown;
-  vi.spyOn(fs, syscall).mockImplementation(((...args: unknown[]) => {
-    const hit = !fired && suffix.test(String(args[syscall === "openSync" ? 0 : 1]));
-    if (hit && when === "before") {
-      fired = true;
-      swap();
-    }
-    const result = original(...args);
-    if (hit && when === "after") {
-      fired = true;
-      swap();
-    }
-    return result;
-  }) as never);
-  syncBuiltinESMExports();
-  return { fired: () => fired };
-}
+import { real, INSIDE, OUTSIDE, type Layout, layout, snapshot, swapParent, swapFile, once } from "./seam-support.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
