@@ -27,7 +27,7 @@
     "@modelcontextprotocol/client": "2.4.0",
     "@modelcontextprotocol/core": "2.4.0",
     "@modelcontextprotocol/ext-apps": "2.0.4",
-    "@xyflow/react": "^12.12.1",
+    "@xyflow/react": "^13.0.2",
     "ajv": "8.20.0",
     "elkjs": "^0.12.1",
     "markdown-it": "15.0.3",
