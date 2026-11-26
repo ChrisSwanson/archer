@@ -76,3 +76,31 @@ test("editing the queue label keeps the Unicode node available in the drawing", 
     await project.stop();
   }
 });
+
+test("clicking the Jobs connection selects it where the Payments hit area reaches it", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const project = await openEditor(page, "awkward", "diagrams/c4-boundaries.mmd");
+  try {
+    const jobs = page.locator('.react-flow__edge[data-id="api--jobs"]');
+    const path = jobs.locator("path.react-flow__edge-path");
+    await expect(path).toHaveCount(1);
+    await settled(page);
+    await page.getByRole("button", { name: "Fit view", exact: true }).click();
+    await settled(page);
+    const point = await path.evaluate((element) => {
+      const stroke = element as SVGPathElement;
+      const point = stroke.getPointAtLength(stroke.getTotalLength() * 0.234).matrixTransform(stroke.getScreenCTM()!);
+      return { x: point.x, y: point.y };
+    });
+    await page.mouse.click(point.x, point.y);
+    const selected = page.locator(
+      '.react-flow__edge:is([data-id="api--jobs"], [data-id="api--payments"])[aria-pressed="true"]',
+    );
+    await expect(selected).toHaveCount(1);
+    test.fail(true, "O295: the Payments connection's wider hit path intercepts the visible Jobs stroke");
+    expect(await selected.getAttribute("data-id")).toBe("api--jobs");
+  } finally {
+    await page.close();
+    await project.stop();
+  }
+});
