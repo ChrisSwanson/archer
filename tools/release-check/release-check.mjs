@@ -572,6 +572,9 @@ const collected = { budgets: [], warnings: [], requests: [], journeys: [] };
 async function lab(entry) {
   const out = join(OUT, "lab");
   const profiles = args.quick ? config.lab.quickProfiles : config.lab.fullProfiles;
+  const { issueLink } = await import("../devkit/sandbox.mjs");
+  // The lab and the journeys represent different clients in the service's duplicate-request telemetry.
+  const login = issueLink({ name: sandbox.name, label: "release-check lab" });
   const before = await serviceWarnings(null);
   // --tls-ca: a TLS sandbox is trusted by its pinned leaf (perf rubric G5), never by ignoring TLS errors.
   // --allow-writes: a throwaway sandbox, so the page behaves exactly as for a person (selection posts, layout reads).
@@ -582,7 +585,7 @@ async function lab(entry) {
       "--base",
       sandbox.origin,
       "--login",
-      sandbox.link,
+      login.url,
       "--project",
       config.lab.project,
       "--pages",
