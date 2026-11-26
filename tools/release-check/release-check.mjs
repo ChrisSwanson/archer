@@ -448,7 +448,7 @@ const bucketBase = args.buckets === "none" ? null : (args.buckets ?? (args.quick
 
 /**
  * gzip per source bucket of the working tree's page against the merge base with `ref`: both built with sourcemaps
- * (the base from `git archive` of ui, shared and ts/src, over this checkout's node_modules) and split by
+ * (the base from `git archive`, including Vite's config imports, over this checkout's node_modules) and split by
  * lib/sizes.mjs attributeBuild. About 20 s. Report only.
  */
 async function buckets(ref, log) {
@@ -471,7 +471,7 @@ async function buckets(ref, log) {
     };
     const tree = join(work, "base");
     mkdirSync(tree);
-    const paths = ["ui", "shared", "ts/src"].filter(
+    const paths = ["ui", "shared", "ts/src", "tools/impeccable-live.mts", "tools/test-writers-dir.mjs"].filter(
       (p) => spawnSync("git", ["cat-file", "-e", `${sha}:${p}`], { cwd: REPO }).status === 0,
     );
     const archive = spawnSync("sh", ["-c", `git archive ${sha} ${paths.join(" ")} | tar -x -C "${tree}"`], {
