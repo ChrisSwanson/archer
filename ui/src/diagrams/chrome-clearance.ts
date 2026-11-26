@@ -220,15 +220,17 @@ export function measureChrome(canvas: Element | null, piece: Element | null): Bo
   return { x: inner.left - outer.left, y: inner.top - outer.top, width: inner.width, height: inner.height };
 }
 
-/** Chrome that floats over a canvas besides its control cluster: the chat button. */
-const FLOATING_CHROME = ".archer-chat-fab";
+export function editorDiagramKey(canvas: Element): Element | null {
+  return canvas.closest(".authoring-preview")?.querySelector(":scope > .archer-diagram-key") ?? null;
+}
 
-/** The floating chrome over `canvas` (`FLOATING_CHROME`), each measured as `measureChrome` measures the cluster. */
+/** The chat button and the editor's floating key, measured like the control cluster. */
 export function measureFloating(canvas: Element | null): Box[] {
   if (canvas === null) return [];
-  return [...canvas.ownerDocument.querySelectorAll(FLOATING_CHROME)]
-    .map((piece) => measureChrome(canvas, piece))
-    .filter((box): box is Box => box !== null);
+  const pieces = [...canvas.ownerDocument.querySelectorAll(".archer-chat-fab")];
+  const editorKey = editorDiagramKey(canvas);
+  if (editorKey) pieces.push(editorKey);
+  return pieces.map((piece) => measureChrome(canvas, piece)).filter((box): box is Box => box !== null);
 }
 
 /**

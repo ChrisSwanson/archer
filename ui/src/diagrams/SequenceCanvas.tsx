@@ -58,6 +58,7 @@ import { useCanvasShortcuts } from "./canvas-shortcuts";
 import { OffscreenCue } from "./OffscreenCue";
 import {
   drawnOn,
+  editorDiagramKey,
   frameClearOfChrome,
   measureFloating,
   hitsAny,
@@ -1750,18 +1751,20 @@ export function SequenceCanvas(props: {
     if (element === null || typeof ResizeObserver === "undefined") {
       return;
     }
+    const key = editorDiagramKey(element);
     let seen = false;
     const observer = new ResizeObserver(() => {
-      // The first callback reports the size the mount effect already framed.
+      // The mount effect already measured the canvas. The editor's sibling key can expand after that framing.
       if (!seen) {
         seen = true;
-        return;
+        if (key === null) return;
       }
       if (!userMovedRef.current) {
         frameRef.current(modeRef.current === "preserve" ? "fit-all" : modeRef.current);
       }
     });
     observer.observe(element);
+    if (key !== null) observer.observe(key);
     return () => observer.disconnect();
   }, []);
 
