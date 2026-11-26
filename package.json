@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
-    "knip": "^6.45.1",
+    "knip": "^6.48.0",
     "vitepress": "^1.6.4",
     "vue-tsc": "^3.3.14"
   }
