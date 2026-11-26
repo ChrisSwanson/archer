@@ -1,25 +1,31 @@
 import { writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { afterEach, expect, test, vi } from "vitest";
 import { CommentsStore } from "../../src/comments/store.ts";
 import type { Thread } from "../../src/comments/contract.ts";
 import { findProject } from "../../src/project/index.ts";
 import { connectService, type ServiceClient } from "../../src/service/index.ts";
-import {
-  cleanUp,
-  events,
-  FLOW2,
-  http,
-  json,
-  project,
-  service,
-  write,
-  type Reply,
-  apiBase,
-  pageHttp,
-} from "./support.ts";
+import { cleanUp, events, FLOW2, json, project, service, write, type Reply, apiBase, pageHttp } from "./support.ts";
 
 const clients: ServiceClient[] = [];
+
+// These two cache tests use immutable fixtures. Keep directory-watch invalidations out of their
+// measurement window. The other HTTP tests still exercise the real watcher.
+const staticRoots = vi.hoisted(() => new Set<string>());
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    watch: (filename: unknown, ...args: unknown[]) => {
+      const path = String(filename);
+      for (const root of staticRoots) {
+        if (path === root || path.startsWith(`${root}${sep}`))
+          throw new Error("This test fixture does not watch files");
+      }
+      return Reflect.apply(actual.watch, actual, [filename, ...args]);
+    },
+  };
+});
 
 // Count calls to the production note inventory for this root. Directory reads from the
 // file-date and discovery caches also run in the background and are outside this assertion.
@@ -47,13 +53,15 @@ afterEach(async () => {
   vi.restoreAllMocks();
   clients.splice(0).forEach((client) => client.close());
   await cleanUp();
+  staticRoots.clear();
 });
 
-async function attached(files: Readonly<Record<string, string>> = {}) {
+async function attached(files: Readonly<Record<string, string>> = {}, { watch = true } = {}) {
   const { svc } = await service();
   const client = await connectService(svc.socketPath);
   clients.push(client);
   const root = project();
+  if (!watch) staticRoots.add(root);
   write(root, ".archer/auth.md", "# Auth flow\n\nHow authentication works.\n");
   for (const [path, contents] of Object.entries(files)) write(root, path, contents);
   const { url } = await client.call("attach", { root });
@@ -117,14 +125,14 @@ test("comment activity scans the note inventory once, independent of its target 
   let skew = 0;
   const clock = vi.spyOn(performance, "now").mockImplementation(() => realNow() + skew);
   try {
-    const one = await attached();
+    const one = await attached({}, { watch: false });
     skew += 60_000;
     await expectFreshNoteScan(one, "api/comment-activity");
 
     const files = Object.fromEntries(
       Array.from({ length: 20 }, (_, index) => [`.archer/n-${index}.md`, `# Note ${index}\n`]),
     );
-    const many = await attached(files);
+    const many = await attached(files, { watch: false });
     skew += 60_000;
     await expectFreshNoteScan(many, "api/comment-activity");
     // Read again before anything changed: the memoized scan answers.
@@ -137,7 +145,7 @@ test("comment activity scans the note inventory once, independent of its target 
 });
 
 test("comment activity rejects an embedded path collision for the whole response", async () => {
-  const { url, send } = await attached({
+  const { send } = await attached({
     "archer.toml": [
       "version = 1",
       "[[views]]",
@@ -290,11 +298,11 @@ test("the inventory lists the notes once, independent of its view count", async 
   let skew = 0;
   const clock = vi.spyOn(performance, "now").mockImplementation(() => realNow() + skew);
   try {
-    const few = await attached();
+    const few = await attached({}, { watch: false });
     skew += 60_000;
     await expectFreshNoteScan(few, "api/diagrams");
     const views = Object.fromEntries(Array.from({ length: 12 }, (_, index) => [`.archer/v-${index}.mmd`, FLOW2]));
-    const many = await attached(views);
+    const many = await attached(views, { watch: false });
     skew += 60_000;
     await expectFreshNoteScan(many, "api/diagrams");
   } finally {
