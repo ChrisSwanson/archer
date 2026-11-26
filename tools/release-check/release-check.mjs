@@ -546,7 +546,8 @@ async function sandboxDown() {
   if (args["keep-sandbox"]) return `kept: node tools/devkit/sandbox.mjs down --name ${sandbox.name}`;
   const { down } = await import("../devkit/sandbox.mjs");
   try {
-    await down({ name: sandbox.name });
+    const result = await down({ name: sandbox.name });
+    if (!result.removed) return `TEARDOWN INCOMPLETE: ${result.note ?? result.stopped}`;
     return `torn down (service log copied to ${rel(join(OUT, "service.log"))})`;
   } catch (error) {
     return `TEARDOWN FAILED: ${error.message}; run node tools/devkit/sandbox.mjs down --name ${sandbox.name}`;
