@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 const args = process.argv.slice(2);
 const topAt = args.indexOf("--top");
 const top = topAt === -1 ? 25 : Number(args[topAt + 1]);
-const files = args.filter((arg, index) => !arg.startsWith("--") && index !== topAt + 1);
+const files = args.filter((arg, index) => !arg.startsWith("--") && (topAt === -1 || index !== topAt + 1));
 
 const seconds = (ms) => `${(ms / 1000).toFixed(1)}s`;
 
