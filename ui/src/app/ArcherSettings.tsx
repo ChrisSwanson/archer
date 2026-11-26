@@ -346,7 +346,7 @@ export default function ArcherSettings(props: ArcherSettingsProps): JSX.Element 
                   Loading settings…
                 </p>
               ) : null}
-              {!loading ? <NetworkStatus example={runtime.examples} /> : null}
+              <NetworkStatus example={runtime.examples} />
               {!loading && settings ? (
                 <>
                   <dl className="archer-settings-identity">
