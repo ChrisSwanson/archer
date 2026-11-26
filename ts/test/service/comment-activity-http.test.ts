@@ -21,20 +21,26 @@ import {
 
 const clients: ServiceClient[] = [];
 
-// Every directory listing in this process, by path. A count is of one project's folder only: the
-// service also lists other directories, and an earlier project's background read-warming (its
-// READ_WARM_DELAY_MS timer, late on a loaded event loop) can list that project's folder meanwhile.
-const directoryScans = vi.hoisted(() => ({ paths: [] as string[] }));
-vi.mock("node:fs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("node:fs")>();
-  const counted = ((...args: unknown[]) => {
-    directoryScans.paths.push(String(args[0]));
-    return Reflect.apply(actual.readdirSync, actual, args);
-  }) as typeof actual.readdirSync;
-  return { ...actual, readdirSync: counted };
+// Count calls to the production note inventory for this root. Directory reads from the
+// file-date and discovery caches also run in the background and are outside this assertion.
+const noteScans = vi.hoisted(() => ({ roots: [] as string[] }));
+vi.mock("../../src/project/index.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../src/project/index.ts")>();
+  const listNotes: typeof actual.listNotes = (project) => {
+    noteScans.roots.push(project.root);
+    return actual.listNotes(project);
+  };
+  return { ...actual, listNotes };
 });
-const scansOf = (root: string): number =>
-  directoryScans.paths.filter((path) => path === root || path.startsWith(`${root}/`)).length;
+const scansOf = (root: string): number => noteScans.roots.filter((scanned) => scanned === root).length;
+
+async function expectFreshNoteScan({ url, root }: { url: string; root: string }, route: string): Promise<void> {
+  noteScans.roots = [];
+  await json(`${apiBase(url)}${route}`);
+  // An expired memo entry gives the request its held value, then ReadMemo refreshes it off the request path.
+  await vi.waitFor(() => expect(scansOf(root)).toBeGreaterThan(0));
+  expect(scansOf(root)).toBe(1);
+}
 
 afterEach(async () => {
   // A failed assertion must not leave a clock spy for the next test to wrap.
@@ -107,35 +113,22 @@ test("comment activity lists every registered view and note, including targets w
 });
 
 test("comment activity scans the note inventory once, independent of its target count", async () => {
-  // Past READ_MEMO_MS the state's memoized reads are made again in the background, so each count is of one
-  // fresh scan: the read that expires them, then the background one it starts.
   const realNow = performance.now.bind(performance);
   let skew = 0;
   const clock = vi.spyOn(performance, "now").mockImplementation(() => realNow() + skew);
   try {
-    // The background reads take a few turns of the event loop each.
-    const revalidated = (): Promise<void> => new Promise((done) => setTimeout(done, 100));
-    const fresh = (): void => {
-      skew += 60_000;
-      directoryScans.paths = [];
-    };
     const one = await attached();
-    fresh();
-    await json(`${apiBase(one.url)}api/comment-activity`);
-    await revalidated();
-    const oneTargetSet = scansOf(one.root);
+    skew += 60_000;
+    await expectFreshNoteScan(one, "api/comment-activity");
 
     const files = Object.fromEntries(
       Array.from({ length: 20 }, (_, index) => [`.archer/n-${index}.md`, `# Note ${index}\n`]),
     );
     const many = await attached(files);
-    fresh();
-    await json(`${apiBase(many.url)}api/comment-activity`);
-    await revalidated();
-    expect(scansOf(many.root)).toBe(oneTargetSet);
-    expect(scansOf(many.root)).toBeGreaterThan(0);
+    skew += 60_000;
+    await expectFreshNoteScan(many, "api/comment-activity");
     // Read again before anything changed: the memoized scan answers.
-    directoryScans.paths = [];
+    noteScans.roots = [];
     await json(`${apiBase(many.url)}api/comment-activity`);
     expect(scansOf(many.root)).toBe(0);
   } finally {
@@ -297,18 +290,13 @@ test("the inventory lists the notes once, independent of its view count", async 
   let skew = 0;
   const clock = vi.spyOn(performance, "now").mockImplementation(() => realNow() + skew);
   try {
-    const count = async ({ url, root }: { url: string; root: string }): Promise<number> => {
-      skew += 60_000;
-      directoryScans.paths = [];
-      await json(`${apiBase(url)}api/diagrams`);
-      // Expired reads are made again in the background, a few turns later.
-      await new Promise((done) => setTimeout(done, 100));
-      return scansOf(root);
-    };
     const few = await attached();
+    skew += 60_000;
+    await expectFreshNoteScan(few, "api/diagrams");
     const views = Object.fromEntries(Array.from({ length: 12 }, (_, index) => [`.archer/v-${index}.mmd`, FLOW2]));
     const many = await attached(views);
-    expect(await count(many)).toBe(await count(few));
+    skew += 60_000;
+    await expectFreshNoteScan(many, "api/diagrams");
   } finally {
     clock.mockRestore();
   }
