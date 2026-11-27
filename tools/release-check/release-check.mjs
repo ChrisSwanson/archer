@@ -448,7 +448,7 @@ const bucketBase = args.buckets === "none" ? null : (args.buckets ?? (args.quick
 
 /**
  * gzip per source bucket of the working tree's page against the merge base with `ref`: both built with sourcemaps
- * (the base from `git archive` of ui, shared and ts/src, over this checkout's node_modules) and split by
+ * (the base from `git archive`, including Vite's config imports, over this checkout's node_modules) and split by
  * lib/sizes.mjs attributeBuild. About 20 s. Report only.
  */
 async function buckets(ref, log) {
@@ -471,7 +471,7 @@ async function buckets(ref, log) {
     };
     const tree = join(work, "base");
     mkdirSync(tree);
-    const paths = ["ui", "shared", "ts/src"].filter(
+    const paths = ["ui", "shared", "ts/src", "tools/impeccable-live.mts", "tools/test-writers-dir.mjs"].filter(
       (p) => spawnSync("git", ["cat-file", "-e", `${sha}:${p}`], { cwd: REPO }).status === 0,
     );
     const archive = spawnSync("sh", ["-c", `git archive ${sha} ${paths.join(" ")} | tar -x -C "${tree}"`], {
@@ -546,7 +546,8 @@ async function sandboxDown() {
   if (args["keep-sandbox"]) return `kept: node tools/devkit/sandbox.mjs down --name ${sandbox.name}`;
   const { down } = await import("../devkit/sandbox.mjs");
   try {
-    await down({ name: sandbox.name });
+    const result = await down({ name: sandbox.name });
+    if (!result.removed) return `TEARDOWN INCOMPLETE: ${result.note ?? result.stopped}`;
     return `torn down (service log copied to ${rel(join(OUT, "service.log"))})`;
   } catch (error) {
     return `TEARDOWN FAILED: ${error.message}; run node tools/devkit/sandbox.mjs down --name ${sandbox.name}`;
@@ -572,6 +573,9 @@ const collected = { budgets: [], warnings: [], requests: [], journeys: [] };
 async function lab(entry) {
   const out = join(OUT, "lab");
   const profiles = args.quick ? config.lab.quickProfiles : config.lab.fullProfiles;
+  const { issueLink } = await import("../devkit/sandbox.mjs");
+  // The lab and the journeys represent different clients in the service's duplicate-request telemetry.
+  const login = issueLink({ name: sandbox.name, label: "release-check lab" });
   const before = await serviceWarnings(null);
   // --tls-ca: a TLS sandbox is trusted by its pinned leaf (perf rubric G5), never by ignoring TLS errors.
   // --allow-writes: a throwaway sandbox, so the page behaves exactly as for a person (selection posts, layout reads).
@@ -582,7 +586,7 @@ async function lab(entry) {
       "--base",
       sandbox.origin,
       "--login",
-      sandbox.link,
+      login.url,
       "--project",
       config.lab.project,
       "--pages",

@@ -142,6 +142,28 @@ describe("Archer settings", () => {
     expect(network).toHaveTextContent("Open to your network at 10.0.0.5:40399");
   });
 
+  it("keeps the live Network Access region mounted while retrying the settings request", async () => {
+    let finishRetry!: (response: Response) => void;
+    const retry = new Promise<Response>((resolve) => {
+      finishRetry = resolve;
+    });
+    globalThis.fetch = vi.fn().mockRejectedValueOnce(new Error("Settings unavailable")).mockReturnValueOnce(retry);
+    act(() => observeNetworkAccess(null));
+    render(<ArcherSettings />);
+    fireEvent.click(screen.getByRole("button", { name: "Archer settings" }));
+    const tryAgain = await screen.findByRole("button", { name: "Try again" });
+    const network = screen.getByRole("region", { name: "Network Access" });
+
+    fireEvent.click(tryAgain);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading settings");
+    expect(network).toBeInTheDocument();
+    act(() => observeNetworkAccess({ address: "https://10.0.0.5:40399/", since: "2026-10-22T10:00:00Z" }));
+    expect(network).toHaveTextContent("Open to your network at 10.0.0.5:40399");
+    finishRetry(new Response(JSON.stringify(SNAPSHOT), { status: 200 }));
+    expect(await screen.findByText("Archer on studio")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Network Access" })).toBe(network);
+  });
+
   it("renders no launcher when the service does not support settings", () => {
     render(<ArcherSettings supported={false} />);
     expect(screen.queryByRole("button", { name: "Archer settings" })).not.toBeInTheDocument();

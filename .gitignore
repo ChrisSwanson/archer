@@ -21,6 +21,7 @@ node_modules
 .env
 .env.*
 coverage/
+.vitest/
 *.log
 
 # Documentation site: derived guides, exported diagrams, build cache and local captures.

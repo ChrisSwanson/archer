@@ -251,7 +251,7 @@ test("by default nothing is listed for a project of one view, or a view with not
   }
 });
 
-test("archer validate lists them by default too, in its own words; --no-suggest turns them off", async () => {
+test("archer validate lists the default rename suggestions before the diagnostics", async () => {
   const root = normalise(true);
   const text = await cli(root, ["validate", "shop-internals"]);
   expect(text.out).toMatch(/- shopApi → api in shop-internals/);
@@ -263,16 +263,32 @@ test("archer validate lists them by default too, in its own words; --no-suggest 
   expect(text.out.indexOf("for other views, ask the person first.")).toBeLessThan(
     text.out.indexOf("shop-internals.mmd:1"),
   );
+});
+
+test("archer validate --json lists the default rename suggestions and says when more are available", async () => {
+  const root = normalise(true);
   const json = JSON.parse((await cli(root, ["validate", "shop-internals", "--json"])).out) as {
     suggestions: Suggestion[];
     suggestionsTruncated?: boolean;
   };
   expect(json.suggestions).toHaveLength(5);
   expect(json.suggestionsTruncated).toBe(true);
+});
+
+test("archer validate --no-suggest --json omits rename suggestions", async () => {
+  const root = normalise(true);
   const off = await cli(root, ["validate", "shop-internals", "--no-suggest", "--json"]);
   expect(off.code).toBe(0);
   expect(JSON.parse(off.out)).not.toHaveProperty("suggestions");
+});
+
+test("archer validate --no-suggest omits rename suggestions from the text", async () => {
+  const root = normalise(true);
   expect((await cli(root, ["validate", "shop-internals", "--no-suggest"])).out).not.toMatch(/Rename suggestions/);
+});
+
+test("archer validate rejects --suggest and --no-suggest together", async () => {
+  const root = normalise(true);
   expect((await cli(root, ["validate", "shop-internals", "--suggest", "--no-suggest"])).code).toBe(2);
 });
 

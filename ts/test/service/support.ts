@@ -19,7 +19,9 @@ export function isolatedProcessEnv(home: string, overrides: NodeJS.ProcessEnv = 
     // The writers root stays shared so a child writer excludes its parent test (src/comments/lock.ts).
     if (value !== undefined && (!key.startsWith("ARCHER_") || key === "ARCHER_WRITERS_DIR")) env[key] = value;
   }
-  Object.assign(env, { HOME: home, XDG_CONFIG_HOME: join(home, ".config") });
+  // Never the person's browser (O306): a service started here would otherwise read TERM_PROGRAM as a desktop
+  // session and open its page on the first present. A test of that policy passes its own value.
+  Object.assign(env, { HOME: home, XDG_CONFIG_HOME: join(home, ".config"), ARCHER_OPEN_BROWSER: "never" });
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) delete env[key];
     else env[key] = value;
