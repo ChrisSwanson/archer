@@ -1,6 +1,6 @@
 {
   "name": "archer",
-  "version": "0.15.3",
+  "version": "0.15.4",
   "private": true,
   "license": "Apache-2.0",
   "description": "Archer in TypeScript: agent-authored Mermaid diagrams as a shared visual layer between a person and their agents",

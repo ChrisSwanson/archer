@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.15.4 — 2026-11-26
+
+Clicks land on the connection you meant, editor drawings stay clear of the Diagram Key, the test tools move to Vitest 5, and the release checks are more reliable.
+
+### Added
+
+- **A browser walkthrough took several manual commands to assemble.** The `ui-walkthrough` Claude Code agent runs the isolated smoke journeys and Playwright checks, and reports failures with traces and screenshots.
+
+### Changed
+
+- **The test tools lagged their current versions.** The workspaces use Vitest 5.1.2 and the UI uses Jest DOM 7.0.1. The advisory dependency check uses Knip 6.48. ([#20](https://github.com/ChrisSwanson/archer/pull/20), [#21](https://github.com/ChrisSwanson/archer/pull/21), [#22](https://github.com/ChrisSwanson/archer/pull/22), [O287](docs/known-failures.md))
+- **React Flow 13 changes the store API, styling and pointer behavior.** Archer stays on 12.12.1 while the separate migration is considered. ([#23](https://github.com/ChrisSwanson/archer/pull/23), [O292](docs/known-failures.md))
+- **The page had grown about 1% past its size caps since 0.15.0.** The caps are raised to this release's measured size plus a little headroom. ([O302](docs/known-failures.md))
+
+### Fixed
+
+- **Clicking a connection's visible line could select a different connection running close by.** A click now goes to the line under the pointer, then the nearest one. ([O295](docs/known-failures.md))
+- **Network Access disappeared while Archer settings loaded.** The region stays mounted and continues to reflect live changes to the service connection. ([O284](docs/known-failures.md))
+- **The Diagram Key covered the Client lifeline, and editing a partly covered flowchart label could move other nodes out of reach.** The editor fits the drawing around the measured Key. ([O293, O294](docs/known-failures.md))
+- **Inventory tests sometimes counted unrelated background reads, and several validation modes shared one deadline on CI.** The inventory checks wait for the note scan itself, and each CLI invocation has its own test. ([O288–O290](docs/known-failures.md))
+- **Running the checks locally opened browser tabs on test pages.** Services started by the tests never open a browser. ([O306](docs/known-failures.md))
+- **The timing tool dropped the first JSON report when run with its default limit.** It now summarizes that report. ([O291](docs/known-failures.md))
+- **Release verification mixed the lab and journey requests, missed build inputs for the baseline size comparison, and could report an incomplete teardown as successful.** The lab has its own client grant, the size comparison includes its build inputs, and the report shows the teardown result. ([O303–O305](docs/known-failures.md))
+
 ## 0.15.3 — 2026-11-21
 
 Closes the macOS write race for other accounts on the computer, and fixes two tests and the release
