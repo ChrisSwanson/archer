@@ -105,6 +105,7 @@ import { cameraAfterPress, showOpened } from "../nesting/toggle-place";
 import { dimmedClass } from "./focus-style";
 import { clearOfChrome, FOLLOW_GLIDE_MS, followFrame, followParts, type WalkCamera } from "../walkthroughs/walk-camera";
 import { useBrowserReducedMotion } from "../emphasis/reduced-motion";
+import { edgeAtPress } from "./edge-picking";
 import {
   CANVAS_MAX_ZOOM,
   CANVAS_MIN_ZOOM,
@@ -202,6 +203,12 @@ export function unnamedReason(figure: unknown): string | null {
 }
 
 /** Whether focus on `element` is keyboard focus; `true` where the browser cannot say (old engines, jsdom). */
+/** The connection a press on an edge means (O295): the line under the pointer, not only the target on top. */
+function pressedEdge(event: { clientX: number; clientY: number; target: EventTarget }, reported: string): string {
+  const flow = event.target instanceof Element ? event.target.closest(".react-flow") : null;
+  return edgeAtPress(reported, event.clientX, event.clientY, flow ?? document);
+}
+
 function focusVisible(element: EventTarget): boolean {
   if (!(element instanceof Element)) return true;
   try {
@@ -1600,8 +1607,8 @@ function Flow(props: {
         props.authoring?.onRefused?.("Grouped node positions are fixed; move a top-level node instead.");
       }
     },
-    onEdgeDoubleClick: (_event, edge) => {
-      if (editing && !hand) props.authoring?.onEdgeLabelEdit?.(edge.id);
+    onEdgeDoubleClick: (event, edge) => {
+      if (editing && !hand) props.authoring?.onEdgeLabelEdit?.(pressedEdge(event, edge.id));
     },
     onNodeClick: (event, node) => {
       if (hand) {
@@ -1632,8 +1639,9 @@ function Flow(props: {
       }
     },
     onEdgeClick: (event, edge) => {
-      if (hand) props.onElementPress?.("edge", edge.id);
-      else props.onEdgeClick?.(edge.id, event.shiftKey);
+      const id = pressedEdge(event, edge.id);
+      if (hand) props.onElementPress?.("edge", id);
+      else props.onEdgeClick?.(id, event.shiftKey);
     },
     onSelectionStart: (event) => props.onMarqueeStart?.(event.shiftKey),
     onSelectionEnd: () => props.onMarqueeEnd?.(),

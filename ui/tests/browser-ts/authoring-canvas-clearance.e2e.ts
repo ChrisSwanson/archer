@@ -97,7 +97,6 @@ test("clicking the Jobs connection selects it where the Payments hit area reache
       '.react-flow__edge:is([data-id="api--jobs"], [data-id="api--payments"])[aria-pressed="true"]',
     );
     await expect(selected).toHaveCount(1);
-    test.fail(true, "O295: the Payments connection's wider hit path intercepts the visible Jobs stroke");
     expect(await selected.getAttribute("data-id")).toBe("api--jobs");
   } finally {
     await page.close();
